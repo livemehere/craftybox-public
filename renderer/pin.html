@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CraftyBox - Pin</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      img {
+        top: 0;
+        left: 0;
+        position: fixed;
+        user-select: none;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+      }
+
+      body::after,
+      body::before {
+        app-region: drag;
+        content: '';
+        top: 0;
+        right: 44px;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 1;
+        display: block;
+      }
+
+      body::after {
+        top: 44px;
+        right: 0;
+      }
+
+      button {
+        app-region: no-drag;
+        width: 36px;
+        height: 36px;
+        background-color: transparent;
+        border: none;
+        position: fixed;
+        top: 4px;
+        right: 4px;
+        z-index: 999;
+        transition: transform 0.2s;
+      }
+
+      button:hover {
+        cursor: pointer;
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <button>
+      <svg
+        stroke="currentColor"
+        fill="tomato"
+        stroke-width="0"
+        viewBox="0 0 512 512"
+        height="100%"
+        width="100%"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M331.3 308.7L278.6 256l52.7-52.7c6.2-6.2 6.2-16.4 0-22.6-6.2-6.2-16.4-6.2-22.6 0L256 233.4l-52.7-52.7c-6.2-6.2-15.6-7.1-22.6 0-7.1 7.1-6 16.6 0 22.6l52.7 52.7-52.7 52.7c-6.7 6.7-6.4 16.3 0 22.6 6.4 6.4 16.4 6.2 22.6 0l52.7-52.7 52.7 52.7c6.2 6.2 16.4 6.2 22.6 0 6.3-6.2 6.3-16.4 0-22.6z"
+        ></path>
+        <path
+          d="M256 76c48.1 0 93.3 18.7 127.3 52.7S436 207.9 436 256s-18.7 93.3-52.7 127.3S304.1 436 256 436c-48.1 0-93.3-18.7-127.3-52.7S76 304.1 76 256s18.7-93.3 52.7-127.3S207.9 76 256 76m0-28C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48z"
+        ></path>
+      </svg>
+    </button>
+    <script src="subApps/pin/index.ts" type="module"></script>
+  </body>
+</html>

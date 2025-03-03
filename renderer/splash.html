@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CraftyBox - Splash</title>
+    <style>
+      * {
+        user-select: none;
+        pointer-events: none;
+      }
+      html,
+      body {
+        background: transparent;
+        overflow: hidden;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+      }
+
+      .bar {
+        width: 90%;
+        height: 4px;
+        background: #505050;
+        margin: auto;
+      }
+
+      .msg {
+        text-align: center;
+        font-size: 12px;
+        position: absolute;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+      }
+
+      .status {
+        text-align: center;
+        font-size: 12px;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+      }
+
+      .progress {
+        width: 0;
+        height: 100%;
+        background: #159e29;
+        transition: width 0.3s;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="./assets/img/logo-no-bg.png" alt="" />
+    <div class="bar">
+      <div class="progress"></div>
+    </div>
+    <div class="msg"></div>
+    <div class="status">
+      <span class="cur">0</span>
+      <span>/</span>
+      <span class="total">0</span>
+      <span class="per">(0)</span>
+    </div>
+    <script src="subApps/splash/index.ts" type="module"></script>
+  </body>
+</html>
