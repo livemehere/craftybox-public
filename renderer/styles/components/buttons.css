@@ -1,0 +1,26 @@
+@layer components {
+  .basic-btn {
+    @apply rounded hover:bg-neutral-700 data-[active="true"]:bg-neutral-700;
+  }
+
+  .icon-circle-btn {
+    @apply flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 transition-colors hover:bg-neutral-700 active:scale-95;
+    svg {
+      @apply h-5 w-5;
+    }
+  }
+
+  .icon-warn-btn {
+    @apply hover:[&>svg]:fill-red-400;
+  }
+
+  .icon-primary-btn {
+    @apply hover:[&>svg]:fill-blue-400;
+  }
+
+  .icon-tab-button {
+    @apply flex items-center justify-center rounded hover:bg-neutral-700 active:scale-95;
+    @apply h-9 w-9 active:scale-95;
+    @apply data-[active="true"]:bg-blue-600;
+  }
+}

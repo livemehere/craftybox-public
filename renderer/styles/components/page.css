@@ -1,0 +1,9 @@
+@layer components {
+  .page-wrapper {
+    @apply h-full w-full;
+  }
+
+  .page-wrapper-with-padding {
+    @apply h-full w-full p-4;
+  }
+}

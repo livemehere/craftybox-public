@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+@import './components/page.css';
+@import './components/buttons.css';
+@import './components/typo.css';
+@import './utils.css';
+
+@layer base {
+  :root {
+    --side-bar-width: 250px;
+  }
+
+  body {
+    font-family: 'Spoqa Han Sans Neo';
+    @apply text-neutral-50;
+  }
+
+  * {
+    user-select: none;
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      @apply rounded-sm bg-neutral-700;
+    }
+
+    &::-webkit-scrollbar-track {
+      @apply rounded-sm bg-neutral-800;
+    }
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+}

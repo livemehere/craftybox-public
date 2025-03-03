@@ -1,0 +1,9 @@
+@layer utilities {
+  .no-drag-zone {
+    app-region: no-drag;
+  }
+
+  .drag-zone {
+    app-region: drag;
+  }
+}

@@ -1,0 +1,5 @@
+@layer components {
+  .typo-desc {
+    @apply text-xs text-neutral-300;
+  }
+}
