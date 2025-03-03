@@ -7,3 +7,5 @@ release
 
 .env
 temp-lib
+.DS_Store
+test/
