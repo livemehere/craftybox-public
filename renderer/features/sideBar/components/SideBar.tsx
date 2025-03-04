@@ -18,7 +18,7 @@ const SideBar = () => {
   return (
     <motion.aside
       className={cn(
-        'overflow-hidden border-r-[1px] border-neutral-700 bg-neutral-900/80 px-2 py-3',
+        'overflow-hidden border-r-[1px] border-neutral-700 bg-neutral-900/98 px-2 py-3',
         'whitespace-nowrap'
       )}
       initial={open ? 'open' : 'close'}
