@@ -41,7 +41,7 @@ type TStageEvents = {
 export default class Stage extends Emitter<TStageEvents> {
   private static idSeq = 0;
 
-  private id: number;
+  private readonly id: number;
   private readonly renderCanvas: HTMLCanvasElement;
   private readonly renderCtx: CanvasRenderingContext2D;
 
