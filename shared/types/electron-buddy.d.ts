@@ -75,6 +75,15 @@ export type InvokeMap = {
     };
     response: void;
   };
+  'url:openExternal': {
+    payload: {
+      url: string;
+    };
+    response: {
+      success: boolean;
+      error?: string;
+    };
+  };
 };
 
 type MessageMap = {

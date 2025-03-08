@@ -2,6 +2,7 @@ import { mainIpc } from '@electron-buddy/ipc/main';
 import { AppManager } from '@main/managers/AppManager';
 import { Manager } from '@main/managers/Manager';
 import { TPlatform } from '@shared/types/os-types';
+import { shell } from 'electron';
 
 export class IpcManager extends Manager {
   app: AppManager;
@@ -61,6 +62,16 @@ export class IpcManager extends Manager {
 
     mainIpc.handle('window:destroy', async ({ id }) => {
       return this.app.windowManager.destroyPinWindow(id);
+    });
+
+    mainIpc.handle('url:openExternal', async ({ url }) => {
+      try {
+        await shell.openExternal(url);
+        return { success: true };
+      } catch (error) {
+        this.logger.error('Failed to open URL in external browser', error);
+        return { success: false, error: (error as Error).message };
+      }
     });
   }
 }

@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import Layout from '@/components/Layout';
 import useOn from '@/hooks/electron/useOn';
 
+
 const HomePage = lazy(() => import('@/pages/HomePage'));
 
 /* tools */
@@ -14,6 +15,9 @@ const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 /* settings */
 const GeneralSettingPage = lazy(() => import('@/pages/settings/GeneralSettingPage'));
 const ShortCutSettingPage = lazy(() => import('@/pages/settings/ShortCutSettingPage'));
+
+/* workspace */
+const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
 
 export default function App() {
   const navigate = useNavigate();
@@ -27,6 +31,9 @@ export default function App() {
           <Route path={'/tools/screenshot'} element={<ScreenShotPage />} />
           <Route path={'/tools/timer'} element={<TimerPage />} />
           <Route path={'/tools/color-picker'} element={<ColorPickerPage />} />
+        </Route>
+        <Route path={'/workspace'}>
+          <Route path={'/workspace/archive'} element={<ArchivePage />} />
         </Route>
         <Route path={'/settings'}>
           <Route path={'/settings'} element={<GeneralSettingPage />} />
