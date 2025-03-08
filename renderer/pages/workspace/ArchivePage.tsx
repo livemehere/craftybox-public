@@ -6,7 +6,13 @@ import { rendererIpc } from '@electron-buddy/ipc/renderer';
 import { useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 
-import { addArchiveAtom, archivesAtom, removeArchiveAtom, updateArchiveLabelAtom } from '@/stores/archiveAtom';
+import {
+  addArchiveAtom,
+  archivesAtom,
+  IArchive,
+  removeArchiveAtom,
+  updateArchiveLabelAtom
+} from '@/stores/archiveAtom';
 import WithBreadcrumb from '@/components/WithBreadcrumb';
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -33,14 +39,14 @@ export default function ArchivePage() {
   const updateArchiveLabel = useSetAtom(updateArchiveLabelAtom);
   const lastInputRef = useRef<HTMLInputElement>(null);
 
-  const latestArchive = archives[archives.length - 1];
+  const latestArchive: IArchive | undefined = archives[archives.length - 1];
 
   useEffect(() => {
-    if (lastInputRef.current && dayjs().diff(dayjs(latestArchive.createdAt), 's') < 1) {
+    if (lastInputRef.current && latestArchive && dayjs().diff(dayjs(latestArchive.createdAt), 's') < 1) {
       lastInputRef.current.focus();
       lastInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [archives.length, latestArchive.createdAt]);
+  }, [archives.length, latestArchive?.createdAt]);
 
   useHotkeys('mod+v', () => {
     navigator.clipboard.readText().then((text) => {
@@ -101,7 +107,7 @@ export default function ArchivePage() {
         </div>
         <div className='flex flex-col gap-4 p-2'>
           {Object.entries(groupedArchives)
-            .sort(([_, a], [__, b]) => b.length - a.length)
+            .sort(([, a], [, b]) => b.length - a.length)
             .map(([domain, domainArchives]) => (
               <div key={domain} className={`rounded-lg ${getDomainColor(domain)} p-4`}>
                 <h3 className='text-md mb-2 font-bold'>
@@ -123,7 +129,7 @@ export default function ArchivePage() {
                     >
                       <input
                         className='w-1/3 shrink-0'
-                        ref={archive.id === latestArchive.id ? lastInputRef : null}
+                        ref={archive.id === latestArchive?.id ? lastInputRef : null}
                         type='text'
                         value={archive.label}
                         onChange={(e) => updateArchiveLabel({ id: archive.id, label: e.target.value })}

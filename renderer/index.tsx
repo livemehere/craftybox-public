@@ -8,10 +8,13 @@ import 'jotai-devtools/styles.css';
 import '@/styles/index.css';
 import { minToMs } from '@shared/utils/time';
 import { ErrorBoundary } from 'react-error-boundary';
+import log from 'electron-log/renderer';
 
 import App from '@/App';
 import ErrorScene from '@/components/ErrorScene';
 import TimerProvider from '@/features/timer/TimerProvider';
+
+const logger = log.scope('Renderer Root');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +34,9 @@ root.render(
         <ErrorScene />
       </div>
     }
+    onError={(e) => {
+      logger.error(e);
+    }}
   >
     <Provider>
       <QueryClientProvider client={queryClient}>
