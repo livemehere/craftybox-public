@@ -1,12 +1,14 @@
 import { Emitter } from '@fewings/core/classes';
 
-import { Box, LayerType, Point } from '../../types';
+import { LayerType } from '../../types';
 import Bound, { Bounds } from '../../Bounds';
 import TextLayer from '../Shapes/TextLayer';
 import LineLayer from '../Shapes/LineLayer';
 import ContainerLayer from '../Container/ContainerLayer';
 
 import InteractionLayer from './InteractionLayer';
+
+import { ILayer } from '@/lib/Canvas/Core/interfaces';
 
 export type LayerOptions = {
   x?: number;
@@ -44,7 +46,7 @@ export interface Renderer {
   _render(ctx: CanvasRenderingContext2D): void;
 }
 
-export default abstract class Layer extends Emitter<TLayerEvents> implements Point, Box, Renderer {
+export default abstract class Layer extends Emitter<TLayerEvents> implements ILayer, Renderer {
   _x = 0;
   _y = 0;
   _width = 0;
