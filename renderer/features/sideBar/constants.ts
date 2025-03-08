@@ -6,6 +6,7 @@ import { RxTimer } from 'react-icons/rx';
 import { TfiClose } from 'react-icons/tfi';
 import { rendererIpc } from '@electron-buddy/ipc/renderer';
 import { FaRegWindowMinimize } from 'react-icons/fa';
+import { RiArchive2Line } from "react-icons/ri";
 
 import { TNavItemGroup } from '@/features/sideBar/types';
 
@@ -53,6 +54,16 @@ export const sideBarMenus: TNavItemGroup[] = [
         path: '/tools/color-picker'
       }
     ]
+  },
+  {
+    groupName: '워크스페이스',
+    items: [
+      {
+        itemName: '아카이브',
+        Icon: RiArchive2Line,
+        path: '/workspace/archive'
+      }
+    ]
   }
 ];
 
@@ -79,3 +90,5 @@ export const appButtons = [
     }
   }
 ] as const;
+
+
