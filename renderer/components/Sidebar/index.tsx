@@ -26,10 +26,12 @@ const SideBar = () => {
       animate={open ? 'open' : 'close'}
       variants={{
         open: {
-          width: 'var(--side-bar-width)'
+          width: 'var(--side-bar-width)',
+          minWidth: 'var(--side-bar-width)'
         },
         close: {
           width: 0,
+          minWidth: 0,
           borderRightWidth: 0,
           paddingLeft: 0,
           paddingRight: 0

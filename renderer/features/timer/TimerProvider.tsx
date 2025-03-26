@@ -74,7 +74,6 @@ const TimerProvider = ({ children }: Props) => {
     }
   };
   const isPlayable = !isRunning || isPaused;
-  console.log('timer', timer);
 
   return (
     <TimerContext.Provider
