@@ -6,9 +6,10 @@ import { RxTimer } from 'react-icons/rx';
 import { TfiClose } from 'react-icons/tfi';
 import { rendererIpc } from '@electron-buddy/ipc/renderer';
 import { FaRegWindowMinimize } from 'react-icons/fa';
-import { RiArchive2Line } from "react-icons/ri";
+import { RiArchive2Line } from 'react-icons/ri';
+import { SiShortcut } from 'react-icons/si';
 
-import { TNavItemGroup } from '@/features/sideBar/types';
+import { TNavItemGroup } from '../types/sidebar';
 
 export const sideBarMenus: TNavItemGroup[] = [
   {
@@ -64,6 +65,16 @@ export const sideBarMenus: TNavItemGroup[] = [
         path: '/workspace/archive'
       }
     ]
+  },
+  {
+    groupName: '에디터',
+    items: [
+      {
+        itemName: '캔버스',
+        Icon: SiShortcut,
+        path: '/editor/canvas'
+      }
+    ]
   }
 ];
 
@@ -90,5 +101,3 @@ export const appButtons = [
     }
   }
 ] as const;
-
-

@@ -1,47 +1,20 @@
-import { Route, Routes, useNavigate } from 'react-router';
-import { lazy } from 'react';
+import { useMemo } from 'react';
+import { RouterProvider } from 'react-router';
+import { createHashRouter, createMemoryRouter } from 'react-router';
 
-import Layout from '@/components/Layout';
-import useOn from '@/hooks/electron/useOn';
+import { routes } from './routes';
+interface AppProps {
+  routerType?: 'browser' | 'memory';
+  initialEntries?: string[];
+}
 
+export default function App({ routerType = 'browser', initialEntries = ['/'] }: AppProps) {
+  const router = useMemo(() => {
+    if (routerType === 'browser') {
+      return createHashRouter(routes);
+    }
+    return createMemoryRouter(routes, { initialEntries });
+  }, [routerType, initialEntries]);
 
-const HomePage = lazy(() => import('@/pages/HomePage'));
-
-/* tools */
-const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
-const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
-const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
-
-/* settings */
-const GeneralSettingPage = lazy(() => import('@/pages/settings/GeneralSettingPage'));
-const ShortCutSettingPage = lazy(() => import('@/pages/settings/ShortCutSettingPage'));
-
-/* workspace */
-const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
-
-export default function App() {
-  const navigate = useNavigate();
-  useOn('route', ({ path }) => {
-    navigate(path);
-  });
-  return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path={'/tools'}>
-          <Route path={'/tools/screenshot'} element={<ScreenShotPage />} />
-          <Route path={'/tools/timer'} element={<TimerPage />} />
-          <Route path={'/tools/color-picker'} element={<ColorPickerPage />} />
-        </Route>
-        <Route path={'/workspace'}>
-          <Route path={'/workspace/archive'} element={<ArchivePage />} />
-        </Route>
-        <Route path={'/settings'}>
-          <Route path={'/settings'} element={<GeneralSettingPage />} />
-          <Route path={'/settings/shortcuts'} element={<ShortCutSettingPage />} />
-        </Route>
-        <Route path={'/'} element={<HomePage />} />
-        <Route path={'*'} element={<div>404</div>} />
-      </Route>
-    </Routes>
-  );
+  return <RouterProvider router={router} />;
 }

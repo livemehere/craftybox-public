@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { IoIosArrowForward } from 'react-icons/io';
 import { motion } from 'motion/react';
 
-import { TNavItem } from '@/features/sideBar/types';
+import { TNavItem } from '../../types/sidebar';
 
 interface Props {
   item: TNavItem;

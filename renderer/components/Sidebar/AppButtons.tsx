@@ -1,5 +1,6 @@
+import { appButtons } from '../../constants/sidebar';
+
 import { cn } from '@/utils/cn';
-import { appButtons } from '@/features/sideBar/constants';
 
 const AppButtons = () => {
   return (

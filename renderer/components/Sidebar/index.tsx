@@ -2,14 +2,15 @@ import { Space } from '@fewings/react/components';
 import { motion } from 'motion/react';
 import { useAtomValue } from 'jotai';
 
-// import CurrentUser from '@/features/sideBar/components/CurrentUser';
-import AppButtons from '@/features/sideBar/components/AppButtons';
-import { sideBarOpenAtom } from '@/stores/sideBarOpenAtom';
+import { sideBarMenus } from '../../constants/sidebar';
+
+import AppButtons from './AppButtons';
+import NavGroup from './NavGroup';
+import NavItem from './NavItem';
+
 import { cn } from '@/utils/cn';
 import { usePlatform } from '@/queries/usePlatform';
-import { sideBarMenus } from '@/features/sideBar/constants';
-import NavGroup from '@/features/sideBar/components/NavGroup';
-import NavItem from '@/features/sideBar/components/NavItem';
+import { sideBarOpenAtom } from '@/stores/sideBarOpenAtom';
 
 const SideBar = () => {
   const open = useAtomValue(sideBarOpenAtom);
