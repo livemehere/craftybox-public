@@ -1,11 +1,11 @@
 import { Rect, Transformer, Arrow, Line, Ellipse, Circle } from 'react-konva';
 import { Stage } from 'react-konva';
 import { Layer } from 'react-konva';
-import useMeasure from 'react-use-measure';
 import { useAtom } from 'jotai';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Konva from 'konva';
 import { uid } from 'uid';
+import { KonvaEventObject } from 'konva/lib/Node';
 
 import CanvasToolBar from '@/features/canvasEditor/components/CanvasToolBar';
 import { stageAtom } from '@/features/canvasEditor/store/stageAtom';
@@ -15,6 +15,7 @@ import { TCanvasTool } from '@/features/canvasEditor/components/CanvasToolBar';
 /**
  * TODO:
  * - snap bug with Ellipse
+ * - cmd or ctrl + dragging -> create selection area and select all. for this implement multiple selection.
  */
 
 // Define interfaces for each shape type to manage them properly
@@ -73,6 +74,12 @@ const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 10;
 const ZOOM_FACTOR = 1.1; // 휠 한 번에 10% 확대/축소
 
+// Ruler 관련 상수
+const RULER_SIZE = 20;
+const RULER_COLOR = '#363636';
+const RULER_LINE_COLOR = '#666666';
+const RULER_TEXT_COLOR = '#BBBBBB';
+
 // Helper to get bounding box for shapes
 const getBoundingBox = (shape: ShapeProps): { x: number; y: number; width: number; height: number } => {
   switch (shape.type) {
@@ -119,11 +126,274 @@ const getBoundingBox = (shape: ShapeProps): { x: number; y: number; width: numbe
   }
 };
 
+// Ruler 컴포넌트 구현
+// 눈금자 계산 유틸리티 함수
+const getOptimalRulerSpacing = (scale: number): { spacing: number; step: number; majorStep: number } => {
+  const baseUnit = 100;
+  let spacing = baseUnit;
+  let step = 10;
+  let majorStep = 100;
+
+  // 최소 step 값 (너무 작아지지 않도록)
+  const MIN_STEP = 5;
+
+  if (scale >= 4) {
+    spacing = 10;
+    step = 1;
+    majorStep = 10;
+  } else if (scale >= 2) {
+    spacing = 20;
+    step = 2;
+    majorStep = 20;
+  } else if (scale >= 1) {
+    spacing = 50;
+    step = 5;
+    majorStep = 50;
+  } else if (scale >= 0.5) {
+    spacing = 100;
+    step = 10;
+    majorStep = 100;
+  } else if (scale >= 0.25) {
+    spacing = 200;
+    step = 20;
+    majorStep = 200;
+  } else if (scale >= 0.1) {
+    spacing = 500;
+    step = 50;
+    majorStep = 500;
+  } else {
+    // 매우 작은 scale 값에 대해 매우 큰 간격 사용
+    spacing = 1000;
+    step = 100;
+    majorStep = 1000;
+  }
+
+  // step이 너무 작아지지 않도록 보장
+  step = Math.max(step, MIN_STEP);
+
+  return { spacing, step, majorStep };
+};
+
+// 수평 눈금자 (가로 ruler) 컴포넌트
+const HorizontalRuler = ({ scale, offset, width }: { scale: number; offset: number; width: number }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 캔버스 설정
+    canvas.width = width;
+    canvas.height = RULER_SIZE;
+
+    // 캔버스 초기화
+    ctx.fillStyle = RULER_COLOR;
+    ctx.fillRect(0, 0, width, RULER_SIZE);
+
+    // scale 값이 너무 작으면 눈금 그리지 않음 (안전장치)
+    if (scale < 0.001) {
+      return;
+    }
+
+    // 오프셋 값이 비정상적으로 크면 제한 (안전장치)
+    const safeOffset = isFinite(offset) ? Math.max(-100000, Math.min(100000, offset)) : 0;
+
+    // 눈금 계산
+    const { spacing, step } = getOptimalRulerSpacing(scale);
+
+    // 작은 눈금 그리기
+    ctx.strokeStyle = RULER_LINE_COLOR;
+    ctx.fillStyle = RULER_TEXT_COLOR;
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    // 절대적인 최대 눈금 개수 제한 (1000개 이상 그리지 않음)
+    const MAX_ABSOLUTE_TICKS = 1000;
+
+    // 화면에 보이는 최대 눈금 개수 계산
+    let maxTicks = Math.ceil(width / (step * scale)) + 1;
+
+    // 눈금 개수가 비정상적으로 크면 제한 (추가 안전장치)
+    if (!isFinite(maxTicks) || maxTicks > MAX_ABSOLUTE_TICKS) {
+      maxTicks = MAX_ABSOLUTE_TICKS;
+    }
+
+    // 시작 위치 계산 (픽셀 위치를 눈금 단위로 변환)
+    const firstVisibleTick = Math.floor(safeOffset / step) * step;
+
+    // 최적화된 방식으로 눈금 그리기
+    for (let i = 0; i < maxTicks; i++) {
+      const tickValue = firstVisibleTick + i * step;
+      const pos = Math.round((tickValue - safeOffset) * scale);
+
+      // 화면 밖으로 나가면 그리지 않음
+      if (pos < 0 || pos > width) continue;
+
+      // 큰 눈금일 경우 더 길게
+      const isMajor = tickValue % spacing === 0;
+      const tickHeight = isMajor ? 12 : 8;
+
+      ctx.beginPath();
+      ctx.moveTo(pos, RULER_SIZE);
+      ctx.lineTo(pos, RULER_SIZE - tickHeight);
+      ctx.stroke();
+
+      // 큰 눈금에만 숫자 표시
+      if (isMajor) {
+        ctx.fillText(tickValue.toString(), pos, 0);
+      }
+    }
+  }, [scale, offset, width]);
+
+  return <canvas ref={canvasRef} className='h-full w-full' />;
+};
+
+// 수직 눈금자 (세로 ruler) 컴포넌트
+const VerticalRuler = ({ scale, offset, height }: { scale: number; offset: number; height: number }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 캔버스 설정
+    canvas.width = RULER_SIZE;
+    canvas.height = height;
+
+    // 캔버스 초기화
+    ctx.fillStyle = RULER_COLOR;
+    ctx.fillRect(0, 0, RULER_SIZE, height);
+
+    // scale 값이 너무 작으면 눈금 그리지 않음 (안전장치)
+    if (scale < 0.001) {
+      return;
+    }
+
+    // 오프셋 값이 비정상적으로 크면 제한 (안전장치)
+    const safeOffset = isFinite(offset) ? Math.max(-100000, Math.min(100000, offset)) : 0;
+
+    // 눈금 계산
+    const { spacing, step } = getOptimalRulerSpacing(scale);
+
+    // 작은 눈금 그리기
+    ctx.strokeStyle = RULER_LINE_COLOR;
+    ctx.fillStyle = RULER_TEXT_COLOR;
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    // 절대적인 최대 눈금 개수 제한 (1000개 이상 그리지 않음)
+    const MAX_ABSOLUTE_TICKS = 1000;
+
+    // 화면에 보이는 최대 눈금 개수 계산
+    let maxTicks = Math.ceil(height / (step * scale)) + 1;
+
+    // 눈금 개수가 비정상적으로 크면 제한 (추가 안전장치)
+    if (!isFinite(maxTicks) || maxTicks > MAX_ABSOLUTE_TICKS) {
+      maxTicks = MAX_ABSOLUTE_TICKS;
+    }
+
+    // 시작 위치 계산 (픽셀 위치를 눈금 단위로 변환)
+    const firstVisibleTick = Math.floor(safeOffset / step) * step;
+
+    // 최적화된 방식으로 눈금 그리기
+    for (let i = 0; i < maxTicks; i++) {
+      const tickValue = firstVisibleTick + i * step;
+      const pos = Math.round((tickValue - safeOffset) * scale);
+
+      // 화면 밖으로 나가면 그리지 않음
+      if (pos < 0 || pos > height) continue;
+
+      // 큰 눈금일 경우 더 길게
+      const isMajor = tickValue % spacing === 0;
+      const tickWidth = isMajor ? 12 : 8;
+
+      ctx.beginPath();
+      ctx.moveTo(RULER_SIZE, pos);
+      ctx.lineTo(RULER_SIZE - tickWidth, pos);
+      ctx.stroke();
+
+      // 큰 눈금에만 숫자 표시
+      if (isMajor) {
+        // 텍스트 회전을 위해 상태 저장
+        ctx.save();
+        ctx.translate(12, pos);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(tickValue.toString(), 0, 0);
+        ctx.restore();
+      }
+    }
+  }, [scale, offset, height]);
+
+  return <canvas ref={canvasRef} className='h-full w-full' />;
+};
+
 export default function CanvasEditor() {
   const initRef = useRef(false);
-  const [parentRef, bounds] = useMeasure();
+  const containerRef = useRef<HTMLDivElement>(null); // 컨테이너 참조용 ref
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 }); // 초기값은 0으로 설정
+  const [isInitialSizeMeasured, setIsInitialSizeMeasured] = useState(false); // 초기 측정 완료 여부
   const [stage, setStage] = useAtom(stageAtom);
   const [selectedTool] = useAtom(selectedCanvasToolAtom);
+
+  // 컨테이너 크기 측정 함수
+  const measureContainerSize = useCallback(() => {
+    if (containerRef.current) {
+      const { width, height } = containerRef.current.getBoundingClientRect();
+
+      // 크기가 유효한 경우에만 업데이트
+      if (width > 10 && height > 10) {
+        // 이전 크기와 같으면 업데이트하지 않음 (불필요한 리렌더링 방지)
+        if (
+          !isInitialSizeMeasured ||
+          Math.abs(width - containerSize.width) > 1 ||
+          Math.abs(height - containerSize.height) > 1
+        ) {
+          setContainerSize({ width, height });
+
+          // 초기 측정이 완료되었음을 표시
+          if (!isInitialSizeMeasured) {
+            setIsInitialSizeMeasured(true);
+          }
+        }
+      }
+    }
+  }, [containerSize.width, containerSize.height, isInitialSizeMeasured]);
+
+  // 초기 마운트 및 리사이즈 이벤트 설정
+  useEffect(() => {
+    // 초기 마운트 시 크기 측정
+    // RAF를 사용하여 레이아웃이 완전히 계산된 후 측정
+    const initialMeasureTimeout = setTimeout(() => {
+      requestAnimationFrame(() => {
+        measureContainerSize();
+      });
+    }, 100); // 약간의 지연을 두어 레이아웃이 안정화될 시간 제공
+
+    // 리사이즈 이벤트에 대해서만 크기 측정 실행
+    const handleResize = () => {
+      if (window.requestAnimationFrame) {
+        // 리사이즈 이벤트는 빠르게 연속으로 발생하므로 requestAnimationFrame으로 디바운스
+        window.requestAnimationFrame(measureContainerSize);
+      } else {
+        setTimeout(measureContainerSize, 66); // 약 60fps에 해당하는 시간
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(initialMeasureTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [measureContainerSize]);
 
   // Store shapes as React state with proper typing
   const [shapes, setShapes] = useState<ShapeProps[]>([]);
@@ -152,6 +422,39 @@ export default function CanvasEditor() {
   // 줌 관련 상태 추가
   const [scale, setScale] = useState(1);
 
+  // 뷰포트 오프셋 계산 함수 (현재 위치 표시용)
+  const getViewportOffset = (): { x: number; y: number } => {
+    if (!stage) return { x: 0, y: 0 };
+
+    // 매우 작은 scale 값에 대한 보호 장치 추가
+    const safeScale = Math.max(scale, 0.001);
+
+    // offset 값에 대한 제한 추가 (너무 큰 값 방지)
+    const stageX = stage.x();
+    const stageY = stage.y();
+
+    // 값이 매우 크거나 NaN, Infinity인 경우 기본값으로 대체
+    const offsetX = isFinite(-stageX / safeScale) ? -stageX / safeScale : 0;
+    const offsetY = isFinite(-stageY / safeScale) ? -stageY / safeScale : 0;
+
+    // 최대 오프셋 제한 (너무 큰 값 방지)
+    const MAX_OFFSET = 100000;
+
+    return {
+      x: Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, offsetX)),
+      y: Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, offsetY))
+    };
+  };
+
+  // 확대/축소 및 위치 초기화
+  const resetView = () => {
+    setScale(1);
+    if (stage) {
+      stage.position({ x: 0, y: 0 });
+      stage.batchDraw();
+    }
+  };
+
   // Clear selection when tool changes
   useEffect(() => {
     if (selectedTool !== 'pointer') {
@@ -164,53 +467,46 @@ export default function CanvasEditor() {
   // Add keyboard event listeners for Ctrl key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Control' || e.key === 'Meta') {
-        setIsCtrlPressed(true);
-
-        // Clear guides when Ctrl/Cmd is pressed
-        if (isCtrlPressed) {
-          setHorizontalGuides([]);
-          setVerticalGuides([]);
-        }
-      }
-
-      // 스페이스바 감지
-      if (e.key === ' ' || e.code === 'Space') {
+      if (e.code === 'Space') {
         setIsSpacePressed(true);
+        // 스페이스 키만 눌렀을 때는 패닝 모드로 전환하지 않음
+        // 커서만 변경하여 사용자에게 패닝 가능함을 알림
         document.body.style.cursor = 'grab';
       }
 
-      // '0' 키를 눌렀을 때 줌 리셋
+      // Ctrl 또는 Meta(Cmd) 키 누를 때 guide 표시 제거
+      if (e.ctrlKey || e.metaKey) {
+        setIsCtrlPressed(true);
+      }
+
+      // '0' 키를 누를 때 확대/축소 및 위치 초기화
       if (e.key === '0') {
-        if (stage) {
-          setScale(1);
-          stage.scale({ x: 1, y: 1 });
-          stage.position({ x: 0, y: 0 });
-        }
+        resetView();
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Control' || e.key === 'Meta') {
-        setIsCtrlPressed(false);
-      }
-
-      // 스페이스바 해제
-      if (e.key === ' ' || e.code === 'Space') {
+      if (e.code === 'Space') {
         setIsSpacePressed(false);
+        // 스페이스 키를 뗐을 때 패닝 중이었다면 패닝 종료
         setIsPanning(false);
+        // 커서 원래대로 복원
         document.body.style.cursor = '';
       }
+
+      if (!e.ctrlKey && !e.metaKey) {
+        setIsCtrlPressed(false);
+      }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [isCtrlPressed]);
+  }, [resetView]);
 
   // 마우스 버튼 이벤트 리스너 추가
   useEffect(() => {
@@ -223,36 +519,50 @@ export default function CanvasEditor() {
         if (transformerRef.current) {
           transformerRef.current.nodes([]);
         }
+        // 마우스 위치 초기화 (첫 이동 시 좌표 저장 위함)
+        setLastPointerPosition(null);
       } else if (e.button === 0 && isSpacePressed) {
-        // 스페이스 + 좌클릭 조합
+        // 스페이스 + 좌클릭 조합일 때만 패닝 시작
         setIsPanning(true);
         document.body.style.cursor = 'grabbing';
         // 패닝 모드에서 Transformer 비활성화
         if (transformerRef.current) {
           transformerRef.current.nodes([]);
         }
+        // 마우스 위치 초기화 (첫 이동 시 좌표 저장 위함)
+        setLastPointerPosition(null);
       }
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      if (e.button === 1) {
+      if (e.button === 1 || (e.button === 0 && isSpacePressed)) {
         setIsPanning(false);
-        document.body.style.cursor = '';
-      } else if (e.button === 0 && isSpacePressed) {
-        // 좌클릭 해제 시 스페이스가 여전히 눌려있으면 grab 커서로 돌아감
+        // 마우스 좌표 초기화
+        setLastPointerPosition(null);
+        // 스페이스 키가 여전히 눌려있으면 grab 커서로, 아니면 기본 커서로
+        document.body.style.cursor = isSpacePressed ? 'grab' : '';
+      }
+    };
+
+    // 마우스가 창 밖으로 나갔을 때 처리 (패닝 중에 발생할 수 있는 문제 방지)
+    const handleMouseLeave = () => {
+      if (isPanning) {
         setIsPanning(false);
+        setLastPointerPosition(null);
         document.body.style.cursor = isSpacePressed ? 'grab' : '';
       }
     };
 
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
+    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      document.documentElement.addEventListener('mouseleave', handleMouseLeave);
     };
-  }, [isSpacePressed]);
+  }, [isSpacePressed, isPanning, transformerRef]);
 
   const createShapeProps = (pos: Konva.Vector2d, tool: TCanvasTool): ShapeProps | null => {
     switch (tool) {
@@ -951,7 +1261,7 @@ export default function CanvasEditor() {
         {verticalGuides.map((guide, i) => (
           <Line
             key={`v-${i}`}
-            points={[guide, 0, guide, bounds.height]}
+            points={[guide, 0, guide, containerSize.height]}
             stroke='#F24E1E'
             strokeWidth={1}
             dash={[4, 4]}
@@ -962,7 +1272,7 @@ export default function CanvasEditor() {
         {horizontalGuides.map((guide, i) => (
           <Line
             key={`h-${i}`}
-            points={[0, guide, bounds.width, guide]}
+            points={[0, guide, containerSize.width, guide]}
             stroke='#F24E1E'
             strokeWidth={1}
             dash={[4, 4]}
@@ -1022,340 +1332,498 @@ export default function CanvasEditor() {
     }
   };
 
-  // 휠 이벤트 처리 함수
-  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
+  // 마우스 휠 이벤트 핸들러 - 확대/축소 기능
+  const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
+    e.evt.preventDefault();
+
     // Ctrl 키나 Cmd 키를 누른 상태에서만 줌 작동
     if (e.evt.ctrlKey || e.evt.metaKey) {
+      const oldScale = scale;
+      const pointer = stage?.getPointerPosition();
+      if (!pointer || !stage) return;
+
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / oldScale,
+        y: (pointer.y - stage.y()) / oldScale
+      };
+
+      // deltaY가 비정상적인 값인지 확인 (안전장치)
+      const deltaY = isFinite(e.evt.deltaY) ? e.evt.deltaY : 0;
+      if (deltaY === 0) return; // deltaY가 0이면 아무 작업도 하지 않음
+
+      // 마우스 휠 방향에 따라 확대/축소 결정
+      const newScale =
+        deltaY < 0
+          ? Math.min(oldScale * ZOOM_FACTOR, MAX_ZOOM) // 확대
+          : Math.max(oldScale / ZOOM_FACTOR, MIN_ZOOM); // 축소
+
+      // 스케일이 실제로 변하지 않으면 불필요한 연산 방지
+      if (Math.abs(newScale - oldScale) < 0.00001) return;
+
+      setScale(newScale);
+
+      // mousePointTo 값이 비정상적인지 확인 (안전장치)
+      if (!isFinite(mousePointTo.x) || !isFinite(mousePointTo.y)) {
+        // 비정상적인 값일 경우 기본 줌 동작 수행
+        stage.scale({ x: newScale, y: newScale });
+        stage.batchDraw();
+        return;
+      }
+
+      // 마우스 위치 기준으로 줌 적용
+      const newPos = {
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale
+      };
+
+      // 계산된 위치가 비정상적인지 확인 (안전장치)
+      if (!isFinite(newPos.x) || !isFinite(newPos.y)) {
+        // 비정상적인 위치일 경우 안전한 기본값 사용
+        stage.scale({ x: newScale, y: newScale });
+        stage.batchDraw();
+        return;
+      }
+
+      stage.scale({ x: newScale, y: newScale });
+      stage.position(newPos);
+      stage.batchDraw();
+    } else {
+      // 일반 스크롤 (panning)
+      if (!stage) return;
+
+      // deltaX, deltaY가 비정상적인 값인지 확인 (안전장치)
+      const dx = isFinite(e.evt.deltaX) ? e.evt.deltaX : 0;
+      const dy = isFinite(e.evt.deltaY) ? e.evt.deltaY : 0;
+
+      // 둘 다 0이면 아무 작업도 하지 않음
+      if (dx === 0 && dy === 0) return;
+
+      // Stage 위치 이동
+      const stageX = stage.x();
+      const stageY = stage.y();
+
+      // 현재 위치가 비정상적인지 확인 (안전장치)
+      if (!isFinite(stageX) || !isFinite(stageY)) {
+        // 스테이지 위치 초기화
+        stage.position({ x: 0, y: 0 });
+        stage.batchDraw();
+        return;
+      }
+
+      const newX = stageX - dx;
+      const newY = stageY - dy;
+
+      // 계산된 위치가 비정상적인지 확인 (안전장치)
+      if (!isFinite(newX) || !isFinite(newY)) {
+        return;
+      }
+
+      stage.position({ x: newX, y: newY });
+      stage.batchDraw();
+    }
+  };
+
+  // onPointerMove 이벤트 핸들러를 외부 함수로 추출하여 가독성 개선
+  const handlePointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    // 패닝 모드일 때만 패닝 수행
+    if (isPanning && stage) {
       e.evt.preventDefault();
 
-      if (stage) {
-        // 현재 마우스 포인터 위치
-        const pointer = stage.getPointerPosition();
-        if (!pointer) return;
+      // 패닝 모드에서 마우스 이동 시 Stage 이동
+      const pointerPosition = stage.getPointerPosition();
 
-        // 현재 스케일
-        const oldScale = scale;
+      // 유효한 포인터 위치가 있는지 확인
+      if (!pointerPosition) return;
 
-        // 확대/축소 계산
-        const newScale =
-          e.evt.deltaY < 0 ? Math.min(oldScale * ZOOM_FACTOR, MAX_ZOOM) : Math.max(oldScale / ZOOM_FACTOR, MIN_ZOOM);
+      if (lastPointerPosition) {
+        // 이동 거리 계산
+        const dx = pointerPosition.x - lastPointerPosition.x;
+        const dy = pointerPosition.y - lastPointerPosition.y;
 
-        // 스케일 변화율
-        const scaleChange = newScale / oldScale;
+        // 너무 큰 이동은 무시 (비정상적인 상황 방지)
+        if (isFinite(dx) && isFinite(dy) && Math.abs(dx) < 100 && Math.abs(dy) < 100) {
+          // 현재 스테이지 위치 확인
+          const currentX = stage.x();
+          const currentY = stage.y();
 
-        // 확대/축소 중심점 계산
-        const newPos = {
-          x: pointer.x - (pointer.x - stage.x()) * scaleChange,
-          y: pointer.y - (pointer.y - stage.y()) * scaleChange
-        };
-
-        // 상태 업데이트
-        setScale(newScale);
-
-        // Stage 업데이트
-        stage.scale({ x: newScale, y: newScale });
-        stage.position(newPos);
+          if (isFinite(currentX) && isFinite(currentY)) {
+            // Stage position 업데이트
+            stage.position({
+              x: currentX + dx,
+              y: currentY + dy
+            });
+            stage.batchDraw(); // 즉시 렌더링하여 부드러운 이동 보장
+          }
+        }
       }
-    } else {
-      // 일반 스크롤은 기본 동작 유지 (페이지 스크롤)
-      // 필요한 경우 여기에 수직/수평 스크롤 로직 추가 가능
+
+      // 마지막 포인터 위치 업데이트
+      setLastPointerPosition(pointerPosition);
       return;
     }
+
+    // 기존 도형 그리기 코드
+    if (!curShapeProps) return;
+    if (!startPos) return;
+    if (!stage) return;
+    const pos = stage.getRelativePointerPosition();
+    if (!pos) return;
+
+    updateShapeProps(pos);
+  };
+
+  // onPointerUp 이벤트 핸들러도 외부 함수로 추출
+  const handlePointerUp = () => {
+    // 패닝 관련 처리
+    if (isPanning) {
+      // 패닝 모드의 마우스 좌표 초기화
+      setLastPointerPosition(null);
+
+      // 마우스 버튼을 떼면 패닝은 종료되지만, 스페이스가 여전히 눌려있다면
+      // isPanning은 false가 되고 커서는 grab 상태 유지
+      if (!isSpacePressed) {
+        document.body.style.cursor = '';
+      } else {
+        document.body.style.cursor = 'grab';
+      }
+    }
+
+    // 도형 그리기 완료 처리
+    if (!curShapeProps) return;
+
+    // Add the current shape to the list of shapes
+    setShapes((prev) => [...prev, curShapeProps]);
+
+    // Reset current shape and start position
+    setStartPos(null);
+    setCurShapeProps(null);
+  };
+
+  // Stage 컴포넌트에 추가적인 이벤트 핸들러
+  const handlePointerLeave = () => {
+    // 마우스가 Stage를 벗어나면 패닝 좌표 초기화
+    // (마우스가 빠르게 움직여 mouseup 이벤트를 놓친 경우에 대한 안전장치)
+    if (isPanning) {
+      setLastPointerPosition(null);
+    }
+  };
+
+  // Stage의 포인터 이벤트 처리 개선
+  const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // isPanning이 true일 때는 handleStageClick 실행하지 않고,
+    // 대신 Stage의 패닝에 집중
+    if (isPanning) {
+      e.evt.preventDefault();
+      e.evt.stopPropagation();
+
+      // Stage 내에서 정확한 마우스 위치 설정
+      const pointerPosition = stage?.getPointerPosition();
+      if (pointerPosition) {
+        setLastPointerPosition(pointerPosition);
+      }
+      return;
+    }
+
+    // 패닝 모드가 아니면 기존 클릭 핸들러 실행
+    handleStageClick(e);
+  };
+
+  // 터치 이벤트용 별도 핸들러
+  const handleStageTouchStart = (e: Konva.KonvaEventObject<TouchEvent>) => {
+    // 패닝 중이면 터치 위치만 저장
+    if (isPanning) {
+      e.evt.preventDefault();
+
+      const pointerPosition = stage?.getPointerPosition();
+      if (pointerPosition) {
+        setLastPointerPosition(pointerPosition);
+      }
+      return;
+    }
+
+    // 여기서는 일반 클릭 핸들러 그대로 사용
+    // 터치 이벤트도 Konva가 처리해주기 때문에
+    handleStageClick(e as any);
   };
 
   return (
     <div
       className={`relative h-full w-full overflow-hidden bg-[#1E1E1E] ${isSpacePressed ? 'cursor-grab' : ''}`}
-      ref={parentRef}
+      ref={containerRef}
     >
-      <Stage
-        width={bounds.width}
-        height={bounds.height}
-        ref={(_stage) => {
-          if (initRef.current) return;
-          setStage(_stage);
-          initRef.current = true;
-        }}
-        draggable={false}
-        scaleX={scale}
-        scaleY={scale}
-        onMouseDown={handleStageClick}
-        onTouchStart={handleStageClick}
-        onPointerMove={(e) => {
-          // 패닝 모드일 때만 패닝 수행
-          if (isPanning && stage) {
-            e.evt.preventDefault();
+      {/* 상단 눈금자 (가로) */}
+      <div className='absolute top-0 right-0 left-[20px] z-10 h-[20px]' style={{ backgroundColor: RULER_COLOR }}>
+        <HorizontalRuler
+          scale={scale}
+          offset={getViewportOffset().x}
+          width={Math.max(10, containerSize.width - RULER_SIZE)}
+        />
+      </div>
 
-            // 패닝 모드에서 마우스 이동 시 Stage 이동
-            const pointerPosition = stage.getPointerPosition();
-            if (pointerPosition && lastPointerPosition) {
-              const dx = pointerPosition.x - lastPointerPosition.x;
-              const dy = pointerPosition.y - lastPointerPosition.y;
+      {/* 좌측 눈금자 (세로) */}
+      <div className='absolute top-[20px] bottom-0 left-0 z-10 w-[20px]' style={{ backgroundColor: RULER_COLOR }}>
+        <VerticalRuler
+          scale={scale}
+          offset={getViewportOffset().y}
+          height={Math.max(10, containerSize.height - RULER_SIZE)}
+        />
+      </div>
 
-              // Stage position 업데이트
-              stage.position({
-                x: stage.x() + dx,
-                y: stage.y() + dy
-              });
-
-              // 마지막 포인터 위치 업데이트
-              setLastPointerPosition(pointerPosition);
-            } else if (pointerPosition) {
-              // 첫 이동 시 좌표만 저장
-              setLastPointerPosition(pointerPosition);
-            }
-            return;
-          }
-
-          // 기존 도형 그리기 코드
-          if (!curShapeProps) return;
-          if (!startPos) return;
-          if (!stage) return;
-          const pos = stage.getRelativePointerPosition();
-          if (!pos) return;
-
-          updateShapeProps(pos);
-        }}
-        onPointerUp={() => {
-          // 패닝 모드의 마우스 좌표 초기화
-          setLastPointerPosition(null);
-
-          // 도형 그리기 완료 처리
-          if (!curShapeProps) return;
-
-          // Add the current shape to the list of shapes
-          setShapes((prev) => [...prev, curShapeProps]);
-
-          // Reset current shape and start position
-          setStartPos(null);
-          setCurShapeProps(null);
-        }}
-        onWheel={handleWheel}
+      {/* 좌상단 코너 (확대/축소 및 위치 초기화) */}
+      <div
+        className='absolute top-0 left-0 z-20 flex h-[20px] w-[20px] cursor-pointer items-center justify-center'
+        style={{ backgroundColor: RULER_COLOR }}
+        onClick={resetView}
       >
-        <Layer>
-          {/* Render all permanent shapes */}
-          {shapes.map(renderShape)}
+        <div className='h-2 w-2 rounded-full bg-gray-500'></div>
+      </div>
 
-          {/* Render the currently drawing shape */}
-          {renderCurrentShape()}
-
-          {/* 선택된 라인/화살표의 앵커 핸들 렌더링 */}
-          {selectedId && lineEndpoints && !isPanning && (
-            <>
-              {/* 시작점 앵커 */}
-              <Circle
-                x={lineEndpoints.start.x}
-                y={lineEndpoints.start.y}
-                radius={8}
-                fill='#1ABCFE'
-                stroke='#fff'
-                strokeWidth={1}
-                draggable
-                onDragMove={(e) => handleLineAnchorDragMove(e, true)}
-                onDragEnd={() => handleLineAnchorDragEnd()}
-              />
-              {/* 끝점 앵커 */}
-              <Circle
-                x={lineEndpoints.end.x}
-                y={lineEndpoints.end.y}
-                radius={8}
-                fill='#FF7262'
-                stroke='#fff'
-                strokeWidth={1}
-                draggable
-                onDragMove={(e) => handleLineAnchorDragMove(e, false)}
-                onDragEnd={() => handleLineAnchorDragEnd()}
-              />
-            </>
-          )}
-
-          {/* Render snap guides */}
-          {renderGuides()}
-
-          {/* Transformer should be the last element to appear on top */}
-          {!isPanning && (
-            <Transformer
-              ref={transformerRef}
-              boundBoxFunc={(oldBox, newBox) => {
-                // Limit size to prevent negative width/height
-                if (newBox.width < 5 || newBox.height < 5) {
-                  return oldBox;
-                }
-
-                // Get the selected shape to check its type
-                const shape = shapes.find((s) => s.id === selectedId);
-
-                // For lines and arrows, allow any transformation (will be handled in transform end)
-                if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
-                  return newBox;
-                }
-
-                // If Ctrl is pressed, disable snapping and return the box as is
-                if (isCtrlPressed) {
-                  return newBox;
-                }
-
-                // Rest of the existing snapping logic for rectangles and ellipses
-                // Collect all potential snap lines from other shapes for snapping
-                const potentialVerticalLines: number[] = [];
-                const potentialHorizontalLines: number[] = [];
-
-                shapes.forEach((otherShape) => {
-                  if (otherShape.id === selectedId) return; // Skip the current shape
-
-                  const otherBox = getBoundingBox(otherShape);
-
-                  // Add vertical lines (left, center, right)
-                  potentialVerticalLines.push(
-                    otherBox.x, // left
-                    otherBox.x + otherBox.width / 2, // center
-                    otherBox.x + otherBox.width // right
-                  );
-
-                  // Add horizontal lines (top, middle, bottom)
-                  potentialHorizontalLines.push(
-                    otherBox.y, // top
-                    otherBox.y + otherBox.height / 2, // middle
-                    otherBox.y + otherBox.height // bottom
-                  );
-                });
-
-                // Create a modified version of newBox to adjust
-                const adjustedBox = { ...newBox };
-
-                // Variables to track snap points
-                let snapX: number | null = null;
-                let snapY: number | null = null;
-
-                // Edges/positions to check
-                const left = newBox.x;
-                const center = newBox.x + newBox.width / 2;
-                const right = newBox.x + newBox.width;
-                const top = newBox.y;
-                const middle = newBox.y + newBox.height / 2;
-                const bottom = newBox.y + newBox.height;
-
-                // Points to check for snapping
-                interface Point {
-                  x: number;
-                  y: number;
-                  position: string;
-                }
-
-                const pointsToCheck: Point[] = [
-                  { x: left, y: top, position: 'top-left' },
-                  { x: center, y: top, position: 'top-center' },
-                  { x: right, y: top, position: 'top-right' },
-                  { x: left, y: middle, position: 'middle-left' },
-                  { x: right, y: middle, position: 'middle-right' },
-                  { x: left, y: bottom, position: 'bottom-left' },
-                  { x: center, y: bottom, position: 'bottom-center' },
-                  { x: right, y: bottom, position: 'bottom-right' }
-                ];
-
-                // Check for vertical snapping
-                const verticalGuides: number[] = [];
-                let minXDistance = SNAP_THRESHOLD;
-                let snappedPoint: Point | null = null;
-
-                for (const point of pointsToCheck) {
-                  for (const line of potentialVerticalLines) {
-                    const distance = Math.abs(point.x - line);
-                    if (distance < minXDistance) {
-                      minXDistance = distance;
-                      snapX = line;
-                      snappedPoint = point;
-                      verticalGuides.push(line);
-                    }
-                  }
-                }
-
-                // Check for horizontal snapping
-                const horizontalGuides: number[] = [];
-                let minYDistance = SNAP_THRESHOLD;
-                let snappedYPoint: Point | null = null;
-
-                for (const point of pointsToCheck) {
-                  for (const line of potentialHorizontalLines) {
-                    const distance = Math.abs(point.y - line);
-                    if (distance < minYDistance) {
-                      minYDistance = distance;
-                      snapY = line;
-                      snappedYPoint = point;
-                      horizontalGuides.push(line);
-                    }
-                  }
-                }
-
-                // Update guides for visual feedback
-                setVerticalGuides([...new Set(verticalGuides)]);
-                setHorizontalGuides([...new Set(horizontalGuides)]);
-
-                // Apply vertical snapping if found
-                if (snapX !== null && snappedPoint !== null) {
-                  if (snappedPoint.position.includes('left')) {
-                    // Left edge snapped
-                    const deltaX = snapX - newBox.x;
-                    adjustedBox.x = snapX;
-                    adjustedBox.width -= deltaX;
-                  } else if (snappedPoint.position.includes('right')) {
-                    // Right edge snapped
-                    adjustedBox.width = snapX - newBox.x;
-                  } else if (snappedPoint.position.includes('center')) {
-                    // Center snapped
-                    adjustedBox.x = snapX - newBox.width / 2;
-                  }
-                }
-
-                // Apply horizontal snapping if found
-                if (snapY !== null && snappedYPoint !== null) {
-                  if (snappedYPoint.position.includes('top')) {
-                    // Top edge snapped
-                    const deltaY = snapY - newBox.y;
-                    adjustedBox.y = snapY;
-                    adjustedBox.height -= deltaY;
-                  } else if (snappedYPoint.position.includes('bottom')) {
-                    // Bottom edge snapped
-                    adjustedBox.height = snapY - newBox.y;
-                  } else if (snappedYPoint.position.includes('middle')) {
-                    // Middle snapped
-                    adjustedBox.y = snapY - newBox.height / 2;
-                  }
-                }
-
-                return adjustedBox;
-              }}
-              // Allow free resize (no aspect ratio lock)
-              keepRatio={false}
-              // Enable all handlers for each edge and corner
-              enabledAnchors={[
-                'top-left',
-                'top-center',
-                'top-right',
-                'middle-left',
-                'middle-right',
-                'bottom-left',
-                'bottom-center',
-                'bottom-right'
-              ]}
-              // Add rotation snapping
-              rotationSnaps={isCtrlPressed ? [] : ROTATION_SNAPS}
-              // Add dragging event to support transformer snapping
-              onDragMove={handleTransformerDragMove}
-              // Add transform event to support resizing snapping
-              onTransform={handleTransformerTransform}
-              // Enable rotation by default
-              rotateEnabled={true}
-            />
-          )}
-        </Layer>
-      </Stage>
-      <CanvasToolBar />
-
-      {/* 줌 레벨 표시 */}
+      {/* 확대/축소 레벨 표시 */}
       <div className='absolute bottom-2 left-2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-70'>
         {Math.round(scale * 100)}%
       </div>
+
+      {/* Stage는 컨테이너 크기가 유효한 경우에만 렌더링 */}
+      {isInitialSizeMeasured && containerSize.width > 10 && containerSize.height > 10 && (
+        <Stage
+          width={containerSize.width - RULER_SIZE}
+          height={containerSize.height - RULER_SIZE}
+          ref={(_stage) => {
+            if (initRef.current) return;
+            setStage(_stage);
+            initRef.current = true;
+          }}
+          draggable={false}
+          scaleX={scale}
+          scaleY={scale}
+          onMouseDown={handleStageMouseDown}
+          onTouchStart={handleStageTouchStart}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onWheel={handleWheel}
+          onPointerLeave={handlePointerLeave}
+          style={{ marginTop: RULER_SIZE, marginLeft: RULER_SIZE }}
+        >
+          <Layer>
+            {/* Render all permanent shapes */}
+            {shapes.map(renderShape)}
+
+            {/* Render the currently drawing shape */}
+            {renderCurrentShape()}
+
+            {/* 선택된 라인/화살표의 앵커 핸들 렌더링 */}
+            {selectedId && lineEndpoints && !isPanning && (
+              <>
+                {/* 시작점 앵커 */}
+                <Circle
+                  x={lineEndpoints.start.x}
+                  y={lineEndpoints.start.y}
+                  radius={8}
+                  fill='#1ABCFE'
+                  stroke='#fff'
+                  strokeWidth={1}
+                  draggable
+                  onDragMove={(e) => handleLineAnchorDragMove(e, true)}
+                  onDragEnd={() => handleLineAnchorDragEnd()}
+                />
+                {/* 끝점 앵커 */}
+                <Circle
+                  x={lineEndpoints.end.x}
+                  y={lineEndpoints.end.y}
+                  radius={8}
+                  fill='#FF7262'
+                  stroke='#fff'
+                  strokeWidth={1}
+                  draggable
+                  onDragMove={(e) => handleLineAnchorDragMove(e, false)}
+                  onDragEnd={() => handleLineAnchorDragEnd()}
+                />
+              </>
+            )}
+
+            {/* Render snap guides */}
+            {renderGuides()}
+
+            {/* Transformer should be the last element to appear on top */}
+            {!isPanning && (
+              <Transformer
+                ref={transformerRef}
+                boundBoxFunc={(oldBox, newBox) => {
+                  // Limit size to prevent negative width/height
+                  if (newBox.width < 5 || newBox.height < 5) {
+                    return oldBox;
+                  }
+
+                  // Get the selected shape to check its type
+                  const shape = shapes.find((s) => s.id === selectedId);
+
+                  // For lines and arrows, allow any transformation (will be handled in transform end)
+                  if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
+                    return newBox;
+                  }
+
+                  // If Ctrl is pressed, disable snapping and return the box as is
+                  if (isCtrlPressed) {
+                    return newBox;
+                  }
+
+                  // Rest of the existing snapping logic for rectangles and ellipses
+                  // Collect all potential snap lines from other shapes for snapping
+                  const potentialVerticalLines: number[] = [];
+                  const potentialHorizontalLines: number[] = [];
+
+                  shapes.forEach((otherShape) => {
+                    if (otherShape.id === selectedId) return; // Skip the current shape
+
+                    const otherBox = getBoundingBox(otherShape);
+
+                    // Add vertical lines (left, center, right)
+                    potentialVerticalLines.push(
+                      otherBox.x, // left
+                      otherBox.x + otherBox.width / 2, // center
+                      otherBox.x + otherBox.width // right
+                    );
+
+                    // Add horizontal lines (top, middle, bottom)
+                    potentialHorizontalLines.push(
+                      otherBox.y, // top
+                      otherBox.y + otherBox.height / 2, // middle
+                      otherBox.y + otherBox.height // bottom
+                    );
+                  });
+
+                  // Create a modified version of newBox to adjust
+                  const adjustedBox = { ...newBox };
+
+                  // Variables to track snap points
+                  let snapX: number | null = null;
+                  let snapY: number | null = null;
+
+                  // Edges/positions to check
+                  const left = newBox.x;
+                  const center = newBox.x + newBox.width / 2;
+                  const right = newBox.x + newBox.width;
+                  const top = newBox.y;
+                  const middle = newBox.y + newBox.height / 2;
+                  const bottom = newBox.y + newBox.height;
+
+                  // Points to check for snapping
+                  interface Point {
+                    x: number;
+                    y: number;
+                    position: string;
+                  }
+
+                  const pointsToCheck: Point[] = [
+                    { x: left, y: top, position: 'top-left' },
+                    { x: center, y: top, position: 'top-center' },
+                    { x: right, y: top, position: 'top-right' },
+                    { x: left, y: middle, position: 'middle-left' },
+                    { x: right, y: middle, position: 'middle-right' },
+                    { x: left, y: bottom, position: 'bottom-left' },
+                    { x: center, y: bottom, position: 'bottom-center' },
+                    { x: right, y: bottom, position: 'bottom-right' }
+                  ];
+
+                  // Check for vertical snapping
+                  const verticalGuides: number[] = [];
+                  let minXDistance = SNAP_THRESHOLD;
+                  let snappedPoint: Point | null = null;
+
+                  for (const point of pointsToCheck) {
+                    for (const line of potentialVerticalLines) {
+                      const distance = Math.abs(point.x - line);
+                      if (distance < minXDistance) {
+                        minXDistance = distance;
+                        snapX = line;
+                        snappedPoint = point;
+                        verticalGuides.push(line);
+                      }
+                    }
+                  }
+
+                  // Check for horizontal snapping
+                  const horizontalGuides: number[] = [];
+                  let minYDistance = SNAP_THRESHOLD;
+                  let snappedYPoint: Point | null = null;
+
+                  for (const point of pointsToCheck) {
+                    for (const line of potentialHorizontalLines) {
+                      const distance = Math.abs(point.y - line);
+                      if (distance < minYDistance) {
+                        minYDistance = distance;
+                        snapY = line;
+                        snappedYPoint = point;
+                        horizontalGuides.push(line);
+                      }
+                    }
+                  }
+
+                  // Update guides for visual feedback
+                  setVerticalGuides([...new Set(verticalGuides)]);
+                  setHorizontalGuides([...new Set(horizontalGuides)]);
+
+                  // Apply vertical snapping if found
+                  if (snapX !== null && snappedPoint !== null) {
+                    if (snappedPoint.position.includes('left')) {
+                      // Left edge snapped
+                      const deltaX = snapX - newBox.x;
+                      adjustedBox.x = snapX;
+                      adjustedBox.width -= deltaX;
+                    } else if (snappedPoint.position.includes('right')) {
+                      // Right edge snapped
+                      adjustedBox.width = snapX - newBox.x;
+                    } else if (snappedPoint.position.includes('center')) {
+                      // Center snapped
+                      adjustedBox.x = snapX - newBox.width / 2;
+                    }
+                  }
+
+                  // Apply horizontal snapping if found
+                  if (snapY !== null && snappedYPoint !== null) {
+                    if (snappedYPoint.position.includes('top')) {
+                      // Top edge snapped
+                      const deltaY = snapY - newBox.y;
+                      adjustedBox.y = snapY;
+                      adjustedBox.height -= deltaY;
+                    } else if (snappedYPoint.position.includes('bottom')) {
+                      // Bottom edge snapped
+                      adjustedBox.height = snapY - newBox.y;
+                    } else if (snappedYPoint.position.includes('middle')) {
+                      // Middle snapped
+                      adjustedBox.y = snapY - newBox.height / 2;
+                    }
+                  }
+
+                  return adjustedBox;
+                }}
+                // Allow free resize (no aspect ratio lock)
+                keepRatio={false}
+                // Enable all handlers for each edge and corner
+                enabledAnchors={[
+                  'top-left',
+                  'top-center',
+                  'top-right',
+                  'middle-left',
+                  'middle-right',
+                  'bottom-left',
+                  'bottom-center',
+                  'bottom-right'
+                ]}
+                // Add rotation snapping
+                rotationSnaps={isCtrlPressed ? [] : ROTATION_SNAPS}
+                // Add dragging event to support transformer snapping
+                onDragMove={handleTransformerDragMove}
+                // Add transform event to support resizing snapping
+                onTransform={handleTransformerTransform}
+                // Enable rotation by default
+                rotateEnabled={true}
+              />
+            )}
+          </Layer>
+        </Stage>
+      )}
+      <CanvasToolBar />
     </div>
   );
 }
