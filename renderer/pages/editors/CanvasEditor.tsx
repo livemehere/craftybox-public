@@ -731,6 +731,14 @@ export default function CanvasEditor() {
         setSelectedId(null);
         setVerticalGuides([]);
         setHorizontalGuides([]);
+
+        // 명시적으로 Transformer 제거
+        if (transformerRef.current) {
+          transformerRef.current.nodes([]);
+        }
+
+        // 라인 엔드포인트 상태 초기화
+        setLineEndpoints(null);
       }
       return;
     }
@@ -855,7 +863,7 @@ export default function CanvasEditor() {
           <Line
             key={`v-${i}`}
             points={[guide, 0, guide, bounds.height]}
-            stroke='#1ABCFE'
+            stroke='#F24E1E'
             strokeWidth={1}
             dash={[4, 4]}
           />
@@ -866,7 +874,7 @@ export default function CanvasEditor() {
           <Line
             key={`h-${i}`}
             points={[0, guide, bounds.width, guide]}
-            stroke='#1ABCFE'
+            stroke='#F24E1E'
             strokeWidth={1}
             dash={[4, 4]}
           />
