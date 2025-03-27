@@ -203,10 +203,18 @@ export default function CanvasEditor() {
       if (e.button === 1) {
         setIsPanning(true);
         document.body.style.cursor = 'grabbing';
+        // 패닝 모드에서 Transformer 비활성화
+        if (transformerRef.current) {
+          transformerRef.current.nodes([]);
+        }
       } else if (e.button === 0 && isSpacePressed) {
         // 스페이스 + 좌클릭 조합
         setIsPanning(true);
         document.body.style.cursor = 'grabbing';
+        // 패닝 모드에서 Transformer 비활성화
+        if (transformerRef.current) {
+          transformerRef.current.nodes([]);
+        }
       }
     };
 
@@ -739,7 +747,7 @@ export default function CanvasEditor() {
 
   // Attach transformer to a node when selected
   const attachTransformer = (node: any) => {
-    if (node && transformerRef.current) {
+    if (node && transformerRef.current && !isPanning) {
       // Get the selected shape
       const shape = shapes.find((s) => s.id === selectedId);
 
@@ -762,6 +770,9 @@ export default function CanvasEditor() {
         transformerRef.current.rotateEnabled(true);
         transformerRef.current.nodes([node]);
       }
+    } else if (transformerRef.current && isPanning) {
+      // 패닝 모드에서는 Transformer 비활성화
+      transformerRef.current.nodes([]);
     }
   };
 
@@ -870,7 +881,7 @@ export default function CanvasEditor() {
 
   // Common props for all shapes
   const getCommonProps = (shape: ShapeProps, isSelected: boolean) => ({
-    draggable: selectedTool === 'pointer',
+    draggable: selectedTool === 'pointer' && !isPanning,
     onClick: () => handleShapeSelect(shape.id),
     onTap: () => handleShapeSelect(shape.id),
     onDragMove: (e: any) => handleDragMove(e, shape.id),
@@ -1069,7 +1080,7 @@ export default function CanvasEditor() {
           {renderCurrentShape()}
 
           {/* 선택된 라인/화살표의 앵커 핸들 렌더링 */}
-          {selectedId && lineEndpoints && (
+          {selectedId && lineEndpoints && !isPanning && (
             <>
               {/* 시작점 앵커 */}
               <Circle
@@ -1102,179 +1113,181 @@ export default function CanvasEditor() {
           {renderGuides()}
 
           {/* Transformer should be the last element to appear on top */}
-          <Transformer
-            ref={transformerRef}
-            boundBoxFunc={(oldBox, newBox) => {
-              // Limit size to prevent negative width/height
-              if (newBox.width < 5 || newBox.height < 5) {
-                return oldBox;
-              }
+          {!isPanning && (
+            <Transformer
+              ref={transformerRef}
+              boundBoxFunc={(oldBox, newBox) => {
+                // Limit size to prevent negative width/height
+                if (newBox.width < 5 || newBox.height < 5) {
+                  return oldBox;
+                }
 
-              // Get the selected shape to check its type
-              const shape = shapes.find((s) => s.id === selectedId);
+                // Get the selected shape to check its type
+                const shape = shapes.find((s) => s.id === selectedId);
 
-              // For lines and arrows, allow any transformation (will be handled in transform end)
-              if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
-                return newBox;
-              }
+                // For lines and arrows, allow any transformation (will be handled in transform end)
+                if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
+                  return newBox;
+                }
 
-              // If Ctrl is pressed, disable snapping and return the box as is
-              if (isCtrlPressed) {
-                return newBox;
-              }
+                // If Ctrl is pressed, disable snapping and return the box as is
+                if (isCtrlPressed) {
+                  return newBox;
+                }
 
-              // Rest of the existing snapping logic for rectangles and ellipses
-              // Collect all potential snap lines from other shapes for snapping
-              const potentialVerticalLines: number[] = [];
-              const potentialHorizontalLines: number[] = [];
+                // Rest of the existing snapping logic for rectangles and ellipses
+                // Collect all potential snap lines from other shapes for snapping
+                const potentialVerticalLines: number[] = [];
+                const potentialHorizontalLines: number[] = [];
 
-              shapes.forEach((otherShape) => {
-                if (otherShape.id === selectedId) return; // Skip the current shape
+                shapes.forEach((otherShape) => {
+                  if (otherShape.id === selectedId) return; // Skip the current shape
 
-                const otherBox = getBoundingBox(otherShape);
+                  const otherBox = getBoundingBox(otherShape);
 
-                // Add vertical lines (left, center, right)
-                potentialVerticalLines.push(
-                  otherBox.x, // left
-                  otherBox.x + otherBox.width / 2, // center
-                  otherBox.x + otherBox.width // right
-                );
+                  // Add vertical lines (left, center, right)
+                  potentialVerticalLines.push(
+                    otherBox.x, // left
+                    otherBox.x + otherBox.width / 2, // center
+                    otherBox.x + otherBox.width // right
+                  );
 
-                // Add horizontal lines (top, middle, bottom)
-                potentialHorizontalLines.push(
-                  otherBox.y, // top
-                  otherBox.y + otherBox.height / 2, // middle
-                  otherBox.y + otherBox.height // bottom
-                );
-              });
+                  // Add horizontal lines (top, middle, bottom)
+                  potentialHorizontalLines.push(
+                    otherBox.y, // top
+                    otherBox.y + otherBox.height / 2, // middle
+                    otherBox.y + otherBox.height // bottom
+                  );
+                });
 
-              // Create a modified version of newBox to adjust
-              const adjustedBox = { ...newBox };
+                // Create a modified version of newBox to adjust
+                const adjustedBox = { ...newBox };
 
-              // Variables to track snap points
-              let snapX: number | null = null;
-              let snapY: number | null = null;
+                // Variables to track snap points
+                let snapX: number | null = null;
+                let snapY: number | null = null;
 
-              // Edges/positions to check
-              const left = newBox.x;
-              const center = newBox.x + newBox.width / 2;
-              const right = newBox.x + newBox.width;
-              const top = newBox.y;
-              const middle = newBox.y + newBox.height / 2;
-              const bottom = newBox.y + newBox.height;
+                // Edges/positions to check
+                const left = newBox.x;
+                const center = newBox.x + newBox.width / 2;
+                const right = newBox.x + newBox.width;
+                const top = newBox.y;
+                const middle = newBox.y + newBox.height / 2;
+                const bottom = newBox.y + newBox.height;
 
-              // Points to check for snapping
-              interface Point {
-                x: number;
-                y: number;
-                position: string;
-              }
+                // Points to check for snapping
+                interface Point {
+                  x: number;
+                  y: number;
+                  position: string;
+                }
 
-              const pointsToCheck: Point[] = [
-                { x: left, y: top, position: 'top-left' },
-                { x: center, y: top, position: 'top-center' },
-                { x: right, y: top, position: 'top-right' },
-                { x: left, y: middle, position: 'middle-left' },
-                { x: right, y: middle, position: 'middle-right' },
-                { x: left, y: bottom, position: 'bottom-left' },
-                { x: center, y: bottom, position: 'bottom-center' },
-                { x: right, y: bottom, position: 'bottom-right' }
-              ];
+                const pointsToCheck: Point[] = [
+                  { x: left, y: top, position: 'top-left' },
+                  { x: center, y: top, position: 'top-center' },
+                  { x: right, y: top, position: 'top-right' },
+                  { x: left, y: middle, position: 'middle-left' },
+                  { x: right, y: middle, position: 'middle-right' },
+                  { x: left, y: bottom, position: 'bottom-left' },
+                  { x: center, y: bottom, position: 'bottom-center' },
+                  { x: right, y: bottom, position: 'bottom-right' }
+                ];
 
-              // Check for vertical snapping
-              const verticalGuides: number[] = [];
-              let minXDistance = SNAP_THRESHOLD;
-              let snappedPoint: Point | null = null;
+                // Check for vertical snapping
+                const verticalGuides: number[] = [];
+                let minXDistance = SNAP_THRESHOLD;
+                let snappedPoint: Point | null = null;
 
-              for (const point of pointsToCheck) {
-                for (const line of potentialVerticalLines) {
-                  const distance = Math.abs(point.x - line);
-                  if (distance < minXDistance) {
-                    minXDistance = distance;
-                    snapX = line;
-                    snappedPoint = point;
-                    verticalGuides.push(line);
+                for (const point of pointsToCheck) {
+                  for (const line of potentialVerticalLines) {
+                    const distance = Math.abs(point.x - line);
+                    if (distance < minXDistance) {
+                      minXDistance = distance;
+                      snapX = line;
+                      snappedPoint = point;
+                      verticalGuides.push(line);
+                    }
                   }
                 }
-              }
 
-              // Check for horizontal snapping
-              const horizontalGuides: number[] = [];
-              let minYDistance = SNAP_THRESHOLD;
-              let snappedYPoint: Point | null = null;
+                // Check for horizontal snapping
+                const horizontalGuides: number[] = [];
+                let minYDistance = SNAP_THRESHOLD;
+                let snappedYPoint: Point | null = null;
 
-              for (const point of pointsToCheck) {
-                for (const line of potentialHorizontalLines) {
-                  const distance = Math.abs(point.y - line);
-                  if (distance < minYDistance) {
-                    minYDistance = distance;
-                    snapY = line;
-                    snappedYPoint = point;
-                    horizontalGuides.push(line);
+                for (const point of pointsToCheck) {
+                  for (const line of potentialHorizontalLines) {
+                    const distance = Math.abs(point.y - line);
+                    if (distance < minYDistance) {
+                      minYDistance = distance;
+                      snapY = line;
+                      snappedYPoint = point;
+                      horizontalGuides.push(line);
+                    }
                   }
                 }
-              }
 
-              // Update guides for visual feedback
-              setVerticalGuides([...new Set(verticalGuides)]);
-              setHorizontalGuides([...new Set(horizontalGuides)]);
+                // Update guides for visual feedback
+                setVerticalGuides([...new Set(verticalGuides)]);
+                setHorizontalGuides([...new Set(horizontalGuides)]);
 
-              // Apply vertical snapping if found
-              if (snapX !== null && snappedPoint !== null) {
-                if (snappedPoint.position.includes('left')) {
-                  // Left edge snapped
-                  const deltaX = snapX - newBox.x;
-                  adjustedBox.x = snapX;
-                  adjustedBox.width -= deltaX;
-                } else if (snappedPoint.position.includes('right')) {
-                  // Right edge snapped
-                  adjustedBox.width = snapX - newBox.x;
-                } else if (snappedPoint.position.includes('center')) {
-                  // Center snapped
-                  adjustedBox.x = snapX - newBox.width / 2;
+                // Apply vertical snapping if found
+                if (snapX !== null && snappedPoint !== null) {
+                  if (snappedPoint.position.includes('left')) {
+                    // Left edge snapped
+                    const deltaX = snapX - newBox.x;
+                    adjustedBox.x = snapX;
+                    adjustedBox.width -= deltaX;
+                  } else if (snappedPoint.position.includes('right')) {
+                    // Right edge snapped
+                    adjustedBox.width = snapX - newBox.x;
+                  } else if (snappedPoint.position.includes('center')) {
+                    // Center snapped
+                    adjustedBox.x = snapX - newBox.width / 2;
+                  }
                 }
-              }
 
-              // Apply horizontal snapping if found
-              if (snapY !== null && snappedYPoint !== null) {
-                if (snappedYPoint.position.includes('top')) {
-                  // Top edge snapped
-                  const deltaY = snapY - newBox.y;
-                  adjustedBox.y = snapY;
-                  adjustedBox.height -= deltaY;
-                } else if (snappedYPoint.position.includes('bottom')) {
-                  // Bottom edge snapped
-                  adjustedBox.height = snapY - newBox.y;
-                } else if (snappedYPoint.position.includes('middle')) {
-                  // Middle snapped
-                  adjustedBox.y = snapY - newBox.height / 2;
+                // Apply horizontal snapping if found
+                if (snapY !== null && snappedYPoint !== null) {
+                  if (snappedYPoint.position.includes('top')) {
+                    // Top edge snapped
+                    const deltaY = snapY - newBox.y;
+                    adjustedBox.y = snapY;
+                    adjustedBox.height -= deltaY;
+                  } else if (snappedYPoint.position.includes('bottom')) {
+                    // Bottom edge snapped
+                    adjustedBox.height = snapY - newBox.y;
+                  } else if (snappedYPoint.position.includes('middle')) {
+                    // Middle snapped
+                    adjustedBox.y = snapY - newBox.height / 2;
+                  }
                 }
-              }
 
-              return adjustedBox;
-            }}
-            // Allow free resize (no aspect ratio lock)
-            keepRatio={false}
-            // Enable all handlers for each edge and corner
-            enabledAnchors={[
-              'top-left',
-              'top-center',
-              'top-right',
-              'middle-left',
-              'middle-right',
-              'bottom-left',
-              'bottom-center',
-              'bottom-right'
-            ]}
-            // Add rotation snapping
-            rotationSnaps={isCtrlPressed ? [] : ROTATION_SNAPS}
-            // Add dragging event to support transformer snapping
-            onDragMove={handleTransformerDragMove}
-            // Add transform event to support resizing snapping
-            onTransform={handleTransformerTransform}
-            // Enable rotation by default
-            rotateEnabled={true}
-          />
+                return adjustedBox;
+              }}
+              // Allow free resize (no aspect ratio lock)
+              keepRatio={false}
+              // Enable all handlers for each edge and corner
+              enabledAnchors={[
+                'top-left',
+                'top-center',
+                'top-right',
+                'middle-left',
+                'middle-right',
+                'bottom-left',
+                'bottom-center',
+                'bottom-right'
+              ]}
+              // Add rotation snapping
+              rotationSnaps={isCtrlPressed ? [] : ROTATION_SNAPS}
+              // Add dragging event to support transformer snapping
+              onDragMove={handleTransformerDragMove}
+              // Add transform event to support resizing snapping
+              onTransform={handleTransformerTransform}
+              // Enable rotation by default
+              rotateEnabled={true}
+            />
+          )}
         </Layer>
       </Stage>
       <CanvasToolBar />
