@@ -1,4 +1,4 @@
-import { Rect, Transformer, Arrow, Line, Ellipse } from 'react-konva';
+import { Rect, Transformer, Arrow, Line, Ellipse, Circle } from 'react-konva';
 import { Stage } from 'react-konva';
 import { Layer } from 'react-konva';
 import useMeasure from 'react-use-measure';
@@ -11,6 +11,11 @@ import CanvasToolBar from '@/features/canvasEditor/components/CanvasToolBar';
 import { stageAtom } from '@/features/canvasEditor/store/stageAtom';
 import { selectedCanvasToolAtom } from '@/features/canvasEditor/store/selectedCanvasToolAtom';
 import { TCanvasTool } from '@/features/canvasEditor/components/CanvasToolBar';
+
+/**
+ * TODO:
+ * - snap bug with Ellipse
+ */
 
 // Define interfaces for each shape type to manage them properly
 interface IShapeBase {
@@ -124,6 +129,9 @@ export default function CanvasEditor() {
   // Selected shape for transformations
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const transformerRef = useRef<Konva.Transformer | null>(null);
+
+  // 선택된 라인/화살표의 앵커 포인트 핸들을 위한 상태 추가
+  const [lineEndpoints, setLineEndpoints] = useState<{ start: Konva.Vector2d; end: Konva.Vector2d } | null>(null);
 
   // Snapping lines (guides)
   const [horizontalGuides, setHorizontalGuides] = useState<number[]>([]);
@@ -663,13 +671,45 @@ export default function CanvasEditor() {
   const handleShapeSelect = (id: string) => {
     if (selectedTool === 'pointer') {
       setSelectedId(id);
+
+      // 라인이나 화살표가 선택된 경우 양 끝점 위치 저장
+      const selectedShape = shapes.find((s) => s.id === id);
+      if (selectedShape && (selectedShape.type === 'line' || selectedShape.type === 'arrow')) {
+        setLineEndpoints({
+          start: { x: selectedShape.points[0], y: selectedShape.points[1] },
+          end: { x: selectedShape.points[2], y: selectedShape.points[3] }
+        });
+      } else {
+        setLineEndpoints(null);
+      }
     }
   };
 
   // Attach transformer to a node when selected
   const attachTransformer = (node: any) => {
     if (node && transformerRef.current) {
-      transformerRef.current.nodes([node]);
+      // Get the selected shape
+      const shape = shapes.find((s) => s.id === selectedId);
+
+      if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
+        // 라인과 화살표에는 Transformer를 사용하지 않음
+        transformerRef.current.nodes([]);
+      } else {
+        // For rectangles and ellipses, enable all anchors
+        transformerRef.current.enabledAnchors([
+          'top-left',
+          'top-center',
+          'top-right',
+          'middle-left',
+          'middle-right',
+          'bottom-left',
+          'bottom-center',
+          'bottom-right'
+        ]);
+        // Enable rotation
+        transformerRef.current.rotateEnabled(true);
+        transformerRef.current.nodes([node]);
+      }
     }
   };
 
@@ -734,8 +774,20 @@ export default function CanvasEditor() {
               radiusX: Math.max(5, (node.width() / 2) * scaleX),
               radiusY: Math.max(5, (node.height() / 2) * scaleY)
             };
+          } else if (shape.type === 'line' || shape.type === 'arrow') {
+            // For lines and arrows, update the endpoints based on transform
+
+            // Calculate new positions for endpoints
+            const startX = node.x();
+            const startY = node.y();
+            const endX = startX + node.width() * scaleX;
+            const endY = startY + node.height() * scaleY;
+
+            return {
+              ...shape,
+              points: [startX, startY, endX, endY]
+            };
           }
-          // TODO: Handle transform for arrow and line if needed
         }
         return shape;
       })
@@ -823,6 +875,56 @@ export default function CanvasEditor() {
     );
   };
 
+  // 라인/화살표 앵커 드래그 핸들러
+  const handleLineAnchorDragMove = (e: any, isStart: boolean) => {
+    // 현재 드래그 중인 앵커 포인트의 새 위치
+    const pos = e.target.position();
+
+    if (lineEndpoints) {
+      // 업데이트된 앵커 포인트 위치 설정
+      setLineEndpoints((prev) => {
+        if (!prev) return null;
+        return isStart ? { ...prev, start: { x: pos.x, y: pos.y } } : { ...prev, end: { x: pos.x, y: pos.y } };
+      });
+
+      // 실시간으로 라인 업데이트
+      setShapes((prev) =>
+        prev.map((shape) => {
+          if (shape.id === selectedId && (shape.type === 'line' || shape.type === 'arrow')) {
+            const newPoints = [...shape.points];
+            if (isStart) {
+              newPoints[0] = pos.x;
+              newPoints[1] = pos.y;
+            } else {
+              newPoints[2] = pos.x;
+              newPoints[3] = pos.y;
+            }
+            return {
+              ...shape,
+              points: newPoints
+            };
+          }
+          return shape;
+        })
+      );
+    }
+  };
+
+  // 라인/화살표 앵커 드래그 종료 핸들러
+  const handleLineAnchorDragEnd = (isStart: boolean) => {
+    if (!selectedId || !lineEndpoints) return;
+
+    // 데이터 모델의 shapes 배열 업데이트 확인
+    const updatedShape = shapes.find((s) => s.id === selectedId);
+    if (updatedShape && (updatedShape.type === 'line' || updatedShape.type === 'arrow')) {
+      // 앵커 위치와 라인 데이터를 동기화
+      setLineEndpoints({
+        start: { x: updatedShape.points[0], y: updatedShape.points[1] },
+        end: { x: updatedShape.points[2], y: updatedShape.points[3] }
+      });
+    }
+  };
+
   return (
     <div className='relative h-full w-full overflow-hidden bg-[#1E1E1E]' ref={parentRef}>
       <Stage
@@ -863,6 +965,36 @@ export default function CanvasEditor() {
           {/* Render the currently drawing shape */}
           {renderCurrentShape()}
 
+          {/* 선택된 라인/화살표의 앵커 핸들 렌더링 */}
+          {selectedId && lineEndpoints && (
+            <>
+              {/* 시작점 앵커 */}
+              <Circle
+                x={lineEndpoints.start.x}
+                y={lineEndpoints.start.y}
+                radius={8}
+                fill='#1ABCFE'
+                stroke='#fff'
+                strokeWidth={1}
+                draggable
+                onDragMove={(e) => handleLineAnchorDragMove(e, true)}
+                onDragEnd={() => handleLineAnchorDragEnd(true)}
+              />
+              {/* 끝점 앵커 */}
+              <Circle
+                x={lineEndpoints.end.x}
+                y={lineEndpoints.end.y}
+                radius={8}
+                fill='#FF7262'
+                stroke='#fff'
+                strokeWidth={1}
+                draggable
+                onDragMove={(e) => handleLineAnchorDragMove(e, false)}
+                onDragEnd={() => handleLineAnchorDragEnd(false)}
+              />
+            </>
+          )}
+
           {/* Render snap guides */}
           {renderGuides()}
 
@@ -875,11 +1007,20 @@ export default function CanvasEditor() {
                 return oldBox;
               }
 
+              // Get the selected shape to check its type
+              const shape = shapes.find((s) => s.id === selectedId);
+
+              // For lines and arrows, allow any transformation (will be handled in transform end)
+              if (shape && (shape.type === 'line' || shape.type === 'arrow')) {
+                return newBox;
+              }
+
               // If Ctrl is pressed, disable snapping and return the box as is
               if (isCtrlPressed) {
                 return newBox;
               }
 
+              // Rest of the existing snapping logic for rectangles and ellipses
               // Collect all potential snap lines from other shapes for snapping
               const potentialVerticalLines: number[] = [];
               const potentialHorizontalLines: number[] = [];
