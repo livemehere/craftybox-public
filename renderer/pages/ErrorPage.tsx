@@ -31,9 +31,12 @@ export default function ErrorPage() {
       data-testid='not-found-page'
     >
       <ErrorContent error={error} />
-      <Link to='/' className='rounded bg-neutral-900 px-8 py-4 hover:bg-neutral-800'>
-        Go Home
-      </Link>
+      <button
+        className='rounded bg-neutral-900 px-8 py-4 hover:bg-neutral-800'
+        onClick={() => window.location.reload()}
+      >
+        Reload
+      </button>
     </div>
   );
 }
