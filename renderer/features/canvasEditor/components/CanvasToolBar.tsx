@@ -71,6 +71,7 @@ export default function CanvasToolBar() {
     tr.nodes([target]);
     target.draggable(true);
     tr.moveToTop();
+    tr.forceUpdate();
   }, []);
 
   /**

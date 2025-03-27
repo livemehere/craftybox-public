@@ -4,6 +4,10 @@ import { useSetAtom } from 'jotai';
 
 import { stageAtom } from './store/stageAtom';
 
+/**
+ * FIXME: resize 줄어들 때 캔버스 레이어가 줄어들지 않음
+ */
+
 export default function CanvasView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const setStage = useSetAtom(stageAtom);
