@@ -820,9 +820,9 @@ export default function CanvasEditor() {
       case 'ellipse':
         return <Ellipse key={shape.id} {...shape} {...commonProps} />;
       case 'arrow':
-        return <Arrow key={shape.id} {...shape} {...commonProps} />;
+        return <Arrow key={shape.id} {...shape} {...commonProps} hitStrokeWidth={10} />;
       case 'line':
-        return <Line key={shape.id} {...shape} {...commonProps} />;
+        return <Line key={shape.id} {...shape} {...commonProps} hitStrokeWidth={10} />;
       default:
         return null;
     }
@@ -838,9 +838,9 @@ export default function CanvasEditor() {
       case 'ellipse':
         return <Ellipse key={curShapeProps.id} {...curShapeProps} />;
       case 'arrow':
-        return <Arrow key={curShapeProps.id} {...curShapeProps} />;
+        return <Arrow key={curShapeProps.id} {...curShapeProps} hitStrokeWidth={10} />;
       case 'line':
-        return <Line key={curShapeProps.id} {...curShapeProps} />;
+        return <Line key={curShapeProps.id} {...curShapeProps} hitStrokeWidth={10} />;
       default:
         return null;
     }
