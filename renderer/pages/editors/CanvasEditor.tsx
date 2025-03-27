@@ -16,6 +16,7 @@ import { TCanvasTool } from '@/features/canvasEditor/components/CanvasToolBar';
  * TODO:
  * - snap bug with Ellipse
  * - cmd or ctrl + dragging -> create selection area and select all. for this implement multiple selection.
+ * - ruler bug
  */
 
 // Define interfaces for each shape type to manage them properly
