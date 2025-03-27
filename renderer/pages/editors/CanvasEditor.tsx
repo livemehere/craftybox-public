@@ -59,6 +59,10 @@ type ShapeProps = IRectProps | IEllipseProps | IArrowProps | ILineProps;
 
 // Snapping threshold in pixels
 const SNAP_THRESHOLD = 10;
+// Rotation snap angles in degrees
+const ROTATION_SNAPS = [
+  0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345
+];
 
 // Helper to get bounding box for shapes
 const getBoundingBox = (shape: ShapeProps): { x: number; y: number; width: number; height: number } => {
@@ -125,6 +129,9 @@ export default function CanvasEditor() {
   const [horizontalGuides, setHorizontalGuides] = useState<number[]>([]);
   const [verticalGuides, setVerticalGuides] = useState<number[]>([]);
 
+  // Ctrl key state to toggle snapping
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+
   // Clear selection when tool changes
   useEffect(() => {
     if (selectedTool !== 'pointer') {
@@ -133,6 +140,35 @@ export default function CanvasEditor() {
       setVerticalGuides([]);
     }
   }, [selectedTool]);
+
+  // Add keyboard event listeners for Ctrl key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlPressed(true);
+
+        // Clear guides when Ctrl is pressed
+        if (isCtrlPressed) {
+          setHorizontalGuides([]);
+          setVerticalGuides([]);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isCtrlPressed]);
 
   const createShapeProps = (pos: Konva.Vector2d, tool: TCanvasTool): ShapeProps | null => {
     switch (tool) {
@@ -236,6 +272,11 @@ export default function CanvasEditor() {
 
   // Find snap points for the current dragging shape
   const findSnapPoints = (currentShape: ShapeProps, otherShapes: ShapeProps[]) => {
+    // If Ctrl is pressed, disable snapping
+    if (isCtrlPressed) {
+      return { verticalGuides: [], horizontalGuides: [], snapX: null, snapY: null };
+    }
+
     const currentSnapPoints = getSnapPoints(currentShape);
 
     // Collect all potential snap lines from other shapes
@@ -293,6 +334,11 @@ export default function CanvasEditor() {
 
   // Calculate adjusted position for snapping during drag
   const calculateSnapPosition = (shape: ShapeProps, newX: number, newY: number) => {
+    // If Ctrl is pressed, disable snapping
+    if (isCtrlPressed) {
+      return { x: newX, y: newY, snap: false };
+    }
+
     // Create a temporary shape with the new position
     let tempShape: ShapeProps;
     const dx = newX - (shape.type === 'rectangle' || shape.type === 'ellipse' ? shape.x : 0);
@@ -431,6 +477,78 @@ export default function CanvasEditor() {
     // Clear guides after drag ends
     setVerticalGuides([]);
     setHorizontalGuides([]);
+  };
+
+  // Handle transformer drag move for snapping
+  const handleTransformerDragMove = (e: any) => {
+    // If Ctrl is pressed, disable snapping
+    if (isCtrlPressed) {
+      setVerticalGuides([]);
+      setHorizontalGuides([]);
+      return;
+    }
+
+    const transformer = e.target;
+    const selectedNode = transformer.nodes()[0];
+    if (!selectedNode) return;
+
+    const shape = shapes.find((s) => s.id === selectedId);
+    if (!shape) return;
+
+    // Get current position of the node
+    const box = selectedNode.getClientRect();
+
+    // Collect all potential snap lines from other shapes
+    const potentialVerticalLines: number[] = [];
+    const potentialHorizontalLines: number[] = [];
+
+    shapes.forEach((otherShape) => {
+      if (otherShape.id === selectedId) return;
+
+      const otherBox = getBoundingBox(otherShape);
+
+      // Add vertical lines (left, center, right)
+      potentialVerticalLines.push(otherBox.x, otherBox.x + otherBox.width / 2, otherBox.x + otherBox.width);
+
+      // Add horizontal lines (top, middle, bottom)
+      potentialHorizontalLines.push(otherBox.y, otherBox.y + otherBox.height / 2, otherBox.y + otherBox.height);
+    });
+
+    // Check for snapping
+    const verticalGuides: number[] = [];
+    const horizontalGuides: number[] = [];
+
+    // Check for snapping on all 8 control points
+    const points = [
+      { x: box.x, y: box.y }, // top-left
+      { x: box.x + box.width / 2, y: box.y }, // top-center
+      { x: box.x + box.width, y: box.y }, // top-right
+      { x: box.x, y: box.y + box.height / 2 }, // middle-left
+      { x: box.x + box.width, y: box.y + box.height / 2 }, // middle-right
+      { x: box.x, y: box.y + box.height }, // bottom-left
+      { x: box.x + box.width / 2, y: box.y + box.height }, // bottom-center
+      { x: box.x + box.width, y: box.y + box.height } // bottom-right
+    ];
+
+    points.forEach((point) => {
+      // Check vertical snapping
+      potentialVerticalLines.forEach((line) => {
+        if (Math.abs(point.x - line) < SNAP_THRESHOLD) {
+          verticalGuides.push(line);
+        }
+      });
+
+      // Check horizontal snapping
+      potentialHorizontalLines.forEach((line) => {
+        if (Math.abs(point.y - line) < SNAP_THRESHOLD) {
+          horizontalGuides.push(line);
+        }
+      });
+    });
+
+    // Update guides for visual feedback
+    setVerticalGuides([...new Set(verticalGuides)]);
+    setHorizontalGuides([...new Set(horizontalGuides)]);
   };
 
   // Handle selecting a shape
@@ -650,9 +768,25 @@ export default function CanvasEditor() {
               }
               return newBox;
             }}
-            // Add snapping behavior during transform
-            // You could also add a custom transformer component for more advanced snapping
-            rotateEnabled={false}
+            // Allow free resize (no aspect ratio lock)
+            keepRatio={false}
+            // Enable all handlers for each edge and corner
+            enabledAnchors={[
+              'top-left',
+              'top-center',
+              'top-right',
+              'middle-left',
+              'middle-right',
+              'bottom-left',
+              'bottom-center',
+              'bottom-right'
+            ]}
+            // Add rotation snapping
+            rotationSnaps={isCtrlPressed ? [] : ROTATION_SNAPS}
+            // Add dragging event to support transformer snapping
+            onDragMove={handleTransformerDragMove}
+            // Enable rotation by default
+            rotateEnabled={true}
           />
         </Layer>
       </Stage>
