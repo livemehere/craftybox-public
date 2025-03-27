@@ -140,6 +140,11 @@ export default function CanvasEditor() {
   // Ctrl key state to toggle snapping
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
+  // ViewPort 관련 상태 추가
+  const [isPanning, setIsPanning] = useState(false);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [lastPointerPosition, setLastPointerPosition] = useState<Konva.Vector2d | null>(null);
+
   // Clear selection when tool changes
   useEffect(() => {
     if (selectedTool !== 'pointer') {
@@ -161,11 +166,24 @@ export default function CanvasEditor() {
           setVerticalGuides([]);
         }
       }
+
+      // 스페이스바 감지
+      if (e.key === ' ' || e.code === 'Space') {
+        setIsSpacePressed(true);
+        document.body.style.cursor = 'grab';
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Control') {
         setIsCtrlPressed(false);
+      }
+
+      // 스페이스바 해제
+      if (e.key === ' ' || e.code === 'Space') {
+        setIsSpacePressed(false);
+        setIsPanning(false);
+        document.body.style.cursor = '';
       }
     };
 
@@ -177,6 +195,40 @@ export default function CanvasEditor() {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [isCtrlPressed]);
+
+  // 마우스 버튼 이벤트 리스너 추가
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      // 마우스 휠 버튼(보통 1, 중간 버튼)
+      if (e.button === 1) {
+        setIsPanning(true);
+        document.body.style.cursor = 'grabbing';
+      } else if (e.button === 0 && isSpacePressed) {
+        // 스페이스 + 좌클릭 조합
+        setIsPanning(true);
+        document.body.style.cursor = 'grabbing';
+      }
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (e.button === 1) {
+        setIsPanning(false);
+        document.body.style.cursor = '';
+      } else if (e.button === 0 && isSpacePressed) {
+        // 좌클릭 해제 시 스페이스가 여전히 눌려있으면 grab 커서로 돌아감
+        setIsPanning(false);
+        document.body.style.cursor = isSpacePressed ? 'grab' : '';
+      }
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isSpacePressed]);
 
   const createShapeProps = (pos: Konva.Vector2d, tool: TCanvasTool): ShapeProps | null => {
     switch (tool) {
@@ -717,6 +769,16 @@ export default function CanvasEditor() {
   const handleStageClick = (e: any) => {
     if (!stage) return;
 
+    // 패닝 모드인 경우에는 패닝 시작 - 도형 선택/생성 처리는 하지 않음
+    if (isPanning) {
+      // 마우스 위치 저장
+      const pointerPosition = stage.getPointerPosition();
+      if (pointerPosition) {
+        setLastPointerPosition(pointerPosition);
+      }
+      return;
+    }
+
     // Get the clicked position
     const pos = stage.getRelativePointerPosition();
     if (!pos) return;
@@ -919,7 +981,7 @@ export default function CanvasEditor() {
   };
 
   // 라인/화살표 앵커 드래그 종료 핸들러
-  const handleLineAnchorDragEnd = (isStart: boolean) => {
+  const handleLineAnchorDragEnd = () => {
     if (!selectedId || !lineEndpoints) return;
 
     // 데이터 모델의 shapes 배열 업데이트 확인
@@ -934,7 +996,10 @@ export default function CanvasEditor() {
   };
 
   return (
-    <div className='relative h-full w-full overflow-hidden bg-[#1E1E1E]' ref={parentRef}>
+    <div
+      className={`relative h-full w-full overflow-hidden bg-[#1E1E1E] ${isSpacePressed ? 'cursor-grab' : ''}`}
+      ref={parentRef}
+    >
       <Stage
         width={bounds.width}
         height={bounds.height}
@@ -942,11 +1007,37 @@ export default function CanvasEditor() {
           if (initRef.current) return;
           setStage(_stage);
           initRef.current = true;
-          console.log('init stage', _stage);
         }}
+        draggable={false}
         onMouseDown={handleStageClick}
         onTouchStart={handleStageClick}
-        onPointerMove={() => {
+        onPointerMove={(e) => {
+          // 패닝 모드일 때만 패닝 수행
+          if (isPanning && stage) {
+            e.evt.preventDefault();
+
+            // 패닝 모드에서 마우스 이동 시 Stage 이동
+            const pointerPosition = stage.getPointerPosition();
+            if (pointerPosition && lastPointerPosition) {
+              const dx = pointerPosition.x - lastPointerPosition.x;
+              const dy = pointerPosition.y - lastPointerPosition.y;
+
+              // Stage position 업데이트
+              stage.position({
+                x: stage.x() + dx,
+                y: stage.y() + dy
+              });
+
+              // 마지막 포인터 위치 업데이트
+              setLastPointerPosition(pointerPosition);
+            } else if (pointerPosition) {
+              // 첫 이동 시 좌표만 저장
+              setLastPointerPosition(pointerPosition);
+            }
+            return;
+          }
+
+          // 기존 도형 그리기 코드
           if (!curShapeProps) return;
           if (!startPos) return;
           if (!stage) return;
@@ -956,6 +1047,10 @@ export default function CanvasEditor() {
           updateShapeProps(pos);
         }}
         onPointerUp={() => {
+          // 패닝 모드의 마우스 좌표 초기화
+          setLastPointerPosition(null);
+
+          // 도형 그리기 완료 처리
           if (!curShapeProps) return;
 
           // Add the current shape to the list of shapes
@@ -986,7 +1081,7 @@ export default function CanvasEditor() {
                 strokeWidth={1}
                 draggable
                 onDragMove={(e) => handleLineAnchorDragMove(e, true)}
-                onDragEnd={() => handleLineAnchorDragEnd(true)}
+                onDragEnd={() => handleLineAnchorDragEnd()}
               />
               {/* 끝점 앵커 */}
               <Circle
@@ -998,7 +1093,7 @@ export default function CanvasEditor() {
                 strokeWidth={1}
                 draggable
                 onDragMove={(e) => handleLineAnchorDragMove(e, false)}
-                onDragEnd={() => handleLineAnchorDragEnd(false)}
+                onDragEnd={() => handleLineAnchorDragEnd()}
               />
             </>
           )}
