@@ -68,6 +68,10 @@ const SNAP_THRESHOLD = 10;
 const ROTATION_SNAPS = [
   0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345
 ];
+// 줌 관련 상수
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 10;
+const ZOOM_FACTOR = 1.1; // 휠 한 번에 10% 확대/축소
 
 // Helper to get bounding box for shapes
 const getBoundingBox = (shape: ShapeProps): { x: number; y: number; width: number; height: number } => {
@@ -145,6 +149,9 @@ export default function CanvasEditor() {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [lastPointerPosition, setLastPointerPosition] = useState<Konva.Vector2d | null>(null);
 
+  // 줌 관련 상태 추가
+  const [scale, setScale] = useState(1);
+
   // Clear selection when tool changes
   useEffect(() => {
     if (selectedTool !== 'pointer') {
@@ -157,10 +164,10 @@ export default function CanvasEditor() {
   // Add keyboard event listeners for Ctrl key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Control') {
+      if (e.key === 'Control' || e.key === 'Meta') {
         setIsCtrlPressed(true);
 
-        // Clear guides when Ctrl is pressed
+        // Clear guides when Ctrl/Cmd is pressed
         if (isCtrlPressed) {
           setHorizontalGuides([]);
           setVerticalGuides([]);
@@ -172,10 +179,19 @@ export default function CanvasEditor() {
         setIsSpacePressed(true);
         document.body.style.cursor = 'grab';
       }
+
+      // '0' 키를 눌렀을 때 줌 리셋
+      if (e.key === '0') {
+        if (stage) {
+          setScale(1);
+          stage.scale({ x: 1, y: 1 });
+          stage.position({ x: 0, y: 0 });
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Control') {
+      if (e.key === 'Control' || e.key === 'Meta') {
         setIsCtrlPressed(false);
       }
 
@@ -1006,6 +1022,47 @@ export default function CanvasEditor() {
     }
   };
 
+  // 휠 이벤트 처리 함수
+  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
+    // Ctrl 키나 Cmd 키를 누른 상태에서만 줌 작동
+    if (e.evt.ctrlKey || e.evt.metaKey) {
+      e.evt.preventDefault();
+
+      if (stage) {
+        // 현재 마우스 포인터 위치
+        const pointer = stage.getPointerPosition();
+        if (!pointer) return;
+
+        // 현재 스케일
+        const oldScale = scale;
+
+        // 확대/축소 계산
+        const newScale =
+          e.evt.deltaY < 0 ? Math.min(oldScale * ZOOM_FACTOR, MAX_ZOOM) : Math.max(oldScale / ZOOM_FACTOR, MIN_ZOOM);
+
+        // 스케일 변화율
+        const scaleChange = newScale / oldScale;
+
+        // 확대/축소 중심점 계산
+        const newPos = {
+          x: pointer.x - (pointer.x - stage.x()) * scaleChange,
+          y: pointer.y - (pointer.y - stage.y()) * scaleChange
+        };
+
+        // 상태 업데이트
+        setScale(newScale);
+
+        // Stage 업데이트
+        stage.scale({ x: newScale, y: newScale });
+        stage.position(newPos);
+      }
+    } else {
+      // 일반 스크롤은 기본 동작 유지 (페이지 스크롤)
+      // 필요한 경우 여기에 수직/수평 스크롤 로직 추가 가능
+      return;
+    }
+  };
+
   return (
     <div
       className={`relative h-full w-full overflow-hidden bg-[#1E1E1E] ${isSpacePressed ? 'cursor-grab' : ''}`}
@@ -1020,6 +1077,8 @@ export default function CanvasEditor() {
           initRef.current = true;
         }}
         draggable={false}
+        scaleX={scale}
+        scaleY={scale}
         onMouseDown={handleStageClick}
         onTouchStart={handleStageClick}
         onPointerMove={(e) => {
@@ -1071,6 +1130,7 @@ export default function CanvasEditor() {
           setStartPos(null);
           setCurShapeProps(null);
         }}
+        onWheel={handleWheel}
       >
         <Layer>
           {/* Render all permanent shapes */}
@@ -1291,6 +1351,11 @@ export default function CanvasEditor() {
         </Layer>
       </Stage>
       <CanvasToolBar />
+
+      {/* 줌 레벨 표시 */}
+      <div className='absolute bottom-2 left-2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-70'>
+        {Math.round(scale * 100)}%
+      </div>
     </div>
   );
 }
