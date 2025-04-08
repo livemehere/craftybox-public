@@ -12,7 +12,7 @@ export const createTimer = (duration = 0, active = false): ITimer => {
     baseTimestampRef: { current: undefined },
     pauseTimestampRef: { current: undefined },
     endTimeStampRef: { current: undefined },
-    status: 'idle'
+    status: 'idle',
   };
 };
 
@@ -25,6 +25,6 @@ export const resetTimer = (timer: ITimer): ITimer => {
     startTimestampRef: { current: undefined },
     baseTimestampRef: { current: undefined },
     pauseTimestampRef: { current: undefined },
-    endTimeStampRef: { current: undefined }
+    endTimeStampRef: { current: undefined },
   };
 };

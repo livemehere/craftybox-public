@@ -1,9 +1,9 @@
-import { resolve } from 'path';
-
 import { app, Menu, nativeImage, Tray } from 'electron';
 import { MainConfig } from '@main/mainConfig';
 import { Manager } from '@main/managers/Manager';
 import { AppManager } from '@main/managers/AppManager';
+
+import { resolve } from 'path';
 
 export class TrayManager extends Manager {
   private static TRAY_ICON = nativeImage
@@ -34,22 +34,22 @@ export class TrayManager extends Manager {
         type: 'normal',
         click: () => {
           windowManager.mainWindow.show();
-        }
+        },
       },
       {
         label: 'Hide',
         type: 'normal',
         click: () => {
           windowManager.mainWindow.hide();
-        }
+        },
       },
       {
         label: 'Quit',
         type: 'normal',
         click: () => {
           app.quit();
-        }
-      }
+        },
+      },
     ]);
 
     this.tray.setContextMenu(contextMenu);

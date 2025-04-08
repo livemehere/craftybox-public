@@ -5,13 +5,13 @@ import { TPlatform } from '@shared/types/os-types';
 export {};
 
 declare module '@electron-buddy/ipc/main' {
-  interface ElectronBuddyInvokeMap extends InvokeMap {}
-  interface ElectronBuddyMessageMap extends MessageMap {}
+  type ElectronBuddyInvokeMap = InvokeMap;
+  type ElectronBuddyMessageMap = MessageMap;
 }
 
 declare module '@electron-buddy/ipc/renderer' {
-  interface ElectronBuddyInvokeMap extends InvokeMap {}
-  interface ElectronBuddyMessageMap extends MessageMap {}
+  type ElectronBuddyInvokeMap = InvokeMap;
+  type ElectronBuddyMessageMap = MessageMap;
 }
 
 /*
@@ -110,7 +110,13 @@ type MessageMap = {
   };
   update: {
     response: {
-      status: 'checking' | 'enable' | 'disable' | 'downloading' | 'done' | 'error';
+      status:
+        | 'checking'
+        | 'enable'
+        | 'disable'
+        | 'downloading'
+        | 'done'
+        | 'error';
       progressInfo?: ProgressInfo;
     };
   };

@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
 
-import Kbd from './Kbd';
-
 import { resolveShortCutToKbd } from '@/utils/kbd';
 import { usePlatform } from '@/queries/usePlatform';
+
+import Kbd from './Kbd';
 
 const SimpleKbd = ({ keyString }: { keyString: string }) => {
   const { data: platform } = usePlatform();

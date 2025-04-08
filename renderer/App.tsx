@@ -8,7 +8,10 @@ interface AppProps {
   initialEntries?: string[];
 }
 
-export default function App({ routerType = 'browser', initialEntries = ['/'] }: AppProps) {
+export default function App({
+  routerType = 'browser',
+  initialEntries = ['/'],
+}: AppProps) {
   const router = useMemo(() => {
     if (routerType === 'browser') {
       return createHashRouter(routes);

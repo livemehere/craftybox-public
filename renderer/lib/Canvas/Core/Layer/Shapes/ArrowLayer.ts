@@ -1,6 +1,7 @@
 import { LayerType } from '../../types';
-import LineEdgeDrawer, { LineEdgeDrawerOptions } from '../../Drawer/LineEdgeDrawer';
-
+import LineEdgeDrawer, {
+  LineEdgeDrawerOptions,
+} from '../../Drawer/LineEdgeDrawer';
 import LineLayer, { LineLayerOptions } from './LineLayer';
 
 type ArrowLayerOptions = LineLayerOptions & Partial<LineEdgeDrawerOptions>;
@@ -17,7 +18,7 @@ export default class ArrowLayer extends LineLayer {
       startEdge: props.startEdge ?? false,
       endEdge: props.endEdge ?? true,
       arrowSize: props.arrowSize ?? defaultArrowSize,
-      padding: props.padding ?? -defaultArrowSize / 2
+      padding: props.padding ?? -defaultArrowSize / 2,
     });
     this.hitLineEdgeDrawer = new LineEdgeDrawer({
       strokeWidth: 0,
@@ -25,7 +26,7 @@ export default class ArrowLayer extends LineLayer {
       startEdge: props.startEdge ?? false,
       endEdge: props.endEdge ?? true,
       arrowSize: props.arrowSize ?? defaultArrowSize,
-      padding: props.padding ?? -defaultArrowSize / 2
+      padding: props.padding ?? -defaultArrowSize / 2,
     });
   }
 

@@ -1,6 +1,8 @@
 const CurrentUser = () => {
   return (
-    <div className={'flex items-center gap-2 rounded-md p-2 hover:bg-neutral-700'}>
+    <div
+      className={'flex items-center gap-2 rounded-md p-2 hover:bg-neutral-700'}
+    >
       <Avatar />
       <UserInfo />
     </div>
@@ -10,7 +12,15 @@ const CurrentUser = () => {
 export default CurrentUser;
 
 const Avatar = () => {
-  return <div className={'flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600'}>U</div>;
+  return (
+    <div
+      className={
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600'
+      }
+    >
+      U
+    </div>
+  );
 };
 
 const UserInfo = () => {

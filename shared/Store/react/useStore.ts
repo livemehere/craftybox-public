@@ -22,13 +22,18 @@ const useStore = <T = unknown>(key: string, defaultData: T) => {
   );
 
   const setStoreData = (data: Dispatch<T>) => {
-    store.setData(key, typeof data === 'function' ? (data as (prev: T) => T)(store.getCache<T>(key)!.data) : data);
+    store.setData(
+      key,
+      typeof data === 'function'
+        ? (data as (prev: T) => T)(store.getCache<T>(key)!.data)
+        : data
+    );
   };
 
   return {
     data: storeData?.data,
     loading: storeData === undefined,
-    setData: setStoreData
+    setData: setStoreData,
   };
 };
 

@@ -17,12 +17,12 @@ const closeBtn = document.querySelector('button') as HTMLButtonElement;
 closeBtn.addEventListener('click', () => {
   if (!id) return;
   rendererIpc.invoke('window:destroy', {
-    id
+    id,
   });
 });
 
 window.addEventListener('beforeunload', () => {
   rendererIpc.invoke('window:destroy', {
-    id
+    id,
   });
 });

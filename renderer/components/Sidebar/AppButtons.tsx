@@ -1,6 +1,6 @@
-import { appButtons } from '../../constants/sidebar';
-
 import { cn } from '@/utils/cn';
+
+import { appButtons } from '../../constants/sidebar';
 
 const AppButtons = () => {
   return (
@@ -9,7 +9,10 @@ const AppButtons = () => {
         <button
           key={i}
           onClick={b.onClick}
-          className={cn('no-drag-zone h-3 w-3 rounded-full bg-red-500', b.color)}
+          className={cn(
+            'no-drag-zone h-3 w-3 rounded-full bg-red-500',
+            b.color
+          )}
         ></button>
       ))}
     </div>

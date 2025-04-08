@@ -60,15 +60,18 @@ export default class Transform {
     let target: InteractionLayer | undefined;
     let prevPos = {
       x: 0,
-      y: 0
+      y: 0,
     };
     let startFlag = false;
     const offDownHandler = stage.on('pointerdown', (e) => {
-      if (layer.hasTag('root') && (e.target === undefined || e.target === layer)) {
+      if (
+        layer.hasTag('root') &&
+        (e.target === undefined || e.target === layer)
+      ) {
         target = layer; // stage.root
         prevPos = {
           x: target.x,
-          y: target.y
+          y: target.y,
         };
         stage.render();
         return;
@@ -78,16 +81,20 @@ export default class Transform {
         target = e.target;
         prevPos = {
           x: target.x,
-          y: target.y
+          y: target.y,
         };
         return;
       }
 
-      if (Layer.isContainerLayer(layer) && e.target?.isParent(layer) && !Transform.isDraggable(e.target)) {
+      if (
+        Layer.isContainerLayer(layer) &&
+        e.target?.isParent(layer) &&
+        !Transform.isDraggable(e.target)
+      ) {
         target = layer;
         prevPos = {
           x: target.x,
-          y: target.y
+          y: target.y,
         };
         return;
       }
@@ -98,7 +105,8 @@ export default class Transform {
         const dx = e.pointerX - e.startX;
         const dy = e.pointerY - e.startY;
 
-        const { dx: adjustedDx, dy: adjustedDy } = target.resolveParentTransform(dx, dy);
+        const { dx: adjustedDx, dy: adjustedDy } =
+          target.resolveParentTransform(dx, dy);
         target.x = prevPos.x + adjustedDx;
         target.y = prevPos.y + adjustedDy;
 
@@ -128,7 +136,11 @@ export default class Transform {
     };
   }
 
-  static scalable(stage: Stage, layer: InteractionLayer, options?: { onScale?: () => void; factor?: number }) {
+  static scalable(
+    stage: Stage,
+    layer: InteractionLayer,
+    options?: { onScale?: () => void; factor?: number }
+  ) {
     Transform.checkInteractable(stage);
     const handler = (e: WheelEvent) => {
       const isUp = e.deltaY < 0;

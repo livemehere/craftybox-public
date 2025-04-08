@@ -34,7 +34,7 @@ export class UpdateManager extends Manager {
 
   private setupListeners() {
     const {
-      windowManager: { splashWindow, destroySplashAndShowMain }
+      windowManager: { splashWindow, destroySplashAndShowMain },
     } = this.app;
 
     autoUpdater.on('checking-for-update', () => {
@@ -69,7 +69,10 @@ export class UpdateManager extends Manager {
       this.logger.info(`[1] Download progress...`);
       this.logger.info(progressObj);
       if (!splashWindow) return;
-      mainIpc.send(splashWindow.webContents, 'update', { status: 'downloading', progressInfo: progressObj });
+      mainIpc.send(splashWindow.webContents, 'update', {
+        status: 'downloading',
+        progressInfo: progressObj,
+      });
     });
 
     autoUpdater.on('update-downloaded', (info) => {

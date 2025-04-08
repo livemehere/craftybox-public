@@ -1,4 +1,7 @@
-import { IBreadcrumbItem, useRegisterBreadcrumb } from '@/stores/breadcrumbAtom';
+import {
+  IBreadcrumbItem,
+  useRegisterBreadcrumb,
+} from '@/stores/breadcrumbAtom';
 
 type Props = {
   children: React.ReactNode;

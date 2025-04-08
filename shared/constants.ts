@@ -4,5 +4,5 @@ export const PKG_JSON = pkg;
 
 export const STORE_KEY_MAP = {
   mainBounds: 'settings/mainBounds',
-  shortcuts: 'settings/shortcuts'
+  shortcuts: 'settings/shortcuts',
 } as const;

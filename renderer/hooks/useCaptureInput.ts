@@ -9,7 +9,7 @@ const resolveNumber = (key: string, shift: boolean) => {
 
 export default function useCaptureInput({
   active,
-  onEnd
+  onEnd,
 }: { active?: boolean; onEnd?: (inputs: string) => void } = {}) {
   const result = useRef('');
   const [curChar, setCurChar] = useState('');
@@ -21,7 +21,12 @@ export default function useCaptureInput({
         return;
       }
 
-      const supportKeys = [e.ctrlKey && 'Control', e.shiftKey && 'Shift', e.altKey && 'Alt', e.metaKey && 'Meta']
+      const supportKeys = [
+        e.ctrlKey && 'Control',
+        e.shiftKey && 'Shift',
+        e.altKey && 'Alt',
+        e.metaKey && 'Meta',
+      ]
         .filter(Boolean)
         .join('+');
 
@@ -51,6 +56,6 @@ export default function useCaptureInput({
 
   return {
     curChar,
-    reset
+    reset,
   };
 }

@@ -13,13 +13,23 @@ type Props = {
   platform: TPlatform;
 };
 
-const ShortCutItem = ({ shortcut, onChangeShortcut, onChangeTargetKey, platform }: Props) => {
+const ShortCutItem = ({
+  shortcut,
+  onChangeShortcut,
+  onChangeTargetKey,
+  platform,
+}: Props) => {
   const keys = resolveShortCutToKbd(shortcut.value, platform);
   return (
-    <div key={shortcut.key} className={'flex items-center justify-between text-sm'}>
+    <div
+      key={shortcut.key}
+      className={'flex items-center justify-between text-sm'}
+    >
       <section className={'flex flex-col gap-1'}>
         <h3>{shortcut.label}</h3>
-        <span className={'text-xs text-neutral-500'}>{shortcut.description}</span>
+        <span className={'text-xs text-neutral-500'}>
+          {shortcut.description}
+        </span>
       </section>
       <section className={'flex items-center gap-4'}>
         <div
@@ -37,7 +47,10 @@ const ShortCutItem = ({ shortcut, onChangeShortcut, onChangeTargetKey, platform 
             </Fragment>
           ))}
         </div>
-        <Switch value={shortcut.enabled} onChange={(v) => onChangeShortcut(shortcut.key, shortcut.value, v)} />
+        <Switch
+          value={shortcut.enabled}
+          onChange={(v) => onChangeShortcut(shortcut.key, shortcut.value, v)}
+        />
       </section>
     </div>
   );

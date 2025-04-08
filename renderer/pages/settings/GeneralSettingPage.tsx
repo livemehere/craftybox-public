@@ -10,8 +10,8 @@ const GeneralSettingPage = () => {
         { name: '설정', path: '/settings' },
         {
           name: '일반',
-          path: '/settings'
-        }
+          path: '/settings',
+        },
       ]}
     >
       <div className={'page-wrapper-with-padding'}>

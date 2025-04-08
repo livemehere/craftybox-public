@@ -35,7 +35,7 @@ const NavItem = ({ item }: Props) => {
             <IoIosArrowForward
               style={{
                 transition: 'transform 0.1s',
-                transform: `rotate(${open ? 90 : 0}deg)`
+                transform: `rotate(${open ? 90 : 0}deg)`,
               }}
             />
           )}
@@ -74,8 +74,8 @@ const GroupItemLeftLine = () => {
         scale: [0, 1],
         transformOrigin: 'top',
         transition: {
-          duration: 0.5
-        }
+          duration: 0.5,
+        },
       }}
       className={'absolute top-0 left-2.5 h-full w-[1px] bg-white opacity-20'}
     ></motion.div>

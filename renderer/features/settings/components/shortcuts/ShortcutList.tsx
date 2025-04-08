@@ -12,7 +12,10 @@ import ShortCutItem from '@/features/settings/components/shortcuts/ShortCutItem'
 const ShortcutList = () => {
   const { data: platform } = usePlatform();
   const [changeTarget, setChangeTarget] = useState<string | null>(null);
-  const { data: shortcuts, setData: setShortcuts } = useStore<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
+  const { data: shortcuts, setData: setShortcuts } = useStore<Shortcuts>(
+    STORE_KEY_MAP.shortcuts,
+    []
+  );
 
   const { curChar, reset } = useCaptureInput({
     active: !!changeTarget,
@@ -21,7 +24,7 @@ const ShortcutList = () => {
         onChangeShortcut(changeTarget, v, true);
       }
       setChangeTarget(null);
-    }
+    },
   });
 
   useEffect(() => {

@@ -5,10 +5,12 @@ const ColorPickerPage = () => {
     <WithBreadcrumb
       items={[
         { name: '도구', path: '/tools' },
-        { name: 'color picker', path: '/tools/color-picker' }
+        { name: 'color picker', path: '/tools/color-picker' },
       ]}
     >
-      <div className={'page-wrapper-with-padding flex items-center justify-center'}>
+      <div
+        className={'page-wrapper-with-padding flex items-center justify-center'}
+      >
         <h1>COMING SOON</h1>
       </div>
     </WithBreadcrumb>

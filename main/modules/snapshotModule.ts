@@ -24,7 +24,7 @@ export class SnapshotModule {
       x: monitor.x,
       y: monitor.y,
       width: monitor.width,
-      height: monitor.height
+      height: monitor.height,
     });
 
     mainIpc.send(snapshotWin.webContents, 'snapshot:get', {
@@ -33,7 +33,7 @@ export class SnapshotModule {
       y: monitor.y,
       width: monitor.width,
       height: monitor.height,
-      scaleFactor: monitor.scaleFactor
+      scaleFactor: monitor.scaleFactor,
     });
 
     globalShortcut.register('esc', () => {

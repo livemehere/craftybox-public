@@ -1,8 +1,8 @@
-import { resolve } from 'path';
-import fs from 'fs';
-
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { app } from 'electron';
+
+import { resolve } from 'path';
+import fs from 'fs';
 
 function ensureStoreFilePath(key: string) {
   const dir = resolve(app.getPath('userData'), 'stores');
@@ -45,21 +45,27 @@ export function setStoreData(key: string, data: any) {
  */
 export default function registerStoreIpcHandlers({
   onGet,
-  onSet
+  onSet,
 }: {
   onGet?: (key: string, defaultData: any) => any;
   onSet?: (key: string, data: any) => void;
 } = {}) {
   // @ts-expect-error
-  mainIpc.handle('store:get', async ({ key, defaultData }: { key: string; defaultData: any }) => {
-    const data = getStoreData(key, defaultData);
-    onGet?.(key, data);
-    return data;
-  });
+  mainIpc.handle(
+    'store:get',
+    async ({ key, defaultData }: { key: string; defaultData: any }) => {
+      const data = getStoreData(key, defaultData);
+      onGet?.(key, data);
+      return data;
+    }
+  );
 
   // @ts-expect-error
-  mainIpc.handle('store:set', async ({ key, data }: { key: string; data: any }) => {
-    onSet?.(key, data);
-    return setStoreData(key, data);
-  });
+  mainIpc.handle(
+    'store:set',
+    async ({ key, data }: { key: string; data: any }) => {
+      onSet?.(key, data);
+      return setStoreData(key, data);
+    }
+  );
 }

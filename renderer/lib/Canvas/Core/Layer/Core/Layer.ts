@@ -1,14 +1,13 @@
 import { Emitter } from '@fewings/core/classes';
 
+import { ILayer } from '@/lib/Canvas/Core/interfaces';
+
 import { LayerType } from '../../types';
 import Bound, { Bounds } from '../../Bounds';
 import TextLayer from '../Shapes/TextLayer';
 import LineLayer from '../Shapes/LineLayer';
 import ContainerLayer from '../Container/ContainerLayer';
-
 import InteractionLayer from './InteractionLayer';
-
-import { ILayer } from '@/lib/Canvas/Core/interfaces';
 
 export type LayerOptions = {
   x?: number;
@@ -46,7 +45,10 @@ export interface Renderer {
   _render(ctx: CanvasRenderingContext2D): void;
 }
 
-export default abstract class Layer extends Emitter<TLayerEvents> implements ILayer, Renderer {
+export default abstract class Layer
+  extends Emitter<TLayerEvents>
+  implements ILayer, Renderer
+{
   _x = 0;
   _y = 0;
   _width = 0;
@@ -70,7 +72,7 @@ export default abstract class Layer extends Emitter<TLayerEvents> implements ILa
     visible = true,
     tags,
     scale = 1,
-    rotate = 0
+    rotate = 0,
   }: LayerOptions = {}) {
     super();
     this._x = x;
@@ -84,16 +86,16 @@ export default abstract class Layer extends Emitter<TLayerEvents> implements ILa
     this.tags = tags ? (Array.isArray(tags) ? tags : [tags]) : [];
   }
 
-  static isTextLayer(layer: Layer): layer is TextLayer {
-    return layer.type === 'text';
+  static isTextLayer(layer: any): layer is TextLayer {
+    return layer instanceof TextLayer;
   }
 
   static isContainerLayer(layer: any): layer is ContainerLayer {
     return 'children' in layer;
   }
 
-  static isLineLayer(layer: Layer): layer is LineLayer {
-    return layer.type === 'line' || layer.type === 'arrow';
+  static isLineLayer(layer: any): layer is LineLayer {
+    return layer instanceof LineLayer;
   }
 
   get x() {

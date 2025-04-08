@@ -3,7 +3,10 @@ import LineDrawer, { LineDrawerOptions } from '../../Drawer/LineDrawer';
 import InteractionLayer from '../Core/InteractionLayer';
 import { LayerType } from '../../types';
 
-export type LineLayerOptions = Omit<LayerOptions, 'x' | 'y' | 'width' | 'height'> &
+export type LineLayerOptions = Omit<
+  LayerOptions,
+  'x' | 'y' | 'width' | 'height'
+> &
   LineDrawerOptions & {
     x1: number;
     y1: number;
@@ -32,14 +35,14 @@ export default class LineLayer extends InteractionLayer {
       x: minX,
       y: minY,
       width: maxX - minX,
-      height: maxY - minY
+      height: maxY - minY,
     });
     this.drawer = new LineDrawer(props);
     this.hitDrawer = new LineDrawer({
       ...props,
       fillStyle: this.id,
       strokeStyle: this.id,
-      dash: undefined
+      dash: undefined,
     });
 
     this.x1 = props.x1;

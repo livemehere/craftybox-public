@@ -2,14 +2,14 @@ import { Outlet, useNavigate } from 'react-router';
 import { Suspense } from 'react';
 import log from 'electron-log/renderer';
 
-import SideBar from './Sidebar';
-
 import ErrorBoundary from '@/components/ErrorBoundary';
 import NavBar from '@/components/NavBar';
 import LoadingScene from '@/components/LoadingScene';
 import ErrorPage from '@/pages/ErrorPage';
 import TimerPopup from '@/features/timer/components/TimerPopup';
 import useOn from '@/hooks/electron/useOn';
+
+import SideBar from './Sidebar';
 
 const logger = log.scope('Renderer Page');
 

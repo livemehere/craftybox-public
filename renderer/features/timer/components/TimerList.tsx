@@ -5,12 +5,18 @@ import { FaLock } from 'react-icons/fa';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { useRef } from 'react';
 
-import { addTimerAtom, removeAllTimersAtom, timersAtom } from '@/features/timer/stores/timersAtom';
+import {
+  addTimerAtom,
+  removeAllTimersAtom,
+  timersAtom,
+} from '@/features/timer/stores/timersAtom';
 import TimerItem from '@/features/timer/components/TimerItem';
 
 const TimerList = () => {
   const timers = useAtomValue(timersAtom);
-  const isAnyTimerPlaying = timers.some((timer) => timer.status === 'running' || timer.status === 'paused');
+  const isAnyTimerPlaying = timers.some(
+    (timer) => timer.status === 'running' || timer.status === 'paused'
+  );
 
   const addNew = useSetAtom(addTimerAtom);
   const removeAll = useSetAtom(removeAllTimersAtom);
@@ -20,7 +26,11 @@ const TimerList = () => {
   return (
     <>
       {isAnyTimerPlaying && (
-        <div className={'absolute inset-0 flex items-center justify-center bg-black/50 text-xs'}>
+        <div
+          className={
+            'absolute inset-0 flex items-center justify-center bg-black/50 text-xs'
+          }
+        >
           <FaLock className={'h-6 w-6'} />
         </div>
       )}
@@ -38,7 +48,10 @@ const TimerList = () => {
           >
             <IoIosAddCircleOutline className={'h-6 w-6'} />
           </button>
-          <button className={'basic-btn icon-warn-btn px-2 py-1'} onClick={() => removeAll()}>
+          <button
+            className={'basic-btn icon-warn-btn px-2 py-1'}
+            onClick={() => removeAll()}
+          >
             <FaRegTrashAlt className={'h-4 w-4'} />
           </button>
         </div>

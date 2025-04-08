@@ -47,7 +47,7 @@ export default class TextLayer extends InteractionLayer {
       ...props,
       fillStyle: this.id,
       strokeStyle: this.id,
-      dash: undefined
+      dash: undefined,
     });
     this.maxWidth = props.maxWidth;
     this.maxLines = props.maxLines;

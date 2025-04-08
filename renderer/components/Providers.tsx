@@ -6,9 +6,9 @@ import TimerProvider from '@/features/timer/TimerProvider';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false
-    }
-  }
+      retry: false,
+    },
+  },
 });
 
 export default function Providers({ children }: { children: React.ReactNode }) {

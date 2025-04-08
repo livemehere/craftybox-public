@@ -2,11 +2,16 @@ import React from 'react';
 
 interface Props {
   children: React.ReactNode;
-  fallback?: React.ReactNode | ((error: Error, reset: () => void) => React.ReactNode);
+  fallback?:
+    | React.ReactNode
+    | ((error: Error, reset: () => void) => React.ReactNode);
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
-export default class ErrorBoundary extends React.Component<Props, { hasError: boolean; error?: Error; key: number }> {
+export default class ErrorBoundary extends React.Component<
+  Props,
+  { hasError: boolean; error?: Error; key: number }
+> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, key: 0 };
@@ -25,7 +30,7 @@ export default class ErrorBoundary extends React.Component<Props, { hasError: bo
     this.setState({
       hasError: false,
       error: undefined,
-      key: this.state.key + 1
+      key: this.state.key + 1,
     });
   }
 
@@ -36,6 +41,10 @@ export default class ErrorBoundary extends React.Component<Props, { hasError: bo
         : (this.props.fallback ?? null);
     }
 
-    return <React.Fragment key={this.state.key}>{this.props.children}</React.Fragment>;
+    return (
+      <React.Fragment key={this.state.key}>
+        {this.props.children}
+      </React.Fragment>
+    );
   }
 }

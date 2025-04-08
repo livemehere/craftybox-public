@@ -18,7 +18,7 @@ export const sideBarMenus: TNavItemGroup[] = [
       {
         itemName: '홈',
         Icon: GrHomeRounded,
-        path: '/'
+        path: '/',
       },
       {
         itemName: '설정',
@@ -26,15 +26,15 @@ export const sideBarMenus: TNavItemGroup[] = [
         subItems: [
           {
             itemName: '일반',
-            path: '/settings'
+            path: '/settings',
           },
           {
             itemName: '단축키',
-            path: '/settings/shortcuts'
-          }
-        ]
-      }
-    ]
+            path: '/settings/shortcuts',
+          },
+        ],
+      },
+    ],
   },
   {
     groupName: '도구',
@@ -42,19 +42,19 @@ export const sideBarMenus: TNavItemGroup[] = [
       {
         itemName: '스크린샷',
         Icon: BiScreenshot,
-        path: '/tools/screenshot'
+        path: '/tools/screenshot',
       },
       {
         itemName: '타이머',
         Icon: RxTimer,
-        path: '/tools/timer'
+        path: '/tools/timer',
       },
       {
         itemName: 'Color Picker',
         Icon: CgColorPicker,
-        path: '/tools/color-picker'
-      }
-    ]
+        path: '/tools/color-picker',
+      },
+    ],
   },
   {
     groupName: '워크스페이스',
@@ -62,9 +62,9 @@ export const sideBarMenus: TNavItemGroup[] = [
       {
         itemName: '아카이브',
         Icon: RiArchive2Line,
-        path: '/workspace/archive'
-      }
-    ]
+        path: '/workspace/archive',
+      },
+    ],
   },
   {
     groupName: '에디터',
@@ -72,10 +72,10 @@ export const sideBarMenus: TNavItemGroup[] = [
       {
         itemName: '캔버스',
         Icon: SiShortcut,
-        path: '/editor/canvas'
-      }
-    ]
-  }
+        path: '/editor/canvas',
+      },
+    ],
+  },
 ];
 
 export const appButtons = [
@@ -84,20 +84,20 @@ export const appButtons = [
     color: 'bg-red-500',
     onClick: () => {
       rendererIpc.invoke('window:hide', 'main');
-    }
+    },
   },
   {
     icon: FaRegWindowMinimize,
     color: 'bg-amber-500',
     onClick: () => {
       rendererIpc.invoke('window:minimize', null);
-    }
+    },
   },
   {
     icon: BiWindows,
     color: 'bg-green-700',
     onClick: () => {
       rendererIpc.invoke('window:maximize', null);
-    }
-  }
+    },
+  },
 ] as const;

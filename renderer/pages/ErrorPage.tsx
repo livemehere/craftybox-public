@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 import log from 'electron-log/renderer';
 
 import { cn } from '@/utils/cn';
@@ -28,11 +28,11 @@ export default function ErrorPage() {
         'flex h-screen flex-col items-center justify-center gap-4 bg-neutral-950',
         '[&>h1]:text-2xl [&>h1]:font-bold'
       )}
-      data-testid='not-found-page'
+      data-testid="not-found-page"
     >
       <ErrorContent error={error} />
       <button
-        className='rounded bg-neutral-900 px-8 py-4 hover:bg-neutral-800'
+        className="rounded bg-neutral-900 px-8 py-4 hover:bg-neutral-800"
         onClick={() => (window.location.href = '/')}
       >
         Reload

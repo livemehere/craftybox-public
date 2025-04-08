@@ -1,51 +1,66 @@
-// @ts-check
-import js from '@eslint/js';
 import globals from 'globals';
-import typescriptParser from '@typescript-eslint/parser';
+import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import pluginReact from 'eslint-plugin-react';
+import unusedImports from 'eslint-plugin-unused-imports';
+import { globalIgnores } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
-import reactPlugin from 'eslint-plugin-react';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
-
-/** @type {import('eslint').Linter.FlatConfig[]} */
+/** @type {import('eslint').Linter.Config[]} */
 export default [
-  js.configs.recommended,
-  reactPlugin.configs.flat.recommended,
-  reactPlugin.configs.flat['jsx-runtime'],
-  ...tseslint.configs.recommended,
   {
-    ignores: ['electron-builder.ts', 'dist/**/*', 'release/**/*'],
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      ...reactPlugin.configs.flat.recommended.languageOptions,
-      parser: typescriptParser,
-      parserOptions: {
-        project: './tsconfig.json'
-      },
-      globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
-        ...globals.node
-      }
-    },
+    files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
+  },
+  globalIgnores([
+    '**/dist/**',
+    '**/node_modules/**',
+    '**/release/**',
+    '**/assets/**',
+    '**/scripts/**',
+  ]),
+  { files: ['**/*.js'], languageOptions: { sourceType: 'commonjs' } },
+  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  {
     plugins: {
+      'unused-imports': unusedImports,
       import: importPlugin,
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
       'import/order': [
         'error',
         {
-          'newlines-between': 'always'
-        }
+          groups: ['external', 'builtin', ['sibling', 'parent']],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'external',
+              position: 'after',
+            },
+          ],
+          'newlines-between': 'always',
+        },
       ],
-      'react/no-unknown-property': ['error', { ignore: ['css'] }],
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off'
-    }
-  }
+    },
+  },
 ];

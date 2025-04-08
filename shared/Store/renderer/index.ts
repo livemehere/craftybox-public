@@ -20,7 +20,7 @@ export default class Store extends Emitter<TStoreEvents> {
   private setCache<T>(key: string, data: T) {
     const cache: TStoreData<T> = {
       data,
-      fetchTime: Date.now()
+      fetchTime: Date.now(),
     };
     this.cache.set(key, cache);
   }
@@ -40,7 +40,7 @@ export default class Store extends Emitter<TStoreEvents> {
       // @ts-expect-error
       .invoke('store:get', {
         key,
-        defaultData
+        defaultData,
       })
       .then((data: any) => {
         this.setCache(key, data);
@@ -58,7 +58,7 @@ export default class Store extends Emitter<TStoreEvents> {
     // @ts-expect-error
     await rendererIpc.invoke('store:set', {
       key,
-      data
+      data,
     });
     this.setCache<T>(key, data);
     const newData = this.getCache<T>(key);

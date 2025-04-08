@@ -1,18 +1,26 @@
-import path, { join, resolve } from 'path';
-
-import { app, BrowserWindow, type BrowserWindowConstructorOptions, nativeImage } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  type BrowserWindowConstructorOptions,
+  nativeImage,
+} from 'electron';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { MainConfig } from '@main/mainConfig';
 import { Manager } from '@main/managers/Manager';
 import { getStoreData, setStoreData } from '@shared/Store/main';
 import { STORE_KEY_MAP } from '@shared/constants';
 
+import path, { join, resolve } from 'path';
+
 type TApp = 'index' | 'snapshot' | 'splash' | 'pin';
 
 export class WindowManager extends Manager {
   static APP_ICON_IMG = nativeImage
     .createFromPath(
-      resolve(__dirname, `${MainConfig.IS_DEV ? '../' : ''}assets/icons/${MainConfig.IS_MAC ? 'icon.png' : 'icon.ico'}`)
+      resolve(
+        __dirname,
+        `${MainConfig.IS_DEV ? '../' : ''}assets/icons/${MainConfig.IS_MAC ? 'icon.png' : 'icon.ico'}`
+      )
     )
     .resize({ width: 64, height: 64 });
 
@@ -70,7 +78,12 @@ export class WindowManager extends Manager {
   }
 
   private async createMainWindow() {
-    const bounds = getStoreData(STORE_KEY_MAP.mainBounds, { x: 0, y: 0, width: 1280, height: 720 });
+    const bounds = getStoreData(STORE_KEY_MAP.mainBounds, {
+      x: 0,
+      y: 0,
+      width: 1280,
+      height: 720,
+    });
     this.mainWindow = await this.createWindow(
       {
         ...bounds,
@@ -79,7 +92,7 @@ export class WindowManager extends Manager {
         show: false,
         transparent: true,
         minWidth: 1280,
-        minHeight: 720
+        minHeight: 720,
       },
       'index'
     );
@@ -112,7 +125,7 @@ export class WindowManager extends Manager {
         resizable: false,
         transparent: true,
         icon: WindowManager.APP_ICON_IMG,
-        show: false
+        show: false,
       },
       'snapshot'
     );
@@ -122,7 +135,13 @@ export class WindowManager extends Manager {
     this.logger.info('Snapshot window created.');
   }
 
-  async addPinWindow(x: number, y: number, width: number, height: number, base64: string) {
+  async addPinWindow(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    base64: string
+  ) {
     const win = await this.createWindow(
       {
         x,
@@ -131,7 +150,7 @@ export class WindowManager extends Manager {
         height,
         icon: WindowManager.APP_ICON_IMG,
         show: false,
-        resizable: false
+        resizable: false,
       },
       'pin'
     );
@@ -139,7 +158,14 @@ export class WindowManager extends Manager {
     win.setSkipTaskbar(true);
     win.webContents.send('set-image', base64);
     this.pinWindows.push(win);
-    mainIpc.send(win.webContents, 'snapshot:get', { base64, width, height, scaleFactor: 1, x, y });
+    mainIpc.send(win.webContents, 'snapshot:get', {
+      base64,
+      width,
+      height,
+      scaleFactor: 1,
+      x,
+      y,
+    });
     mainIpc.send(win.webContents, 'window:getId', win.id);
     this.logger.info(`Pin window created. (id:${win.id})`);
   }
@@ -152,21 +178,24 @@ export class WindowManager extends Manager {
         transparent: true,
         resizable: false,
         icon: WindowManager.APP_ICON_IMG,
-        show: true
+        show: true,
       },
       'splash'
     );
     this.splashWindow.center();
   }
 
-  private async createWindow(options: BrowserWindowConstructorOptions, html: TApp) {
+  private async createWindow(
+    options: BrowserWindowConstructorOptions,
+    html: TApp
+  ) {
     const win = new BrowserWindow({
       ...options,
       frame: false,
       webPreferences: {
         preload: join(__dirname, './preload.js'),
-        sandbox: false
-      }
+        sandbox: false,
+      },
     });
     this.setupWindow(win);
     await this.loadRenderer(win, html);

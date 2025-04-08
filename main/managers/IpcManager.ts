@@ -48,9 +48,12 @@ export class IpcManager extends Manager {
       return process.platform as TPlatform;
     });
 
-    mainIpc.handle('window:createPin', async ({ x, y, width, height, base64 }) => {
-      return this.app.windowManager.addPinWindow(x, y, width, height, base64);
-    });
+    mainIpc.handle(
+      'window:createPin',
+      async ({ x, y, width, height, base64 }) => {
+        return this.app.windowManager.addPinWindow(x, y, width, height, base64);
+      }
+    );
 
     mainIpc.handle('window:showPin', async ({ id }) => {
       return this.app.windowManager.showPinWindow(id);

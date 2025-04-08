@@ -12,8 +12,12 @@ const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
 const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
-const GeneralSettingPage = lazy(() => import('@/pages/settings/GeneralSettingPage'));
-const ShortCutSettingPage = lazy(() => import('@/pages/settings/ShortCutSettingPage'));
+const GeneralSettingPage = lazy(
+  () => import('@/pages/settings/GeneralSettingPage')
+);
+const ShortCutSettingPage = lazy(
+  () => import('@/pages/settings/ShortCutSettingPage')
+);
 
 /* workspace */
 const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
@@ -22,12 +26,12 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
-    errorElement: import.meta.env.DEV ? <ErrorPage /> : <Navigate to='/' />,
+    errorElement: import.meta.env.DEV ? <ErrorPage /> : <Navigate to="/" />,
     children: [
       {
         index: true,
         id: 'home',
-        Component: HomePage
+        Component: HomePage,
       },
       {
         path: 'tools',
@@ -36,19 +40,19 @@ export const routes: RouteObject[] = [
           {
             path: 'screenshot',
             id: 'screenshot',
-            Component: ScreenShotPage
+            Component: ScreenShotPage,
           },
           {
             path: 'timer',
             id: 'timer',
-            Component: TimerPage
+            Component: TimerPage,
           },
           {
             path: 'color-picker',
             id: 'color-picker',
-            Component: ColorPickerPage
-          }
-        ]
+            Component: ColorPickerPage,
+          },
+        ],
       },
       {
         path: 'workspace',
@@ -57,9 +61,9 @@ export const routes: RouteObject[] = [
           {
             path: 'archive',
             id: 'archive',
-            Component: ArchivePage
-          }
-        ]
+            Component: ArchivePage,
+          },
+        ],
       },
       {
         path: 'settings',
@@ -68,15 +72,15 @@ export const routes: RouteObject[] = [
           {
             index: true,
             id: 'general',
-            Component: GeneralSettingPage
+            Component: GeneralSettingPage,
           },
           {
             path: 'shortcuts',
             id: 'shortcuts',
-            Component: ShortCutSettingPage
-          }
-        ]
-      }
-    ]
-  }
+            Component: ShortCutSettingPage,
+          },
+        ],
+      },
+    ],
+  },
 ];

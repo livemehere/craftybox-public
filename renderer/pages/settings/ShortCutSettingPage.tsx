@@ -6,7 +6,7 @@ const ShortCutSettingPage = () => {
     <WithBreadcrumb
       items={[
         { name: '설정', path: '/settings' },
-        { name: '단축키', path: '/settings/shortcuts' }
+        { name: '단축키', path: '/settings/shortcuts' },
       ]}
     >
       <div className={'page-wrapper-with-padding'}>

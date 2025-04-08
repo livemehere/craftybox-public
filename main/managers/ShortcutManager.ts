@@ -1,7 +1,10 @@
 import { globalShortcut } from 'electron';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { Shortcuts, TShortcutKeys } from '@shared/types/shortcut-types';
-import registerStoreIpcHandlers, { getStoreData, setStoreData } from '@shared/Store/main';
+import registerStoreIpcHandlers, {
+  getStoreData,
+  setStoreData,
+} from '@shared/Store/main';
 import { AppManager } from '@main/managers/AppManager';
 import { Manager } from '@main/managers/Manager';
 import { STORE_KEY_MAP } from '@shared/constants';
@@ -15,15 +18,15 @@ export class ShortcutManager extends Manager {
       value: 'Control+1',
       label: '캡쳐하기',
       enabled: true,
-      description: '현재 마우스 커서가 위치한 모니터를 캡쳐합니다.'
+      description: '현재 마우스 커서가 위치한 모니터를 캡쳐합니다.',
     },
     {
       key: 'color-picker:open',
       value: 'Control+2',
       label: '색상 추출',
       enabled: true,
-      description: '현재 마우스 커서가 위치한 화면의 색상을 추출합니다.'
-    }
+      description: '현재 마우스 커서가 위치한 화면의 색상을 추출합니다.',
+    },
   ];
 
   constructor({ app }: { app: AppManager }) {
@@ -31,8 +34,11 @@ export class ShortcutManager extends Manager {
     this.app = app;
 
     this.shortcutHandlers = {
-      'capture:cursor': () => this.app.snapshotModule.handleCaptureWithRenderer(this.app.windowManager.snapshotWindow),
-      'color-picker:open': this.openColorPicker.bind(this)
+      'capture:cursor': () =>
+        this.app.snapshotModule.handleCaptureWithRenderer(
+          this.app.windowManager.snapshotWindow
+        ),
+      'color-picker:open': this.openColorPicker.bind(this),
     };
 
     this.initialize();
@@ -43,13 +49,15 @@ export class ShortcutManager extends Manager {
         if (key.includes('shortcuts')) {
           this.registerGlobalShortcuts(data as Shortcuts);
         }
-      }
+      },
     });
   }
 
   private openColorPicker(): void {
     const mainWindow = this.app.windowManager.mainWindow;
-    mainIpc.send(mainWindow.webContents, 'route', { path: '/tools/color-picker' });
+    mainIpc.send(mainWindow.webContents, 'route', {
+      path: '/tools/color-picker',
+    });
     mainWindow.show();
   }
 
@@ -71,11 +79,19 @@ export class ShortcutManager extends Manager {
   }
 
   private registerIpcHandlers(): void {
-    mainIpc.handle('shortcut:set', async ({ key, register }) => this.toggleShortcut(key, register));
+    mainIpc.handle('shortcut:set', async ({ key, register }) =>
+      this.toggleShortcut(key, register)
+    );
   }
 
-  private async toggleShortcut(key: TShortcutKeys, enabled: boolean): Promise<void> {
-    const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
+  private async toggleShortcut(
+    key: TShortcutKeys,
+    enabled: boolean
+  ): Promise<void> {
+    const shortcuts = getStoreData<Shortcuts>(
+      STORE_KEY_MAP.shortcuts,
+      this.defaultShortcuts
+    );
     const targetShortcut = shortcuts.find((shortcut) => shortcut.key === key);
 
     if (!targetShortcut) return;
@@ -95,7 +111,10 @@ export class ShortcutManager extends Manager {
   }
 
   private initialize(): void {
-    const storedShortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
+    const storedShortcuts = getStoreData<Shortcuts>(
+      STORE_KEY_MAP.shortcuts,
+      this.defaultShortcuts
+    );
     const mergedShortcuts = this.mergeWithDefaults(storedShortcuts);
 
     setStoreData(STORE_KEY_MAP.shortcuts, mergedShortcuts);
@@ -104,7 +123,9 @@ export class ShortcutManager extends Manager {
 
   private mergeWithDefaults(storedShortcuts: Shortcuts): Shortcuts {
     return this.defaultShortcuts.map((defaultShortcut) => {
-      const userShortcut = storedShortcuts.find((shortcut) => shortcut.key === defaultShortcut.key);
+      const userShortcut = storedShortcuts.find(
+        (shortcut) => shortcut.key === defaultShortcut.key
+      );
 
       if (!userShortcut) {
         return defaultShortcut;
@@ -112,7 +133,7 @@ export class ShortcutManager extends Manager {
 
       return {
         ...defaultShortcut,
-        ...userShortcut
+        ...userShortcut,
       };
     });
   }
