@@ -34,7 +34,6 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
-
   build: {
     rollupOptions: {
       output: {
