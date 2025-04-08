@@ -1,10 +1,10 @@
 import { Outlet, useNavigate } from 'react-router';
 import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import log from 'electron-log/renderer';
 
 import SideBar from './Sidebar';
 
+import ErrorBoundary from '@/components/ErrorBoundary';
 import NavBar from '@/components/NavBar';
 import LoadingScene from '@/components/LoadingScene';
 import ErrorPage from '@/pages/ErrorPage';

@@ -18,9 +18,6 @@ const ShortCutSettingPage = lazy(() => import('@/pages/settings/ShortCutSettingP
 /* workspace */
 const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
 
-/* editors */
-const CanvasEditor = lazy(() => import('@/pages/editors/CanvasEditor'));
-
 export const routes: RouteObject[] = [
   {
     path: '/',
@@ -77,17 +74,6 @@ export const routes: RouteObject[] = [
             path: 'shortcuts',
             id: 'shortcuts',
             Component: ShortCutSettingPage
-          }
-        ]
-      },
-      {
-        path: 'editor',
-        id: 'editor',
-        children: [
-          {
-            path: 'canvas',
-            id: 'canvas',
-            Component: CanvasEditor
           }
         ]
       }

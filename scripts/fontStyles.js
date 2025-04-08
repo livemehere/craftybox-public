@@ -1,4 +1,4 @@
-export const injectStyleTag = `
+export const fontStyles = `
 <style>
   @font-face {
     font-family: 'Spoqa Han Sans Neo';

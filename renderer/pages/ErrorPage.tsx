@@ -33,7 +33,7 @@ export default function ErrorPage() {
       <ErrorContent error={error} />
       <button
         className='rounded bg-neutral-900 px-8 py-4 hover:bg-neutral-800'
-        onClick={() => window.location.reload()}
+        onClick={() => (window.location.href = '/')}
       >
         Reload
       </button>
