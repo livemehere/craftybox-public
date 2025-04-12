@@ -1,8 +1,4 @@
 @layer components {
-  .basic-btn {
-    @apply rounded hover:bg-neutral-700 data-[active="true"]:bg-neutral-700;
-  }
-
   .icon-circle-btn {
     @apply flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 transition-colors hover:bg-neutral-700 active:scale-95;
     svg {

@@ -38,7 +38,7 @@ const TimerList = () => {
         <p>목록</p>
         <div className={'flex gap-1'}>
           <button
-            className={'basic-btn icon-primary-btn p-1'}
+            className={'pressable icon-primary-btn p-1'}
             onClick={() => {
               addNew();
               requestAnimationFrame(() => {
@@ -49,7 +49,7 @@ const TimerList = () => {
             <IoIosAddCircleOutline className={'h-6 w-6'} />
           </button>
           <button
-            className={'basic-btn icon-warn-btn px-2 py-1'}
+            className={'pressable icon-warn-btn px-2 py-1'}
             onClick={() => removeAll()}
           >
             <FaRegTrashAlt className={'h-4 w-4'} />
