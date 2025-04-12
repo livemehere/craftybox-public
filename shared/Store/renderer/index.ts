@@ -37,7 +37,6 @@ export default class Store extends Emitter<TStoreEvents> {
     }
 
     rendererIpc
-      // @ts-expect-error
       .invoke('store:get', {
         key,
         defaultData,
@@ -55,7 +54,6 @@ export default class Store extends Emitter<TStoreEvents> {
    * 2. update cache and dispatch `${key}change` event
    */
   async setData<T>(key: string, data: T) {
-    // @ts-expect-error
     await rendererIpc.invoke('store:set', {
       key,
       data,

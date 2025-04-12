@@ -22,6 +22,20 @@ declare module '@electron-buddy/ipc/renderer' {
  * response: any
  */
 export type InvokeMap = {
+  'store:get': {
+    payload: {
+      key: string;
+      defaultData: any;
+    };
+    response: any;
+  };
+  'store:set': {
+    payload: {
+      key: string;
+      data: any;
+    };
+    response: void;
+  };
   'window:ready': {
     payload: 'main';
     response: void;
