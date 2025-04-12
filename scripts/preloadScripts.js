@@ -1,4 +1,4 @@
-export const fontStyles = `
+export const preloadScripts = `
 <style>
   @font-face {
     font-family: 'Spoqa Han Sans Neo';

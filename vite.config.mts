@@ -10,7 +10,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import path from 'path';
 
-import { fontStyles } from './scripts/fontStyles';
+import { preloadScripts } from './scripts/preloadScripts';
 
 const isStorybookEnv = process.env['npm_lifecycle_event'] === 'storybook';
 
@@ -33,7 +33,7 @@ export default defineConfig({
                 '@main': path.resolve(__dirname, 'main'),
               },
             },
-            injectToHead: fontStyles,
+            injectToHead: preloadScripts,
           }),
         ]),
     tailwindcss(),
