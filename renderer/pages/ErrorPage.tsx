@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { isRouteErrorResponse, useRouteError } from 'react-router';
-import log from 'electron-log/renderer';
 
 import { cn } from '@/utils/cn';
+import { useLogger } from '@/providers/LoggerProvider';
+
 interface ErrorResponse {
   status: number;
   statusText: string;
@@ -11,12 +12,11 @@ interface ErrorResponse {
   error: Error;
 }
 
-const logger = log.scope('ErrorPage');
-
 /**
  * Only for development, production should redirect to home page
  */
 export default function ErrorPage() {
+  const logger = useLogger();
   const error = useRouteError() as ErrorResponse | Error;
   useEffect(() => {
     logger.error(error);

@@ -1,17 +1,10 @@
 import { Outlet, useNavigate } from 'react-router';
-import { Suspense } from 'react';
-import log from 'electron-log/renderer';
 
-import ErrorBoundary from '@/components/ErrorBoundary';
 import NavBar from '@/components/NavBar';
-import LoadingScene from '@/components/LoadingScene';
-import ErrorPage from '@/pages/ErrorPage';
 import TimerPopup from '@/features/timer/components/TimerPopup';
 import useOn from '@/hooks/electron/useOn';
 
 import SideBar from './Sidebar';
-
-const logger = log.scope('Renderer Page');
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -25,16 +18,7 @@ export default function Layout() {
         <NavBar />
         <main className={'flex-1 overflow-x-hidden overflow-y-auto'}>
           <TimerPopup />
-          <ErrorBoundary
-            fallback={<ErrorPage />}
-            onError={(e) => {
-              logger.error(e);
-            }}
-          >
-            <Suspense fallback={<LoadingScene />}>
-              <Outlet />
-            </Suspense>
-          </ErrorBoundary>
+          <Outlet />
         </main>
       </div>
     </div>

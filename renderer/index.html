@@ -20,6 +20,15 @@
   </head>
   <body style="overflow: hidden">
     <div id="app"></div>
+    <script>
+      window.app = {
+        invoke: () => Promise.resolve(''),
+        send: () => {},
+        on: () => {
+          return () => {};
+        },
+      };
+    </script>
     <script src="index.tsx" type="module"></script>
   </body>
 </html>

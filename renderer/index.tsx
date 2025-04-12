@@ -8,11 +8,15 @@ import '@/styles/index.css';
 import Providers from '@/Providers';
 import App from '@/App';
 
+import { LoggerProvider } from './providers/LoggerProvider';
+
 const root = createRoot(document.getElementById('app')!);
 root.render(
-  <Providers>
-    <ReactQueryDevtools />
-    <DevTools />
-    <App />
-  </Providers>
+  <LoggerProvider>
+    <Providers>
+      <ReactQueryDevtools />
+      <DevTools />
+      <App />
+    </Providers>
+  </LoggerProvider>
 );

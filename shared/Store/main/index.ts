@@ -50,7 +50,6 @@ export default function registerStoreIpcHandlers({
   onGet?: (key: string, defaultData: any) => any;
   onSet?: (key: string, data: any) => void;
 } = {}) {
-  // @ts-expect-error
   mainIpc.handle(
     'store:get',
     async ({ key, defaultData }: { key: string; defaultData: any }) => {
@@ -60,7 +59,6 @@ export default function registerStoreIpcHandlers({
     }
   );
 
-  // @ts-expect-error
   mainIpc.handle(
     'store:set',
     async ({ key, data }: { key: string; data: any }) => {
