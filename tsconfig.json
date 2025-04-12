@@ -18,5 +18,11 @@
       "@main/*": ["./main/*"]
     }
   },
-  "include": ["main/**/*", "renderer/**/*", "preload/**/*", "shared/**/*"]
+  "include": [
+    "main/**/*",
+    "renderer/**/*",
+    "preload/**/*",
+    "shared/**/*",
+    "__test__/**/*"
+  ]
 }

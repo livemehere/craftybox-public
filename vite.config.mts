@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import { defineConfig } from 'vite';
 import { electron } from '@electron-buddy/vite-plugin';
 import svgr from 'vite-plugin-svgr';
@@ -11,6 +13,11 @@ import path from 'path';
 import { fontStyles } from './scripts/fontStyles';
 
 export default defineConfig({
+  test: {
+    include: ['../__test__/**/*.test.ts?(x)'],
+    setupFiles: './__test__/vitest.setup.ts',
+    environment: 'jsdom',
+  },
   root: './renderer',
   plugins: [
     electron({

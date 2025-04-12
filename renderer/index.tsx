@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import 'jotai-devtools/styles.css';
 import '@/styles/index.css';
 
-import Providers from '@/components/Providers';
+import Providers from '@/Providers';
 import App from '@/App';
 
 const root = createRoot(document.getElementById('app')!);
