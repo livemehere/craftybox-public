@@ -1,17 +1,11 @@
-import { Outlet, useNavigate } from 'react-router';
+import { Outlet } from 'react-router';
 
 import NavBar from '@/components/NavBar';
 import TimerPopup from '@/features/timer/components/TimerPopup';
-import useOn from '@/hooks/electron/useOn';
 
 import LNB from '../features/LNB/components';
 
 export default function Layout() {
-  const navigate = useNavigate();
-  useOn('route', ({ path }) => {
-    navigate(path);
-  });
-
   return (
     <div className={'flex h-screen w-screen'}>
       <LNB />

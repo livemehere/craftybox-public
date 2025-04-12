@@ -6,13 +6,14 @@ import { motion } from 'motion/react';
 import { useSetAtom } from 'jotai';
 
 import { ITimer } from '@/features/timer/types';
-import { formatToTimeString } from '@/lib/ui-kit/input-utils/formatter';
 import { cn } from '@/utils/cn';
 import {
   removeTimerAtom,
   setActiveTimerAtom,
   setDurationAtom,
 } from '@/features/timer/stores/timersAtom';
+
+import { formatToTimeString } from '../utils';
 
 interface Props {
   timer: ITimer;
