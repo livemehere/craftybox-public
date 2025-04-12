@@ -23,6 +23,7 @@
     "renderer/**/*",
     "preload/**/*",
     "shared/**/*",
-    "__test__/**/*"
+    "__test__/**/*",
+    ".storybook/**/*"
   ]
 }

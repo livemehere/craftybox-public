@@ -17,7 +17,9 @@
     "package:mac": "pnpm build && electron-builder --mac --publish never",
     "publish:win": "pnpm build && electron-builder --win --publish always",
     "publish:mac": "pnpm build && electron-builder --mac --publish always",
-    "test": "vitest"
+    "test": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "keywords": [
     "tools"
@@ -33,6 +35,11 @@
     "@electron-buddy/vite-plugin": "^1.5.0",
     "@eslint/js": "^9.16.0",
     "@fewings/svgr": "^0.0.7",
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/addon-onboarding": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/react": "^8.6.12",
+    "@storybook/react-vite": "^8.6.12",
     "@tailwindcss/vite": "^4.0.6",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -42,6 +49,8 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/browser": "3.1.1",
+    "@vitest/coverage-v8": "3.1.1",
     "chokidar": "^4.0.3",
     "electron": "^33.2.1",
     "electron-builder": "25.1.8",
@@ -50,11 +59,14 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-storybook": "^0.12.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^15.13.0",
     "jsdom": "^26.0.0",
+    "playwright": "^1.51.1",
     "prettier": "^3.4.1",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "storybook": "^8.6.12",
     "terser": "^5.36.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.17.0",
@@ -89,5 +101,10 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^4.0.6",
     "uid": "^2.0.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
   }
 }

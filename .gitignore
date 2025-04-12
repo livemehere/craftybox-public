@@ -9,3 +9,5 @@ release
 temp-lib
 .DS_Store
 test/
+
+*storybook.log

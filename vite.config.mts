@@ -12,6 +12,8 @@ import path from 'path';
 
 import { fontStyles } from './scripts/fontStyles';
 
+const isStorybookEnv = !!process.env['npm_lifecycle_event'];
+
 export default defineConfig({
   test: {
     include: ['../__test__/**/*.test.ts?(x)'],
@@ -20,16 +22,20 @@ export default defineConfig({
   },
   root: './renderer',
   plugins: [
-    electron({
-      copyDirs: ['assets'],
-      main: {
-        alias: {
-          '@shared': path.resolve(__dirname, 'shared'),
-          '@main': path.resolve(__dirname, 'main'),
-        },
-      },
-      injectToHead: fontStyles,
-    }),
+    ...(isStorybookEnv
+      ? []
+      : [
+          electron({
+            copyDirs: ['assets'],
+            main: {
+              alias: {
+                '@shared': path.resolve(__dirname, 'shared'),
+                '@main': path.resolve(__dirname, 'main'),
+              },
+            },
+            injectToHead: fontStyles,
+          }),
+        ]),
     tailwindcss(),
     react(),
     svgr(),
