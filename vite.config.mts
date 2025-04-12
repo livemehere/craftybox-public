@@ -10,7 +10,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import path from 'path';
 
-import { preloadScripts } from './scripts/preloadScripts';
+import { preloadScripts } from './preloadScripts';
 
 const isStorybookEnv = process.env['npm_lifecycle_event'] === 'storybook';
 
