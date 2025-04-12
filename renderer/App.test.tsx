@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react';
 
 import App from '@/App';
 
-import { renderWithProvider } from './utils';
+import { renderWithProvider } from './__test__/utils';
 
 describe('App', () => {
   describe('Routing', async () => {
