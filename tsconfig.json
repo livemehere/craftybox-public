@@ -23,7 +23,7 @@
     "renderer/**/*",
     "preload/**/*",
     "shared/**/*",
-    "__test__/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "vitest.setup.ts"
   ]
 }

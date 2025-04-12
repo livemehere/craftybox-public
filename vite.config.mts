@@ -15,12 +15,12 @@ import { fontStyles } from './scripts/fontStyles';
 const isStorybookEnv = !!process.env['npm_lifecycle_event'];
 
 export default defineConfig({
+  root: './renderer',
   test: {
-    include: ['../__test__/**/*.test.ts?(x)'],
-    setupFiles: './__test__/vitest.setup.ts',
+    include: ['./**/*.test.ts?(x)', '../main/**/*.test.ts'],
+    setupFiles: './vitest.setup.ts',
     environment: 'jsdom',
   },
-  root: './renderer',
   plugins: [
     ...(isStorybookEnv
       ? []
