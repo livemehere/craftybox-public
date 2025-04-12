@@ -34,6 +34,22 @@ export const routes: RouteObject[] = [
         Component: HomePage,
       },
       {
+        path: 'settings',
+        id: 'settings',
+        children: [
+          {
+            index: true,
+            id: 'general',
+            Component: GeneralSettingPage,
+          },
+          {
+            path: 'shortcuts',
+            id: 'shortcuts',
+            Component: ShortCutSettingPage,
+          },
+        ],
+      },
+      {
         path: 'tools',
         id: 'tools',
         children: [
@@ -62,22 +78,6 @@ export const routes: RouteObject[] = [
             path: 'archive',
             id: 'archive',
             Component: ArchivePage,
-          },
-        ],
-      },
-      {
-        path: 'settings',
-        id: 'settings',
-        children: [
-          {
-            index: true,
-            id: 'general',
-            Component: GeneralSettingPage,
-          },
-          {
-            path: 'shortcuts',
-            id: 'shortcuts',
-            Component: ShortCutSettingPage,
           },
         ],
       },
