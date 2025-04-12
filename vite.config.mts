@@ -12,7 +12,7 @@ import path from 'path';
 
 import { fontStyles } from './scripts/fontStyles';
 
-const isStorybookEnv = !!process.env['npm_lifecycle_event'];
+const isStorybookEnv = process.env['npm_lifecycle_event'] === 'storybook';
 
 export default defineConfig({
   root: './renderer',
