@@ -26,7 +26,7 @@ const VARIANTS: Variants = {
 
 const LNB = () => {
   const open = useAtomValue(lnbOpenAtom);
-  const { data: platform } = usePlatform();
+  const platform = usePlatform();
 
   return (
     <motion.aside

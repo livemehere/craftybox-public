@@ -1,25 +1,27 @@
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Shortcuts } from '@shared/types/shortcut-types';
-import { TPlatform } from '@shared/types/os-types';
 
 import Switch from '@/components/ui/Switch';
 import Kbd from '@/components/ui/Kbd/Kbd';
 import { resolveShortCutToKbd } from '@/utils/kbd';
+import { usePlatform } from '@/queries/usePlatform';
 
 type Props = {
   shortcut: Shortcuts[number];
   onChangeTargetKey: (key: string) => void;
   onChangeShortcut: (key: string, value: string, enabled?: boolean) => void;
-  platform: TPlatform;
 };
 
 const ShortCutItem = ({
   shortcut,
   onChangeShortcut,
   onChangeTargetKey,
-  platform,
 }: Props) => {
-  const keys = resolveShortCutToKbd(shortcut.value, platform);
+  const platform = usePlatform();
+  const keys = useMemo(
+    () => (platform ? resolveShortCutToKbd(shortcut.value, platform) : []),
+    [platform, shortcut.value]
+  );
   return (
     <div
       key={shortcut.key}

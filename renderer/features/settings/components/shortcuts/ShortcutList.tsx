@@ -4,13 +4,11 @@ import { Shortcuts } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
 import { produce } from 'immer';
 
-import useCaptureInput from '@/hooks/useCaptureInput';
-import { usePlatform } from '@/queries/usePlatform';
+import useCaptureInput from '@/features/settings/hooks/useCaptureInput';
 import { ShortCutInputOverlay } from '@/features/settings/components/shortcuts/ShortCutInputOverlay';
 import ShortCutItem from '@/features/settings/components/shortcuts/ShortCutItem';
 
 const ShortcutList = () => {
-  const { data: platform } = usePlatform();
   const [changeTarget, setChangeTarget] = useState<string | null>(null);
   const { data: shortcuts, setData: setShortcuts } = useStore<Shortcuts>(
     STORE_KEY_MAP.shortcuts,
@@ -57,7 +55,6 @@ const ShortcutList = () => {
               shortcut={shortcut}
               onChangeShortcut={onChangeShortcut}
               onChangeTargetKey={setChangeTarget}
-              platform={platform}
             />
           );
         })}
