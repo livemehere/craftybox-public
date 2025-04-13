@@ -6,11 +6,7 @@ import {
   nativeImage,
   Tray,
 } from 'electron';
-import { UpdateManager } from '@main/managers/UpdateManager';
-import { SnapshotModule } from '@main/modules/SnapshotModule';
-import { WindowModule } from '@main/modules/WindowModule';
-import { PlatformModule } from '@main/modules/PlatformModule';
-import { ColorPickerModule } from '@main/modules/ColorPickerModule';
+import { UpdateManager } from '@main/core/UpdateManager';
 import { IModule } from '@main/modules/BaseModule';
 import { TShortcutKeys, Shortcuts } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
@@ -19,6 +15,7 @@ import registerStoreIpcHandlers from '@shared/Store/main';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { config } from '@main/config';
 import log from 'electron-log/main';
+import { bundleModules } from '@main/modules';
 
 import { resolve } from 'path';
 
@@ -44,11 +41,7 @@ export class App {
 
   updateManager!: UpdateManager;
 
-  private modules: Map<string, IModule> = new Map();
-  snapshotModule!: SnapshotModule;
-  windowModule!: WindowModule;
-  platformModule!: PlatformModule;
-  colorPickerModule!: ColorPickerModule;
+  private moduleMap = new Map<string, IModule>();
 
   private readonly defaultShortcuts: Shortcuts = [
     {
@@ -267,36 +260,14 @@ export class App {
       });
     }
   }
-  private initializeModules() {
-    // 기능별 모듈 초기화
-    this.registerModule('snapshot', new SnapshotModule(this));
-    this.registerModule('window', new WindowModule(this));
-    this.registerModule('platform', new PlatformModule(this));
-    this.registerModule('colorPicker', new ColorPickerModule(this));
-
-    // 모듈 참조 설정
-    this.snapshotModule = this.getModule('snapshot') as SnapshotModule;
-    this.windowModule = this.getModule('window') as WindowModule;
-    this.platformModule = this.getModule('platform') as PlatformModule;
-    this.colorPickerModule = this.getModule('colorPicker') as ColorPickerModule;
-
-    // 각 모듈 초기화
-    for (const [name, module] of this.modules.entries()) {
-      this.logger.info(`Initializing module: ${name}`);
-      module.initialize();
+  private async initializeModules() {
+    const promises = [];
+    for (const Module of bundleModules) {
+      const instance = new Module(this);
+      promises.push(instance.initialize());
+      this.moduleMap.set(instance.name, instance);
     }
-  }
-
-  private registerModule(name: string, module: IModule): void {
-    this.modules.set(name, module);
-  }
-
-  getModule(name: string): IModule {
-    const module = this.modules.get(name);
-    if (!module) {
-      throw new Error(`Module not found: ${name}`);
-    }
-    return module;
+    await Promise.all(promises);
   }
 
   private initializeShortcuts(): void {

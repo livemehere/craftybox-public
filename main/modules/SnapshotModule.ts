@@ -9,26 +9,21 @@ import { getStoreData } from '@shared/Store/main';
 import { BaseModule } from './BaseModule';
 
 export class SnapshotModule extends BaseModule {
-  constructor(appManager: App) {
-    super(appManager, 'SnapshotModule');
+  constructor(app: App) {
+    super(app, 'SnapshotModule');
     this.shortcutHandlers = {
       'capture:cursor': this.handleCaptureWithRenderer.bind(
         this,
-        appManager.snapshot.win
+        this.app.snapshot.win
       ),
     };
   }
 
-  initialize(): void {
-    this.registerIpcHandlers();
-    this.registerShortcuts();
-  }
-
-  registerIpcHandlers(): void {
+  async registerIpcHandlers() {
     // 스냅샷 관련 IPC 핸들러 등록
   }
 
-  registerShortcuts(): void {
+  async registerShortcuts() {
     const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
 
     const captureShortcut = shortcuts.find(

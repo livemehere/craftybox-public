@@ -4,20 +4,15 @@ import { TPlatform } from '@shared/types/os-types';
 import { BaseModule } from './BaseModule';
 
 export class PlatformModule extends BaseModule {
-  constructor(appManager: App) {
-    super(appManager, 'PlatformModule');
+  constructor(app: App) {
+    super(app, 'PlatformModule');
   }
 
-  initialize(): void {
-    this.registerIpcHandlers();
-    this.registerShortcuts();
-  }
-
-  registerShortcuts(): void {
+  async registerShortcuts() {
     // 플랫폼 모듈은 현재 사용하는 단축키가 없음
   }
 
-  registerIpcHandlers(): void {
+  async registerIpcHandlers() {
     this.registerIpcHandler('platform:get', () => {
       return process.platform as TPlatform;
     });

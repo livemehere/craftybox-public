@@ -4,24 +4,19 @@ import { App } from '@main/core/App';
 import { BaseModule } from './BaseModule';
 
 export class WindowModule extends BaseModule {
-  constructor(appManager: App) {
-    super(appManager, 'WindowModule');
+  constructor(app: App) {
+    super(app, 'WindowModule');
   }
 
-  initialize(): void {
-    this.registerIpcHandlers();
-    this.registerShortcuts();
-  }
-
-  registerShortcuts(): void {
+  async registerShortcuts() {
     // 윈도우 모듈은 현재 사용하는 단축키가 없음
   }
 
-  registerIpcHandlers(): void {
+  async registerIpcHandlers() {
     this.registerIpcHandler('window:ready', (type) => {
       switch (type) {
         case 'main':
-          this.appManager.destroySplashAndShowMain();
+          this.app.destroySplashAndShowMain();
           break;
         default:
           break;
@@ -31,41 +26,41 @@ export class WindowModule extends BaseModule {
     this.registerIpcHandler('window:hide', (winType) => {
       switch (winType) {
         case 'snapshot':
-          return this.appManager.snapshot.win.hide();
+          return this.app.snapshot.win.hide();
         case 'main':
-          return this.appManager.main.win.hide();
+          return this.app.main.win.hide();
       }
     });
 
     this.registerIpcHandler('window:minimize', () => {
-      return this.appManager.main.win.minimize();
+      return this.app.main.win.minimize();
     });
 
     this.registerIpcHandler('window:maximize', () => {
-      if (this.appManager.main.win.isMaximized()) {
-        return this.appManager.main.win.unmaximize();
+      if (this.app.main.win.isMaximized()) {
+        return this.app.main.win.unmaximize();
       } else {
-        return this.appManager.main.win.maximize();
+        return this.app.main.win.maximize();
       }
     });
 
     this.registerIpcHandler(
       'window:createPin',
       ({ x, y, width, height, base64 }) => {
-        return this.appManager.addPinWindow(x, y, width, height, base64);
+        return this.app.addPinWindow(x, y, width, height, base64);
       }
     );
 
     this.registerIpcHandler('window:showPin', ({ id }) => {
-      return this.appManager.showPinWindow(id);
+      return this.app.showPinWindow(id);
     });
 
     this.registerIpcHandler('window:showMain', () => {
-      return this.appManager.main.win.show();
+      return this.app.main.win.show();
     });
 
     this.registerIpcHandler('window:destroy', ({ id }) => {
-      return this.appManager.destroyPinWindow(id);
+      return this.app.destroyPinWindow(id);
     });
 
     this.registerIpcHandler('url:openExternal', ({ url }) => {

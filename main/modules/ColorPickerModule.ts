@@ -7,23 +7,18 @@ import { getStoreData } from '@shared/Store/main';
 import { BaseModule } from './BaseModule';
 
 export class ColorPickerModule extends BaseModule {
-  constructor(appManager: App) {
-    super(appManager, 'ColorPickerModule');
+  constructor(app: App) {
+    super(app, 'ColorPickerModule');
     this.shortcutHandlers = {
       'color-picker:open': this.openColorPicker.bind(this),
     };
   }
 
-  initialize(): void {
-    this.registerIpcHandlers();
-    this.registerShortcuts();
-  }
-
-  registerIpcHandlers(): void {
+  async registerIpcHandlers() {
     // 컬러 피커 관련 IPC 핸들러가 필요한 경우 여기에 추가
   }
 
-  registerShortcuts(): void {
+  async registerShortcuts() {
     const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
 
     const colorPickerShortcut = shortcuts.find(
@@ -39,7 +34,7 @@ export class ColorPickerModule extends BaseModule {
   }
 
   private openColorPicker(): void {
-    const mainWindow = this.appManager.windowManager.mainWindow;
+    const mainWindow = this.app.main.win;
     mainIpc.send(mainWindow.webContents, 'route', {
       path: '/tools/color-picker',
     });
