@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import Store from '../renderer';
 
@@ -19,27 +19,37 @@ const useStore = <T = unknown>(
   defaultData: T,
   version?: string
 ) => {
-  const store = getGlobalStore();
+  const storeRef = useRef<Store>(undefined);
+  if (!storeRef.current) {
+    storeRef.current = getGlobalStore();
+  }
+  const store = storeRef.current;
   const storeData = useSyncExternalStore(
     (cb) => store.on(`${key}change`, cb),
     () => store.getData<T>(key, defaultData, version)
   );
 
-  const setStoreData = (data: Dispatch<T>) => {
-    store.setData(
-      key,
-      typeof data === 'function'
-        ? (data as (prev: T) => T)(store.getCache<T>(key)!.data)
-        : data,
-      version
-    );
-  };
+  const setStoreData = useCallback(
+    (data: Dispatch<T>) => {
+      store.setData(
+        key,
+        typeof data === 'function'
+          ? (data as (prev: T) => T)(store.getCache<T>(key)!.data)
+          : data,
+        version
+      );
+    },
+    [key, store, version]
+  );
 
-  return {
-    data: storeData?.data,
-    loading: storeData === undefined,
-    setData: setStoreData,
-  };
+  return useMemo(
+    () => ({
+      data: storeData?.data,
+      loading: storeData === undefined,
+      setData: setStoreData,
+    }),
+    [storeData, setStoreData]
+  );
 };
 
 export default useStore;
