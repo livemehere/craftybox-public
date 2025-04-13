@@ -8,20 +8,26 @@ import { Manager } from '@main/managers/Manager';
 import { SnapshotModule } from '@main/modules/snapshotModule';
 
 export class AppManager extends Manager {
-  windowManager!: WindowManager;
   updateManager!: UpdateManager;
   trayManager!: TrayManager;
+  windowManager!: WindowManager;
   ipcManager!: IpcManager;
   shortcutManager!: ShortcutManager;
 
   /* modules */
   snapshotModule!: SnapshotModule;
 
-  constructor() {
+  private constructor() {
     super({ logScope: 'AppManager' });
   }
 
-  async initialize() {
+  static async create() {
+    const appManager = new AppManager();
+    await appManager.initialize();
+    return appManager;
+  }
+
+  private async initialize() {
     await app.whenReady();
 
     this.ipcManager = new IpcManager({ app: this });
