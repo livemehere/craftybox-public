@@ -6,4 +6,8 @@
   .drag-zone {
     app-region: drag;
   }
+
+  .pressable {
+    @apply rounded hover:bg-neutral-700 data-[active="true"]:bg-neutral-700;
+  }
 }

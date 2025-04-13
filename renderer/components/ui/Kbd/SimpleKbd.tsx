@@ -1,13 +1,16 @@
-import { Fragment } from 'react';
-
-import Kbd from './Kbd';
+import { Fragment, useMemo } from 'react';
 
 import { resolveShortCutToKbd } from '@/utils/kbd';
 import { usePlatform } from '@/queries/usePlatform';
 
+import Kbd from './Kbd';
+
 const SimpleKbd = ({ keyString }: { keyString: string }) => {
-  const { data: platform } = usePlatform();
-  const keys = resolveShortCutToKbd(keyString, platform);
+  const platform = usePlatform();
+  const keys = useMemo(
+    () => (platform ? resolveShortCutToKbd(keyString, platform) : []),
+    [platform, keyString]
+  );
 
   return (
     <div>

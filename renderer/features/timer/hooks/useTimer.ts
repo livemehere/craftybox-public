@@ -1,6 +1,10 @@
 import { RefObject, useEffect } from 'react';
 import { secondToTime } from '@fewings/core/converter';
-import { useCallbackRef, useControlledState, useForceUpdate } from '@fewings/react/hooks';
+import {
+  useCallbackRef,
+  useControlledState,
+  useForceUpdate,
+} from '@fewings/react/hooks';
 
 import useControlledRef from '@/hooks/useControlledRef';
 
@@ -53,7 +57,7 @@ export const useTimer = ({
   startTimestampRef: _startTimestampRef,
   baseTimestampRef: _baseTimestampRef,
   pauseTimestampRef: _pauseTimestampRef,
-  endTimeStampRef: _endTimeStampRef
+  endTimeStampRef: _endTimeStampRef,
 }: Options = {}) => {
   const update = useForceUpdate();
 
@@ -73,14 +77,17 @@ export const useTimer = ({
   const [duration = 0, setDuration] = useControlledState({
     defaultValue: defaultDuration || 0,
     value: _duration,
-    onChange: onChangeDuration
+    onChange: onChangeDuration,
   });
 
   const isRunning = !!baseTimestampRef.current;
   const isPaused = !!pauseTimestampRef.current;
 
   const calcDiff = () => {
-    return Math.floor((baseTimestampRef.current ? Date.now() - baseTimestampRef.current : 0) / 1000);
+    return Math.floor(
+      (baseTimestampRef.current ? Date.now() - baseTimestampRef.current : 0) /
+        1000
+    );
   };
 
   const diff = calcDiff();
@@ -171,7 +178,11 @@ export const useTimer = ({
   };
 
   useEffect(() => {
-    if (resumeUnfinishedTimer && baseTimestampRef.current && !endTimeStampRef.current) {
+    if (
+      resumeUnfinishedTimer &&
+      baseTimestampRef.current &&
+      !endTimeStampRef.current
+    ) {
       if (remain <= 0) {
         reset();
       } else {
@@ -204,6 +215,6 @@ export const useTimer = ({
     progress,
     remain,
     isRunning,
-    isPaused
+    isPaused,
   };
 };

@@ -3,9 +3,6 @@ import { rendererIpc } from '@electron-buddy/ipc/renderer';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { motion, useMotionValue } from 'motion/react';
 
-import AreaOverlay, { useAreaOverlayControls } from './components/AreaOverlay';
-import Tools, { TToggleKey, TToolKey } from './components/Tools';
-
 import Stage from '@/lib/Canvas/Core/Stage';
 import ImageLayer from '@/lib/Canvas/Core/Layer/Shapes/ImageLayer';
 import useOn from '@/hooks/electron/useOn';
@@ -18,6 +15,9 @@ import { EllipseLayer } from '@/lib/Canvas/Core/Layer/Shapes/EllipseLayer';
 import TextLayer from '@/lib/Canvas/Core/Layer/Shapes/TextLayer';
 import Transform from '@/lib/Canvas/Core/Helper/Transform';
 import FrameLayer from '@/lib/Canvas/Core/Layer/Container/FrameLayer';
+
+import Tools, { TToggleKey, TToolKey } from './components/Tools';
+import AreaOverlay, { useAreaOverlayControls } from './components/AreaOverlay';
 
 const DASH = [10, 5];
 const LABEL_START = 1;
@@ -37,7 +37,7 @@ export const SnapshotApp = () => {
     x: 0,
     y: 0,
     width: 0,
-    height: 0
+    height: 0,
   });
   const [pixelRatio, setPixelRatio] = useState(1);
 
@@ -48,16 +48,7 @@ export const SnapshotApp = () => {
   const [fontSize, setFontSize] = useState(16);
   const [curLabelNumber, setCurLabelNumber] = useState(LABEL_START);
 
-  const historyRef = useRef<string[]>([]);
   const offListenersRef = useRef<(() => void)[]>([]);
-
-  const pushHistory = () => {
-    // TODO
-  };
-
-  const undo = async () => {
-    // TODO
-  };
 
   const createPin = async () => {
     const stage = stageRef.current;
@@ -70,15 +61,15 @@ export const SnapshotApp = () => {
         x: crop.x * pixelRatio,
         y: crop.y * pixelRatio,
         width: crop.width * pixelRatio,
-        height: crop.height * pixelRatio
-      }
+        height: crop.height * pixelRatio,
+      },
     });
     await rendererIpc.invoke('window:createPin', {
       x: monitorPosRef.current.x + parseInt(crop.x.toString()),
       y: monitorPosRef.current.y + parseInt(crop.y.toString()),
       width: parseInt(crop.width.toString()),
       height: parseInt(crop.height.toString()),
-      base64
+      base64,
     });
     await rendererIpc.invoke('window:hide', 'snapshot');
   };
@@ -94,8 +85,8 @@ export const SnapshotApp = () => {
         x: crop.x * pixelRatio,
         y: crop.y * pixelRatio,
         width: crop.width * pixelRatio,
-        height: crop.height * pixelRatio
-      }
+        height: crop.height * pixelRatio,
+      },
     });
     await rendererIpc.invoke('window:hide', 'snapshot');
   };
@@ -127,7 +118,6 @@ export const SnapshotApp = () => {
     stage.render();
   };
 
-  useHotkeys('mod+z', () => undo());
   useHotkeys('mod+c', () => copyToClipboard());
   useOn('snapshot:reset', () => {
     reset();
@@ -139,7 +129,7 @@ export const SnapshotApp = () => {
       canvas,
       backgroundColor: '#fff',
       interactable: true,
-      pixelRatio: e.scaleFactor
+      pixelRatio: e.scaleFactor,
     });
     stageRef.current = stage;
     setPixelRatio(e.scaleFactor);
@@ -148,9 +138,9 @@ export const SnapshotApp = () => {
       src: e.base64,
       tags: ['screen'],
       width: e.width,
-      height: e.height
+      height: e.height,
     });
-    stage.root.addChild(screenImg);
+    stage.root.addChild(screenImg as InteractionLayer);
     stage.render();
     isReset.current = false;
     monitorPosRef.current = { x: e.x, y: e.y };
@@ -202,20 +192,20 @@ export const SnapshotApp = () => {
       const strokes = {
         strokeWidth,
         strokeStyle: color,
-        dash: toggleKeys.includes('dash') ? DASH : undefined
+        dash: toggleKeys.includes('dash') ? DASH : undefined,
       };
       const fills = {
-        fillStyle: color
+        fillStyle: color,
       };
       const linePos = {
         x1: e.pointerX,
         y1: e.pointerY,
         x2: e.pointerX,
-        y2: e.pointerY
+        y2: e.pointerY,
       };
       const boxPos = {
         x: e.pointerX,
-        y: e.pointerY
+        y: e.pointerY,
       };
 
       switch (activeToolKey) {
@@ -224,26 +214,26 @@ export const SnapshotApp = () => {
         case 'rect':
           layer = new RectLayer({
             ...boxPos,
-            ...strokes
-          });
+            ...strokes,
+          }) as InteractionLayer;
           break;
         case 'ellipse':
           layer = new EllipseLayer({
             ...boxPos,
-            ...strokes
-          });
+            ...strokes,
+          }) as InteractionLayer;
           break;
         case 'arrow':
           layer = new ArrowLayer({
             ...linePos,
-            ...strokes
-          });
+            ...strokes,
+          }) as InteractionLayer;
           break;
         case 'line':
           layer = new LineLayer({
             ...linePos,
-            ...strokes
-          });
+            ...strokes,
+          }) as InteractionLayer;
           break;
         case 'text':
           {
@@ -252,13 +242,13 @@ export const SnapshotApp = () => {
               ...fills,
               text: '',
               strokeWidth: 0,
-              fontSize
-            });
+              fontSize,
+            }) as InteractionLayer;
             const off = Transform.textEditable(stage, layer as TextLayer, {
               onBlur: () => {
                 off();
                 setActiveToolKey('select');
-              }
+              },
             });
           }
           break;
@@ -267,7 +257,7 @@ export const SnapshotApp = () => {
             const group = new FrameLayer({
               ...boxPos,
               width: 20,
-              height: 20
+              height: 20,
             });
             group.x -= group.width / 2;
             group.y -= group.height / 2;
@@ -275,7 +265,7 @@ export const SnapshotApp = () => {
               text: `${curLabelNumber}`,
               fontSize: 14,
               fillStyle: '#fff',
-              strokeWidth: 0
+              strokeWidth: 0,
             });
             stage.measureAndUpdateTextLayer(count);
             count.x = group.width / 2 - count.width / 2;
@@ -283,10 +273,10 @@ export const SnapshotApp = () => {
             const bg = new EllipseLayer({
               width: group.width,
               height: group.height,
-              ...fills
+              ...fills,
             });
             group.addChild(bg);
-            group.addChild(count);
+            group.addChild(count as InteractionLayer);
             group.addTag('label');
             layer = group;
             setCurLabelNumber((prev) => prev + 1);
@@ -304,8 +294,9 @@ export const SnapshotApp = () => {
     const moveOff = stage.on('pointermove', (e) => {
       if (!layer) return;
       if (Layer.isLineLayer(layer)) {
-        layer.x2 = e.pointerX;
-        layer.y2 = e.pointerY;
+        const lineLayer = layer as LineLayer;
+        lineLayer.x2 = e.pointerX;
+        lineLayer.y2 = e.pointerY;
       } else {
         layer.width = e.pointerX - layer.x;
         layer.height = e.pointerY - layer.y;
@@ -328,10 +319,14 @@ export const SnapshotApp = () => {
     <main
       className={'h-screen w-screen bg-transparent'}
       style={{
-        cursor: isAreaSelectDone ? 'default' : 'crosshair'
+        cursor: isAreaSelectDone ? 'default' : 'crosshair',
       }}
     >
-      <AreaOverlay onChange={setCrop} controls={controls} onChangeDone={setIsAreaSelectDone} />
+      <AreaOverlay
+        onChange={setCrop}
+        controls={controls}
+        onChangeDone={setIsAreaSelectDone}
+      />
       <motion.div
         ref={toolsRef}
         drag
@@ -342,7 +337,7 @@ export const SnapshotApp = () => {
           right: `calc(100% - ${crop.x + crop.width}px)`,
           display: `${isAreaSelectDone ? 'block' : 'none'}`,
           x: toolX,
-          y: toolY
+          y: toolY,
         }}
         whileTap={{ scale: 0.99 }}
       >
@@ -354,12 +349,17 @@ export const SnapshotApp = () => {
           color={color}
           setColor={setColor}
           strokeWidth={activeToolKey === 'text' ? fontSize : strokeWidth}
-          setStrokeWidth={activeToolKey === 'text' ? setFontSize : setStrokeWidth}
+          setStrokeWidth={
+            activeToolKey === 'text' ? setFontSize : setStrokeWidth
+          }
           resetChildren={resetCanvas}
           createPin={createPin}
         />
       </motion.div>
-      <canvas className={'fixed inset-0 z-[2] h-screen w-screen'} ref={canvasRef}></canvas>
+      <canvas
+        className={'fixed inset-0 z-[2] h-screen w-screen'}
+        ref={canvasRef}
+      ></canvas>
     </main>
   );
 };

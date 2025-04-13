@@ -16,39 +16,39 @@ import ColorPicker, { TColorPickerRef } from '@/components/Form/ColorPicker';
 const items = [
   {
     IconComp: LuMousePointer2,
-    key: 'select'
+    key: 'select',
   },
   {
     IconComp: RiRectangleLine,
-    key: 'rect'
+    key: 'rect',
   },
   {
     IconComp: GoArrowUpRight,
-    key: 'arrow'
+    key: 'arrow',
   },
   {
     IconComp: MdOutlineFormatColorText,
-    key: 'text'
+    key: 'text',
   },
   {
     IconComp: AiOutlineMinus,
-    key: 'line'
+    key: 'line',
   },
   {
     IconComp: FaRegCircle,
-    key: 'ellipse'
+    key: 'ellipse',
   },
   {
     IconComp: TbCircleNumber0,
-    key: 'label'
-  }
+    key: 'label',
+  },
 ] as const;
 
 const toggleOptions = [
   {
     IconComp: AiOutlineDash,
-    key: 'dash'
-  }
+    key: 'dash',
+  },
 ] as const;
 
 export type TToggleKey = (typeof toggleOptions)[number]['key'];
@@ -82,13 +82,15 @@ const Tools = ({
   strokeWidth,
   setStrokeWidth,
   resetChildren,
-  createPin
+  createPin,
 }: Props) => {
   const colorPickerRef = useRef<TColorPickerRef>({} as TColorPickerRef);
   const [strokeInput, setStrokeInput] = useState<HTMLInputElement | null>(null);
   const toggleKey = (key: TToggleKey) => {
     setActiveToggleKeys(
-      activeToggleKeys.includes(key) ? activeToggleKeys.filter((k) => k !== key) : [...activeToggleKeys, key]
+      activeToggleKeys.includes(key)
+        ? activeToggleKeys.filter((k) => k !== key)
+        : [...activeToggleKeys, key]
     );
   };
 
@@ -123,7 +125,11 @@ const Tools = ({
   }, [strokeInput]);
 
   return (
-    <div className={'mt-2 flex flex-col justify-center gap-1.5 rounded bg-neutral-800 p-1.5 text-white select-none'}>
+    <div
+      className={
+        'mt-2 flex flex-col justify-center gap-1.5 rounded bg-neutral-800 p-1.5 text-white select-none'
+      }
+    >
       <section className={'flex items-center gap-1.5'}>
         {toggleOptions.map((item) => (
           <button
@@ -152,18 +158,27 @@ const Tools = ({
       <section className={'flex items-center gap-1.5'}>
         <button className={'icon-tab-button'}>
           <ColorPicker value={color} onChange={setColor} ref={colorPickerRef}>
-            <div className={'h-6 w-6 rounded-full'} style={{ backgroundColor: color }}></div>
+            <div
+              className={'h-6 w-6 rounded-full'}
+              style={{ backgroundColor: color }}
+            ></div>
           </ColorPicker>
         </button>
         <button className={'icon-tab-button h-[32px] w-[72px] px-2'}>
           <input
             ref={setStrokeInput}
-            type='number'
+            type="number"
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            className={'h-full w-full rounded-md bg-none text-center text-white'}
+            className={
+              'h-full w-full rounded-md bg-none text-center text-white'
+            }
             onKeyDown={(e) => {
-              if (e.key !== 'Backspace' && isNaN(Number(e.key)) && !e.key.includes('Arrow')) {
+              if (
+                e.key !== 'Backspace' &&
+                isNaN(Number(e.key)) &&
+                !e.key.includes('Arrow')
+              ) {
                 e.preventDefault();
                 e.currentTarget.blur();
               }

@@ -46,27 +46,32 @@ export const setActiveTimerAtom = atom(null, (get, set, id: string) => {
     const next = prev.map((timer) => {
       return {
         ...timer,
-        active: timer.id === id
+        active: timer.id === id,
       };
     });
     return next;
   });
 });
 
-export const setDurationAtom = atom(null, (get, set, { id, duration }: { id: string; duration: number }) => {
-  set(timersAtom, (prev) => {
-    const next = prev.map((timer) => {
-      return {
-        ...timer,
-        duration: timer.id === id ? duration : timer.duration
-      };
+export const setDurationAtom = atom(
+  null,
+  (get, set, { id, duration }: { id: string; duration: number }) => {
+    set(timersAtom, (prev) => {
+      const next = prev.map((timer) => {
+        return {
+          ...timer,
+          duration: timer.id === id ? duration : timer.duration,
+        };
+      });
+      return next;
     });
-    return next;
-  });
-});
+  }
+);
 
 /* --- */
 
 /* active timer atom */
-export const activeTimerAtom = focusAtom(timersAtom, (o) => o.find((timer) => timer.active));
+export const activeTimerAtom = focusAtom(timersAtom, (o) =>
+  o.find((timer) => timer.active)
+);
 activeTimerAtom.debugLabel = 'activeTimer';

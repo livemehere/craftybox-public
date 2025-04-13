@@ -1,6 +1,8 @@
 import InteractionLayer from '../Core/InteractionLayer';
 import { LayerOptions } from '../Core/Layer';
-import EllipseDrawer, { EllipseDrawerOptions } from '../../Drawer/EllipseDrawer';
+import EllipseDrawer, {
+  EllipseDrawerOptions,
+} from '../../Drawer/EllipseDrawer';
 import { LayerType } from '../../types';
 
 type EllipseLayerOptions = LayerOptions & EllipseDrawerOptions;
@@ -17,7 +19,7 @@ export class EllipseLayer extends InteractionLayer {
       ...props,
       fillStyle: this.id,
       strokeStyle: this.id,
-      dash: undefined
+      dash: undefined,
     });
   }
 

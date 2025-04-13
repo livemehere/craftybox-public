@@ -1,8 +1,10 @@
+import { mainIpc } from '@electron-buddy/ipc/main';
+import { app } from 'electron';
+
 import { resolve } from 'path';
 import fs from 'fs';
 
-import { mainIpc } from '@electron-buddy/ipc/main';
-import { app } from 'electron';
+import { createStoreData, StoreDataType, validateStoreData } from '../schema';
 
 function ensureStoreFilePath(key: string) {
   const dir = resolve(app.getPath('userData'), 'stores');
@@ -21,23 +23,40 @@ function ensureStoreFilePath(key: string) {
 }
 
 /**
- * call at main process for getting store data
+ * - read file and check it is valid store data
+ * - if not, write default data to file
+ * - return store data's data property
  */
-export function getStoreData<T>(key: string, defaultData: T) {
+export function getStoreData<T>(key: string, defaultData: T, version?: string) {
   const filePath = ensureStoreFilePath(key);
   const fileExist = fs.existsSync(filePath);
   if (!fileExist) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultData));
+    fs.writeFileSync(
+      filePath,
+      JSON.stringify(createStoreData(defaultData, version))
+    );
   }
-  return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' })) as T;
+  const readData = JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }));
+  if (!validateStoreData(readData, version)) {
+    fs.writeFileSync(
+      filePath,
+      JSON.stringify(createStoreData(defaultData, version))
+    );
+  }
+  const validReadData = JSON.parse(
+    fs.readFileSync(filePath, { encoding: 'utf-8' })
+  );
+  return validReadData as StoreDataType<T>;
 }
 
 /**
  * call at main process for setting store data
  */
-export function setStoreData(key: string, data: any) {
+export function setStoreData(key: string, data: any, version?: string) {
   const filePath = ensureStoreFilePath(key);
-  fs.writeFileSync(filePath, JSON.stringify(data));
+  const writeData = createStoreData(data, version);
+  fs.writeFileSync(filePath, JSON.stringify(writeData));
+  return writeData;
 }
 
 /**
@@ -45,21 +64,20 @@ export function setStoreData(key: string, data: any) {
  */
 export default function registerStoreIpcHandlers({
   onGet,
-  onSet
+  onSet,
 }: {
-  onGet?: (key: string, defaultData: any) => any;
-  onSet?: (key: string, data: any) => void;
+  onGet?: (key: string, readData: StoreDataType) => any;
+  onSet?: (key: string, writeData: StoreDataType) => void;
 } = {}) {
-  // @ts-expect-error
-  mainIpc.handle('store:get', async ({ key, defaultData }: { key: string; defaultData: any }) => {
-    const data = getStoreData(key, defaultData);
-    onGet?.(key, data);
-    return data;
+  mainIpc.handle('store:get', async ({ key, defaultData, version }) => {
+    const readData = getStoreData(key, defaultData, version);
+    onGet?.(key, readData);
+    return readData;
   });
 
-  // @ts-expect-error
-  mainIpc.handle('store:set', async ({ key, data }: { key: string; data: any }) => {
-    onSet?.(key, data);
-    return setStoreData(key, data);
+  mainIpc.handle('store:set', async ({ key, data, version }) => {
+    const writeData = setStoreData(key, data, version);
+    onSet?.(key, writeData);
+    return writeData;
   });
 }

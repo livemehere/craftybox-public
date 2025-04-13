@@ -17,7 +17,16 @@ export type Rounds = {
 
 export type FillStyle = string | CanvasGradient | CanvasPattern;
 
-export type LayerType = 'group' | 'frame' | 'rect' | 'line' | 'ellipse' | 'polygon' | 'text' | 'image' | 'arrow';
+export type LayerType =
+  | 'group'
+  | 'frame'
+  | 'rect'
+  | 'line'
+  | 'ellipse'
+  | 'polygon'
+  | 'text'
+  | 'image'
+  | 'arrow';
 
 export type CursorType =
   | 'default'

@@ -8,19 +8,23 @@ export const ShortCutInputOverlay = ({ char }: Props) => {
   const [scope, animate] = useAnimate();
   useEffect(() => {
     animate(scope.current, {
-      scale: [0.9, 1]
+      scale: [0.9, 1],
     });
   }, [char]);
 
   return (
-    <div className={'fixed inset-0 flex flex-col items-center justify-center bg-black/50'}>
+    <div
+      className={
+        'fixed inset-0 flex flex-col items-center justify-center bg-black/50'
+      }
+    >
       <motion.div
         animate={{
-          scale: [0.9, 1]
+          scale: [0.9, 1],
         }}
         className={'flex flex-col items-center justify-center gap-6 text-xl'}
       >
-        <div>사용할 단축키를 그대로 입력하세요</div>
+        <div>Press the key you want to set (e.g {`"ctrl+shift+s"`})</div>
         <div
           ref={scope}
           className={

@@ -46,7 +46,10 @@ export default class ImageLayer extends InteractionLayer {
           this.dispatch('redraw');
         })
         .catch(() => {
-          this.dispatch('error', new Error(`[ImageLayer] Failed to load image src : ${this._src}`));
+          this.dispatch(
+            'error',
+            new Error(`[ImageLayer] Failed to load image src : ${this._src}`)
+          );
         });
     }
   }
@@ -58,7 +61,7 @@ export default class ImageLayer extends InteractionLayer {
       ...props,
       fillStyle: this.id,
       strokeStyle: this.id,
-      dash: undefined
+      dash: undefined,
     });
     this._src = props.src;
     this.loadImage();

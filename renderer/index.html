@@ -10,15 +10,25 @@
     <!--    <meta http-equiv="Content-Security-Policy" content="script-src 'self';" />-->
     <!--    <meta http-equiv="Content-Security-Policy" content="default-src 'none'" />-->
     <style>
-      html,body {
-          border-radius: 8px;
-          overflow: hidden;
+      html,
+      body {
+        border-radius: 8px;
+        overflow: hidden;
       }
     </style>
     <title>CraftyBox - Main</title>
   </head>
   <body style="overflow: hidden">
     <div id="app"></div>
+    <script>
+      window.app = {
+        invoke: () => Promise.resolve(''),
+        send: () => {},
+        on: () => {
+          return () => {};
+        },
+      };
+    </script>
     <script src="index.tsx" type="module"></script>
   </body>
 </html>

@@ -1,10 +1,12 @@
 import { LayerOptions } from '../Core/Layer';
 import RectDrawer, { RectDrawerOptions } from '../../Drawer/RectDrawer';
 import { Bounds } from '../../Bounds';
-
 import ContainerLayer from './ContainerLayer';
 
-export type GroupLayerOptions = Omit<LayerOptions, 'x' | 'y' | 'width' | 'height' | 'scale' | 'rotate'> &
+export type GroupLayerOptions = Omit<
+  LayerOptions,
+  'x' | 'y' | 'width' | 'height' | 'scale' | 'rotate'
+> &
   RectDrawerOptions;
 
 export default class GroupLayer extends ContainerLayer {
@@ -16,7 +18,7 @@ export default class GroupLayer extends ContainerLayer {
     super(props ?? {});
     this.drawer = new RectDrawer(props ?? {});
     this.hitDrawer = new RectDrawer({
-      fillStyle: this.id
+      fillStyle: this.id,
     });
     this.addTag('group');
   }
@@ -104,7 +106,7 @@ export default class GroupLayer extends ContainerLayer {
       l: Infinity,
       t: Infinity,
       r: -Infinity,
-      b: -Infinity
+      b: -Infinity,
     };
     this.children.forEach((c) => {
       const childBounds = c.getClientBoundRect();

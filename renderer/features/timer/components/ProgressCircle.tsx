@@ -8,7 +8,13 @@ type Props = {
   color: string;
 };
 
-const ProgressCircle = ({ progress, size, strokeWidth, bgColor, color }: Props) => {
+const ProgressCircle = ({
+  progress,
+  size,
+  strokeWidth,
+  bgColor,
+  color,
+}: Props) => {
   const r = size / 2 - strokeWidth;
   const dashArray = 2 * Math.PI * r;
   return (
@@ -30,13 +36,13 @@ const ProgressCircle = ({ progress, size, strokeWidth, bgColor, color }: Props) 
         strokeWidth={strokeWidth}
         strokeDasharray={dashArray}
         initial={{
-          strokeDashoffset: dashArray * (1 - progress)
+          strokeDashoffset: dashArray * (1 - progress),
         }}
         animate={{
-          strokeDashoffset: dashArray * (1 - progress)
+          strokeDashoffset: dashArray * (1 - progress),
         }}
         style={{
-          rotate: -90
+          rotate: -90,
         }}
       ></motion.circle>
     </svg>

@@ -43,17 +43,17 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
       height.set(0);
       isDown.current = false;
       setDone(false);
-    }
+    },
   }));
 
   return (
     <svg
-      width='100%'
-      height='100%'
-      xmlns='http://www.w3.org/2000/svg'
+      width="100%"
+      height="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={'absolute inset-0 z-10'}
       style={{
-        pointerEvents: isDone ? 'none' : 'auto'
+        pointerEvents: isDone ? 'none' : 'auto',
       }}
       onPointerDown={(e) => {
         if (isDone) return;
@@ -64,7 +64,7 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
           x: x.get(),
           y: y.get(),
           width: 0,
-          height: 0
+          height: 0,
         });
       }}
       onPointerUp={() => {
@@ -79,33 +79,39 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
           x: x.get(),
           y: y.get(),
           width: width.get(),
-          height: height.get()
+          height: height.get(),
         });
       }}
     >
       <defs>
-        <mask id='alphaMask'>
-          <rect width='100%' height='100%' fill='white' />
+        <mask id="alphaMask">
+          <rect width="100%" height="100%" fill="white" />
           <motion.rect
-            fill='black'
+            fill="black"
             style={{
               x,
               y,
               width,
-              height
+              height,
             }}
           />
         </mask>
       </defs>
-      <motion.rect width='100%' height='100%' fill='black' opacity='0.5' mask='url(#alphaMask)' />
       <motion.rect
-        fill='transparent'
+        width="100%"
+        height="100%"
+        fill="black"
+        opacity="0.5"
+        mask="url(#alphaMask)"
+      />
+      <motion.rect
+        fill="transparent"
         style={{
           x,
           y,
           width,
           height,
-          outline: '2px solid white'
+          outline: '2px solid white',
         }}
       />
     </svg>

@@ -8,9 +8,11 @@ type Props = {
 const Switch = ({ value, onChange }: Props) => {
   return (
     <motion.div
-      className={'flex h-[20px] w-[36px] cursor-pointer items-center rounded-full px-[3px] py-1'}
+      className={
+        'flex h-[20px] w-[36px] cursor-pointer items-center rounded-full px-[3px] py-1'
+      }
       style={{
-        justifyContent: value ? 'flex-end' : 'flex-start'
+        justifyContent: value ? 'flex-end' : 'flex-start',
       }}
       animate={{ backgroundColor: value ? '#095FDB' : '#3A3A3A' }}
       onClick={() => onChange(!value)}

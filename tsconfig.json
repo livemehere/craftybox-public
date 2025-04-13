@@ -18,5 +18,12 @@
       "@main/*": ["./main/*"]
     }
   },
-  "include": ["main/**/*", "renderer/**/*", "preload/**/*", "shared/**/*", "vite.config.mts", "injectStyleTags.ts"]
+  "include": [
+    "main/**/*",
+    "renderer/**/*",
+    "preload/**/*",
+    "shared/**/*",
+    ".storybook/**/*",
+    "vitest.setup.ts"
+  ]
 }

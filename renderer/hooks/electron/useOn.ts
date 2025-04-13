@@ -1,4 +1,7 @@
-import { rendererIpc, ElectronBuddyMessageMap } from '@electron-buddy/ipc/renderer';
+import {
+  rendererIpc,
+  ElectronBuddyMessageMap,
+} from '@electron-buddy/ipc/renderer';
 import { useEffect, useRef } from 'react';
 
 export default function useOn<C extends keyof ElectronBuddyMessageMap>(
@@ -17,6 +20,5 @@ export default function useOn<C extends keyof ElectronBuddyMessageMap>(
     return () => {
       off();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, ...deps]);
 }

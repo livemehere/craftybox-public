@@ -40,7 +40,7 @@ export default abstract class Drawer {
     dashOffset = 0,
     showBounds = false,
     boundsStrokeStyle = 'red',
-    boundsStrokeWidth = 1
+    boundsStrokeWidth = 1,
   }: DrawerOptions) {
     this.fillStyle = fillStyle;
     this.strokeStyle = strokeStyle;
@@ -55,7 +55,10 @@ export default abstract class Drawer {
   /*
    * must draw with center anchor
    * */
-  protected abstract _drawPath(ctx: CanvasRenderingContext2D, layer: Layer): void;
+  protected abstract _drawPath(
+    ctx: CanvasRenderingContext2D,
+    layer: Layer
+  ): void;
 
   private drawBonds(ctx: CanvasRenderingContext2D, layer: Layer) {
     const { width, height } = layer;
@@ -83,7 +86,12 @@ export default abstract class Drawer {
     ctx.fillStyle = this.fillStyle;
   }
 
-  draw(ctx: CanvasRenderingContext2D, layer: Layer, renderChildren?: () => void, options?: DrawOptions) {
+  draw(
+    ctx: CanvasRenderingContext2D,
+    layer: Layer,
+    renderChildren?: () => void,
+    options?: DrawOptions
+  ) {
     const { x, y, width, height, rotate, scale } = layer;
 
     ctx.save();

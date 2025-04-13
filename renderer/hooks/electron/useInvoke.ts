@@ -1,11 +1,15 @@
-import { ElectronBuddyInvokeMap, rendererIpc } from '@electron-buddy/ipc/renderer';
+import {
+  ElectronBuddyInvokeMap,
+  rendererIpc,
+} from '@electron-buddy/ipc/renderer';
 import { useEffect, useState } from 'react';
 
 export default function useInvoke<
   C extends keyof ElectronBuddyInvokeMap,
-  P extends ElectronBuddyInvokeMap[C]['payload']
+  P extends ElectronBuddyInvokeMap[C]['payload'],
 >(channel: C, payload: P) {
-  const [response, setResponse] = useState<ElectronBuddyInvokeMap[C]['response']>();
+  const [response, setResponse] =
+    useState<ElectronBuddyInvokeMap[C]['response']>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -29,6 +33,6 @@ export default function useInvoke<
     data: response,
     error,
     loading,
-    refetch: invoke
+    refetch: invoke,
   };
 }

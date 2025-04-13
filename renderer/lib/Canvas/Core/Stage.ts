@@ -71,7 +71,7 @@ export default class Stage extends Emitter<TStageEvents> {
     backgroundColor,
     pixelRatio = 1,
     debugHitArea = false,
-    interactable = true
+    interactable = true,
   }: StageOptions) {
     super();
     this.id = Stage.idSeq++;
@@ -80,7 +80,10 @@ export default class Stage extends Emitter<TStageEvents> {
     this.backgroundColor = backgroundColor;
 
     this.renderCanvas = canvas;
-    this.renderCtx = this.renderCanvas.getContext('2d', { alpha: transparent, willReadFrequently: false })!;
+    this.renderCtx = this.renderCanvas.getContext('2d', {
+      alpha: transparent,
+      willReadFrequently: false,
+    })!;
 
     this.width = this.renderCanvas.offsetWidth;
     this.height = this.renderCanvas.offsetHeight;
@@ -92,7 +95,10 @@ export default class Stage extends Emitter<TStageEvents> {
     if (this.interactable) {
       this.hitCanvas = document.createElement('canvas');
       this.hitCanvas.id = `hit-canvas-${this.id}`;
-      this.hitCtx = this.hitCanvas.getContext('2d', { alpha: false, willReadFrequently: true })!;
+      this.hitCtx = this.hitCanvas.getContext('2d', {
+        alpha: false,
+        willReadFrequently: true,
+      })!;
       this.hitCtx.imageSmoothingEnabled = false;
       this.hitCanvas.width = this.width;
       this.hitCanvas.height = this.height;
@@ -113,7 +119,7 @@ export default class Stage extends Emitter<TStageEvents> {
       tags: ['root'],
       width: this.width,
       height: this.height,
-      clipContent: false
+      clipContent: false,
     });
     this.rootLayer.on('redraw', this.render.bind(this));
     this.rootLayer.on('error', (e) => {
@@ -121,8 +127,15 @@ export default class Stage extends Emitter<TStageEvents> {
     });
   }
 
-  isInteractable(): this is Stage & { hitCanvas: HTMLCanvasElement; hitCtx: CanvasRenderingContext2D } {
-    return this.interactable === true && this.hitCanvas !== undefined && this.hitCtx !== undefined;
+  isInteractable(): this is Stage & {
+    hitCanvas: HTMLCanvasElement;
+    hitCtx: CanvasRenderingContext2D;
+  } {
+    return (
+      this.interactable === true &&
+      this.hitCanvas !== undefined &&
+      this.hitCtx !== undefined
+    );
   }
 
   get root() {
@@ -144,9 +157,18 @@ export default class Stage extends Emitter<TStageEvents> {
   }
 
   registerPointerEvents() {
-    this.renderCanvas.addEventListener('pointerdown', this.onPointerDown.bind(this));
-    this.renderCanvas.addEventListener('pointermove', this.onPointerMove.bind(this));
-    this.renderCanvas.addEventListener('pointerup', this.onPointerUp.bind(this));
+    this.renderCanvas.addEventListener(
+      'pointerdown',
+      this.onPointerDown.bind(this)
+    );
+    this.renderCanvas.addEventListener(
+      'pointermove',
+      this.onPointerMove.bind(this)
+    );
+    this.renderCanvas.addEventListener(
+      'pointerup',
+      this.onPointerUp.bind(this)
+    );
   }
 
   render() {
@@ -226,7 +248,12 @@ export default class Stage extends Emitter<TStageEvents> {
     return int.toString(16).replace(/^f/, '#');
   }
 
-  private dispatchLayerEvent(layer: InteractionLayer, type: keyof TLayerEvents, x: number, y: number) {
+  private dispatchLayerEvent(
+    layer: InteractionLayer,
+    type: keyof TLayerEvents,
+    x: number,
+    y: number
+  ) {
     layer.dispatch(type, {
       target: layer,
       currentTarget: layer,
@@ -236,17 +263,22 @@ export default class Stage extends Emitter<TStageEvents> {
       startY: this.startPos?.y ?? null,
       stopPropagation: () => {
         throw new Error('not implemented');
-      }
+      },
     });
   }
 
-  private dispatchStageEvent(layer: InteractionLayer | undefined, type: keyof TStageEvents, x: number, y: number) {
+  private dispatchStageEvent(
+    layer: InteractionLayer | undefined,
+    type: keyof TStageEvents,
+    x: number,
+    y: number
+  ) {
     this.dispatch(type, {
       target: layer,
       pointerX: x,
       pointerY: y,
       startX: this.startPos?.x ?? null,
-      startY: this.startPos?.y ?? null
+      startY: this.startPos?.y ?? null,
     });
   }
 
@@ -297,7 +329,17 @@ export default class Stage extends Emitter<TStageEvents> {
       const cropCtx = cropCanvas.getContext('2d')!;
       cropCanvas.width = crop.width;
       cropCanvas.height = crop.height;
-      cropCtx.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0, 0, crop.width, crop.height);
+      cropCtx.drawImage(
+        img,
+        crop.x,
+        crop.y,
+        crop.width,
+        crop.height,
+        0,
+        0,
+        crop.width,
+        crop.height
+      );
       return new Promise<Blob>((resolve) => {
         cropCanvas.toBlob((blob) => {
           resolve(blob!);
@@ -322,7 +364,7 @@ export default class Stage extends Emitter<TStageEvents> {
   async copyToClipboard(options?: TExportOptions) {
     const blob = await this.toBlob(options);
     const item = new ClipboardItem({
-      'image/png': blob
+      'image/png': blob,
     });
     await navigator.clipboard.write([item]);
   }
@@ -345,9 +387,18 @@ export default class Stage extends Emitter<TStageEvents> {
     this.removeAllLoops();
     this.removeAllListeners();
     if (this.isInteractable()) {
-      this.renderCanvas.removeEventListener('pointerdown', this.onPointerDown.bind(this));
-      this.renderCanvas.removeEventListener('pointermove', this.onPointerMove.bind(this));
-      this.renderCanvas.removeEventListener('pointerup', this.onPointerUp.bind(this));
+      this.renderCanvas.removeEventListener(
+        'pointerdown',
+        this.onPointerDown.bind(this)
+      );
+      this.renderCanvas.removeEventListener(
+        'pointermove',
+        this.onPointerMove.bind(this)
+      );
+      this.renderCanvas.removeEventListener(
+        'pointerup',
+        this.onPointerUp.bind(this)
+      );
       this.hitCanvas!.remove();
     }
     this.curHoverLayer = null;

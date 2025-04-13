@@ -1,4 +1,3 @@
-import Layer from '../Layer/Core/Layer';
 import ImageLayer from '../Layer/Shapes/ImageLayer';
 
 import Drawer, { DrawerOptions } from './index';

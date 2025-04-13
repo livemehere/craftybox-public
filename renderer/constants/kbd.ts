@@ -4,11 +4,11 @@ export const KBD_MAP: {
   Meta: '⌘',
   Control: {
     win32: 'Ctrl',
-    darwin: '⌃'
+    darwin: '⌃',
   },
   Alt: {
     win32: 'Alt',
-    darwin: '⌥'
+    darwin: '⌥',
   },
   Shift: '⇧',
   ArrowUp: '↑',
@@ -25,5 +25,5 @@ export const KBD_MAP: {
   PageDown: 'PgDn',
   Insert: 'Ins',
   PrintScreen: 'PrtScn',
-  ScrollLock: 'ScrLk'
+  ScrollLock: 'ScrLk',
 };

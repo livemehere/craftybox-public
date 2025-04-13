@@ -1,6 +1,5 @@
 import { LayerOptions } from '../Core/Layer';
 import RectDrawer, { RectDrawerOptions } from '../../Drawer/RectDrawer';
-
 import ContainerLayer from './ContainerLayer';
 
 // TODO: add clip options (when children is out of frame)
@@ -23,7 +22,7 @@ export default class FrameLayer extends ContainerLayer {
     this.clipContent = props.clipContent ?? true;
     this.drawer = new RectDrawer(props);
     this.hitDrawer = new RectDrawer({
-      fillStyle: this.id
+      fillStyle: this.id,
     });
   }
 
@@ -35,7 +34,7 @@ export default class FrameLayer extends ContainerLayer {
         this.children.forEach((c) => c.render(ctx));
       },
       {
-        clipChildren: this.clipContent
+        clipChildren: this.clipContent,
       }
     );
   }
@@ -48,7 +47,7 @@ export default class FrameLayer extends ContainerLayer {
         this.children.forEach((c) => c.renderHitArea(ctx));
       },
       {
-        clipChildren: this.clipContent
+        clipChildren: this.clipContent,
       }
     );
   }

@@ -16,13 +16,24 @@ export const TimerContext = createContext({
   remain: 0,
   duration: 0,
   formatTime: (v: number) => `${v}`,
-  reset: () => {}
+  reset: () => {},
 });
 
 const TimerProvider = ({ children }: Props) => {
   const [timer, setTimer] = useAtom(activeTimerAtom);
 
-  const { progress, duration, remain, isRunning, isPaused, start, pause, reset, resume, formatTime } = useTimer({
+  const {
+    progress,
+    duration,
+    remain,
+    isRunning,
+    isPaused,
+    start,
+    pause,
+    reset,
+    resume,
+    formatTime,
+  } = useTimer({
     onEnd: () => {
       notify();
       setTimer((prev) => ({ ...prev, status: 'finished', progress: 1 }));
@@ -45,19 +56,19 @@ const TimerProvider = ({ children }: Props) => {
     onChangeDuration: (v) => {
       setTimer((prev) => ({
         ...prev,
-        duration: v
+        duration: v,
       }));
     },
     timerRef: timer?.timerRef,
     startTimestampRef: timer?.startTimestampRef,
     baseTimestampRef: timer?.baseTimestampRef,
     pauseTimestampRef: timer?.pauseTimestampRef,
-    endTimeStampRef: timer?.endTimeStampRef
+    endTimeStampRef: timer?.endTimeStampRef,
   });
 
   const notify = () => {
     new window.Notification('타이머 종료 알림', {
-      body: `${formatTime(duration)} 타이머가 종료되었습니다.`
+      body: `${formatTime(duration)} 타이머가 종료되었습니다.`,
     }).onclick = () => {
       rendererIpc.invoke('window:showMain', null);
     };
@@ -84,7 +95,7 @@ const TimerProvider = ({ children }: Props) => {
         remain,
         duration,
         formatTime,
-        reset
+        reset,
       }}
     >
       {children}

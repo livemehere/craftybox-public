@@ -15,20 +15,23 @@ const TimerPopup = () => {
   const progress = useContextSelector(TimerContext, (v) => v.progress);
   const location = useLocation();
 
-  const showPopup = timer?.status === 'running' && location.pathname !== '/tools/timer';
+  const showPopup =
+    timer?.status === 'running' && location.pathname !== '/tools/timer';
 
   return (
     <AnimatePresence>
       {showPopup && (
         <motion.div
-          className={'fixed top-4 right-4 w-[250px] rounded bg-neutral-800/80 p-2'}
+          className={
+            'fixed top-4 right-4 w-[250px] rounded bg-neutral-800/80 p-2'
+          }
           animate={{
             x: [20, 0],
-            opacity: [0, 1]
+            opacity: [0, 1],
           }}
           exit={{
             x: 20,
-            opacity: 0
+            opacity: 0,
           }}
         >
           <p className={'mb-2 flex items-center gap-2 text-xs'}>
@@ -39,16 +42,18 @@ const TimerPopup = () => {
             <motion.div
               className={'h-full w-full origin-left bg-amber-500'}
               animate={{
-                scaleX: progress
+                scaleX: progress,
               }}
               transition={{
-                type: 'keyframes'
+                type: 'keyframes',
               }}
             />
             <motion.div
-              className={'absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500'}
+              className={
+                'absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500'
+              }
               animate={{
-                left: `${progress * 100}%`
+                left: `${progress * 100}%`,
               }}
             />
             <motion.div
@@ -57,7 +62,7 @@ const TimerPopup = () => {
                 'animate-ping'
               )}
               animate={{
-                left: `${progress * 100}%`
+                left: `${progress * 100}%`,
               }}
             />
           </div>

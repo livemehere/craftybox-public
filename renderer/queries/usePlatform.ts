@@ -1,10 +1,11 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { rendererIpc } from '@electron-buddy/ipc/renderer';
 
 export const usePlatform = () => {
-  return useSuspenseQuery({
+  const { data } = useQuery({
     queryKey: ['platform'],
-    queryFn: () => rendererIpc.invoke('platform:get', null),
-    staleTime: Infinity
+    queryFn: () => rendererIpc.invoke('common:platform', null),
+    staleTime: Infinity,
   });
+  return data;
 };

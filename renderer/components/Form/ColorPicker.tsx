@@ -24,15 +24,15 @@ const ColorPicker = ({
   const inputRef = useRef<HTMLInputElement>(null);
   useImperativeHandle(ref, () => ({
     focus: () => inputRef.current?.click(),
-    blur: () => inputRef.current?.blur()
+    blur: () => inputRef.current?.blur(),
   }));
   return (
     <div
       className={cn('relative', {
-        'h-[20px] w-[20px] rounded': !children
+        'h-[20px] w-[20px] rounded': !children,
       })}
       style={{
-        ...(!children && { backgroundColor: value })
+        ...(!children && { backgroundColor: value }),
       }}
       onClick={() => {
         inputRef.current?.click();
@@ -42,7 +42,7 @@ const ColorPicker = ({
       {children}
       <input
         ref={inputRef}
-        type='color'
+        type="color"
         className={'pointer-events-none invisible absolute inset-0'}
         onChange={(e) => {
           onChange(e.target.value);

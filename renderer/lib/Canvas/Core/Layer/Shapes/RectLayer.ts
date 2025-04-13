@@ -21,7 +21,7 @@ export default class RectLayer extends InteractionLayer {
       ...props,
       fillStyle: this.id,
       strokeStyle: this.id,
-      dash: undefined
+      dash: undefined,
     });
   }
 

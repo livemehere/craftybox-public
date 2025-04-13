@@ -16,18 +16,21 @@ export const ROOT_PARENT_ID = 'root';
 export const archivesAtom = atomWithLocalStorage<IArchive[]>('archives', []);
 archivesAtom.debugLabel = 'archivesAtom';
 
-export const addArchiveAtom = atom(null, (get, set, { label, value, parentId = ROOT_PARENT_ID }) => {
-  const newArchive: IArchive = {
-    parentId,
-    id: uid(8),
-    label,
-    value,
-    createdAt: Date.now()
-  };
+export const addArchiveAtom = atom(
+  null,
+  (get, set, { label, value, parentId = ROOT_PARENT_ID }) => {
+    const newArchive: IArchive = {
+      parentId,
+      id: uid(8),
+      label,
+      value,
+      createdAt: Date.now(),
+    };
 
-  set(archivesAtom, (prev) => [...prev, newArchive]);
-  return newArchive;
-});
+    set(archivesAtom, (prev) => [...prev, newArchive]);
+    return newArchive;
+  }
+);
 
 export const removeArchiveAtom = atom(null, (get, set, { id }) => {
   const archives = get(archivesAtom);
@@ -37,6 +40,8 @@ export const removeArchiveAtom = atom(null, (get, set, { id }) => {
 
 export const updateArchiveLabelAtom = atom(null, (get, set, { id, label }) => {
   const archives = get(archivesAtom);
-  const updatedArchives = archives.map((archive) => (archive.id === id ? { ...archive, label } : archive));
+  const updatedArchives = archives.map((archive) =>
+    archive.id === id ? { ...archive, label } : archive
+  );
   set(archivesAtom, updatedArchives);
 });

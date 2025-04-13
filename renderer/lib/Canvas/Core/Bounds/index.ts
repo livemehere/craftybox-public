@@ -8,12 +8,17 @@ export interface Bounds {
 }
 
 export default class Bound {
-  static createBounds(x: number, y: number, width: number, height: number): Bounds {
+  static createBounds(
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): Bounds {
     return {
       t: height > 0 ? y : y + height,
       r: width > 0 ? x + width : x,
       b: height > 0 ? y + height : y,
-      l: width > 0 ? x : x + width
+      l: width > 0 ? x : x + width,
     };
   }
 
@@ -51,13 +56,13 @@ export default class Bound {
       [0, 0, 0, 0],
       [0, 1, 0, 1],
       [0, 1, 2, 1],
-      [0, 1, 2, 3]
+      [0, 1, 2, 3],
     ][values.length - 1];
     return {
       t: values[idx[0]],
       r: values[idx[1]],
       b: values[idx[2]],
-      l: values[idx[3]]
+      l: values[idx[3]],
     };
   }
 }

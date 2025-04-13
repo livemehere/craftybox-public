@@ -3,14 +3,16 @@ import { TPayLoad } from '@fewings/core/classes';
 
 import { mapToRange } from '../../../Utils/range';
 import { IDrawer } from '../../Drawer';
-
 import Layer, { LayerOptions, TLayerEvents } from './Layer';
 
 export interface HitAreaRenderer {
   _renderHitArea(ctx: CanvasRenderingContext2D): void;
 }
 
-export default abstract class InteractionLayer extends Layer implements HitAreaRenderer, IDrawer {
+export default abstract class InteractionLayer
+  extends Layer
+  implements HitAreaRenderer, IDrawer
+{
   private static idMap = new Map<string, InteractionLayer>();
   private static seq = 0;
   static seqStep = 1;
@@ -25,7 +27,11 @@ export default abstract class InteractionLayer extends Layer implements HitAreaR
   protected constructor(props: LayerOptions) {
     super(props);
     InteractionLayer.seq += InteractionLayer.seqStep;
-    this.id = (0xf000000 | mapToRange(djb2(`${InteractionLayer.seq}`), 0, 0xffffff)).toString(16).replace(/^f/, '#');
+    this.id = (
+      0xf000000 | mapToRange(djb2(`${InteractionLayer.seq}`), 0, 0xffffff)
+    )
+      .toString(16)
+      .replace(/^f/, '#');
     InteractionLayer.idMap.set(this.id, this);
   }
 
@@ -35,7 +41,10 @@ export default abstract class InteractionLayer extends Layer implements HitAreaR
     this.renderRoutine(ctx, this._renderHitArea, false);
   }
 
-  override dispatch<E extends keyof TLayerEvents>(event: E, payload?: TPayLoad<TLayerEvents, E>) {
+  override dispatch<E extends keyof TLayerEvents>(
+    event: E,
+    payload?: TPayLoad<TLayerEvents, E>
+  ) {
     let stop = false;
     if (payload && !(payload instanceof Error)) {
       payload.stopPropagation = () => (stop = true);

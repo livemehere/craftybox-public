@@ -12,85 +12,75 @@ const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
 const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
-const GeneralSettingPage = lazy(() => import('@/pages/settings/GeneralSettingPage'));
-const ShortCutSettingPage = lazy(() => import('@/pages/settings/ShortCutSettingPage'));
+const GeneralSettingPage = lazy(
+  () => import('@/pages/settings/GeneralSettingPage')
+);
+const ShortCutSettingPage = lazy(
+  () => import('@/pages/settings/ShortCutSettingPage')
+);
 
 /* workspace */
 const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
-
-/* editors */
-const CanvasEditor = lazy(() => import('@/pages/editors/CanvasEditor'));
 
 export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
-    errorElement: import.meta.env.DEV ? <ErrorPage /> : <Navigate to='/' />,
+    errorElement: import.meta.env.DEV ? <ErrorPage /> : <Navigate to="/" />,
     children: [
       {
         index: true,
         id: 'home',
-        Component: HomePage
-      },
-      {
-        path: 'tools',
-        id: 'tools',
-        children: [
-          {
-            path: 'screenshot',
-            id: 'screenshot',
-            Component: ScreenShotPage
-          },
-          {
-            path: 'timer',
-            id: 'timer',
-            Component: TimerPage
-          },
-          {
-            path: 'color-picker',
-            id: 'color-picker',
-            Component: ColorPickerPage
-          }
-        ]
-      },
-      {
-        path: 'workspace',
-        id: 'workspace',
-        children: [
-          {
-            path: 'archive',
-            id: 'archive',
-            Component: ArchivePage
-          }
-        ]
+        Component: HomePage,
       },
       {
         path: 'settings',
-        id: 'settings',
+        id: 'Settings',
         children: [
           {
             index: true,
-            id: 'general',
-            Component: GeneralSettingPage
+            id: 'General',
+            Component: GeneralSettingPage,
           },
           {
             path: 'shortcuts',
-            id: 'shortcuts',
-            Component: ShortCutSettingPage
-          }
-        ]
+            id: 'Shortcuts',
+            Component: ShortCutSettingPage,
+          },
+        ],
       },
       {
-        path: 'editor',
-        id: 'editor',
+        path: 'tools',
+        id: 'Tools',
         children: [
           {
-            path: 'canvas',
-            id: 'canvas',
-            Component: CanvasEditor
-          }
-        ]
-      }
-    ]
-  }
+            path: 'screenshot',
+            id: 'Screenshot',
+            Component: ScreenShotPage,
+          },
+          {
+            path: 'timer',
+            id: 'Timer',
+            Component: TimerPage,
+          },
+          {
+            path: 'color-picker',
+            id: 'ColorPicker',
+            Component: ColorPickerPage,
+          },
+        ],
+      },
+      {
+        path: 'workspace',
+        id: 'Workspace',
+        children: [
+          {
+            path: 'archive',
+            id: 'Archive',
+            Component: ArchivePage,
+          },
+        ],
+      },
+    ],
+  },
 ];

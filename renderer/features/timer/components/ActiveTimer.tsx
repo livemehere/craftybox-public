@@ -18,7 +18,10 @@ const ActiveTimer = () => {
   const duration = useContextSelector(TimerContext, (v) => v.duration);
   const formatTime = useContextSelector(TimerContext, (v) => v.formatTime);
   const reset = useContextSelector(TimerContext, (v) => v.reset);
-  const onClickActionButton = useContextSelector(TimerContext, (v) => v.onClickActionButton);
+  const onClickActionButton = useContextSelector(
+    TimerContext,
+    (v) => v.onClickActionButton
+  );
 
   if (!timer) {
     return <div>타이머를 선택해주세요</div>;
@@ -35,7 +38,11 @@ const ActiveTimer = () => {
           bgColor={'#3A3A3A'}
         />
         <div className={'absolute top-1/2 -translate-y-1/2'}>
-          <AnimateNumber className={'text-5xl font-bold'} value={remain} format={formatTime} />
+          <AnimateNumber
+            className={'text-5xl font-bold'}
+            value={remain}
+            format={formatTime}
+          />
         </div>
         <div className={'absolute bottom-1/4'}>
           <p className={'text-sm opacity-60'}>{formatTime(duration)}</p>
@@ -45,11 +52,15 @@ const ActiveTimer = () => {
       <div className={'flex justify-center gap-3'}>
         <button
           className={cn('icon-circle-btn', {
-            'bg-red-500': !isPlayable
+            'bg-red-500': !isPlayable,
           })}
           onClick={onClickActionButton}
         >
-          {isPlayable ? <FaPlay className={'translate-x-[2px]'} /> : <FaPause />}
+          {isPlayable ? (
+            <FaPlay className={'translate-x-[2px]'} />
+          ) : (
+            <FaPause />
+          )}
         </button>
         <button className={'icon-circle-btn'} onClick={reset}>
           <GrPowerReset />
