@@ -25,7 +25,7 @@ export interface LnbItem {
 
 export const LNB_MENUS: LnbCategory[] = [
   {
-    category: 'general',
+    category: 'General',
     pathKey: '',
     children: [
       {
@@ -40,12 +40,12 @@ export const LNB_MENUS: LnbCategory[] = [
         children: [
           {
             Icon: GrTopCorner,
-            name: 'general',
+            name: 'General',
             pathKey: '',
           },
           {
             Icon: GrTopCorner,
-            name: 'shortcuts',
+            name: 'Shortcuts',
             pathKey: 'shortcuts',
           },
         ],
@@ -53,7 +53,7 @@ export const LNB_MENUS: LnbCategory[] = [
     ],
   },
   {
-    category: 'tools',
+    category: 'Tools',
     pathKey: 'tools',
     children: [
       {
@@ -68,13 +68,13 @@ export const LNB_MENUS: LnbCategory[] = [
       },
       {
         Icon: CgColorPicker,
-        name: 'Color Picker',
+        name: 'ColorPicker',
         pathKey: 'color-picker',
       },
     ],
   },
   {
-    category: 'workspace',
+    category: 'Workspace',
     pathKey: 'workspace',
     children: [
       {

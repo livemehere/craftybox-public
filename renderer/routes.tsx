@@ -35,48 +35,48 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'settings',
-        id: 'settings',
+        id: 'Settings',
         children: [
           {
             index: true,
-            id: 'general',
+            id: 'General',
             Component: GeneralSettingPage,
           },
           {
             path: 'shortcuts',
-            id: 'shortcuts',
+            id: 'Shortcuts',
             Component: ShortCutSettingPage,
           },
         ],
       },
       {
         path: 'tools',
-        id: 'tools',
+        id: 'Tools',
         children: [
           {
             path: 'screenshot',
-            id: 'screenshot',
+            id: 'Screenshot',
             Component: ScreenShotPage,
           },
           {
             path: 'timer',
-            id: 'timer',
+            id: 'Timer',
             Component: TimerPage,
           },
           {
             path: 'color-picker',
-            id: 'color-picker',
+            id: 'ColorPicker',
             Component: ColorPickerPage,
           },
         ],
       },
       {
         path: 'workspace',
-        id: 'workspace',
+        id: 'Workspace',
         children: [
           {
             path: 'archive',
-            id: 'archive',
+            id: 'Archive',
             Component: ArchivePage,
           },
         ],
