@@ -118,7 +118,7 @@ export default function ArchivePage() {
                     onClick={() => {
                       try {
                         new URL(archive.value);
-                        rendererIpc.invoke('url:openExternal', {
+                        rendererIpc.invoke('common:openExternal', {
                           url: archive.value,
                         });
                       } catch {

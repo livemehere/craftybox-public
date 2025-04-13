@@ -16,13 +16,13 @@ rendererIpc.on('snapshot:get', (e) => {
 const closeBtn = document.querySelector('button') as HTMLButtonElement;
 closeBtn.addEventListener('click', () => {
   if (!id) return;
-  rendererIpc.invoke('window:destroy', {
+  rendererIpc.invoke('window:destroyPin', {
     id,
   });
 });
 
 window.addEventListener('beforeunload', () => {
-  rendererIpc.invoke('window:destroy', {
+  rendererIpc.invoke('window:destroyPin', {
     id,
   });
 });

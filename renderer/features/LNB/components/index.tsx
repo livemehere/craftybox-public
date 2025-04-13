@@ -14,6 +14,7 @@ const VARIANTS: Variants = {
   open: {
     width: 'var(--side-bar-width)',
     minWidth: 'var(--side-bar-width)',
+    borderWidth: 1,
   },
   close: {
     width: 0,
@@ -21,6 +22,7 @@ const VARIANTS: Variants = {
     borderRightWidth: 0,
     paddingLeft: 0,
     paddingRight: 0,
+    borderWidth: 0,
   },
 };
 
@@ -31,7 +33,7 @@ const LNB = () => {
   return (
     <motion.aside
       className={cn(
-        'overflow-hidden border-r-[1px] border-neutral-700 bg-neutral-900/98 px-2 py-3',
+        'overflow-hidden rounded-l-xl border-neutral-700 bg-neutral-900/98 px-2 py-3',
         'whitespace-nowrap'
       )}
       initial={open ? 'open' : 'close'}
