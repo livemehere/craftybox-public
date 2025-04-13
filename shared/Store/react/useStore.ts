@@ -14,11 +14,15 @@ const getGlobalStore = () => {
 };
 
 type Dispatch<T> = T | ((prev: T) => T);
-const useStore = <T = unknown>(key: string, defaultData: T) => {
+const useStore = <T = unknown>(
+  key: string,
+  defaultData: T,
+  version?: string
+) => {
   const store = getGlobalStore();
   const storeData = useSyncExternalStore(
     (cb) => store.on(`${key}change`, cb),
-    () => store.getData<T>(key, defaultData)
+    () => store.getData<T>(key, defaultData, version)
   );
 
   const setStoreData = (data: Dispatch<T>) => {
@@ -26,7 +30,8 @@ const useStore = <T = unknown>(key: string, defaultData: T) => {
       key,
       typeof data === 'function'
         ? (data as (prev: T) => T)(store.getCache<T>(key)!.data)
-        : data
+        : data,
+      version
     );
   };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import useStore from '@shared/Store/react/useStore';
-import { Shortcuts } from '@shared/types/shortcut-types';
+import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
 import { produce } from 'immer';
 
@@ -10,10 +10,8 @@ import ShortCutItem from '@/features/settings/components/shortcuts/ShortCutItem'
 
 const ShortcutList = () => {
   const [changeTarget, setChangeTarget] = useState<string | null>(null);
-  const { data: shortcuts, setData: setShortcuts } = useStore<Shortcuts>(
-    STORE_KEY_MAP.shortcuts,
-    []
-  );
+  const { data: shortcuts, setData: setShortcuts } =
+    useStore<TUserShortcutSettings>(STORE_KEY_MAP.shortcuts, []);
 
   const { curChar, reset } = useCaptureInput({
     active: !!changeTarget,

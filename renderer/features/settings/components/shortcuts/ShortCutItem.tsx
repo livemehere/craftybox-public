@@ -1,5 +1,6 @@
 import { Fragment, useMemo } from 'react';
-import { Shortcuts } from '@shared/types/shortcut-types';
+import { TUserShortcutSettings } from '@shared/types/shortcut-types';
+import { getShortcutMeta } from '@shared/meta/shortcuts';
 
 import Switch from '@/components/ui/Switch';
 import Kbd from '@/components/ui/Kbd/Kbd';
@@ -7,7 +8,7 @@ import { resolveShortCutToKbd } from '@/utils/kbd';
 import { usePlatform } from '@/queries/usePlatform';
 
 type Props = {
-  shortcut: Shortcuts[number];
+  shortcut: TUserShortcutSettings[number];
   onChangeTargetKey: (key: string) => void;
   onChangeShortcut: (key: string, value: string, enabled?: boolean) => void;
 };
@@ -22,16 +23,17 @@ const ShortCutItem = ({
     () => (platform ? resolveShortCutToKbd(shortcut.value, platform) : []),
     [platform, shortcut.value]
   );
+
+  const meta = getShortcutMeta(shortcut.key);
+
   return (
     <div
       key={shortcut.key}
       className={'flex items-center justify-between text-sm'}
     >
       <section className={'flex flex-col gap-1'}>
-        <h3>{shortcut.label}</h3>
-        <span className={'text-xs text-neutral-500'}>
-          {shortcut.description}
-        </span>
+        <h3>{meta.label}</h3>
+        <span className={'text-xs text-neutral-500'}>{meta.description}</span>
       </section>
       <section className={'flex items-center gap-4'}>
         <div
