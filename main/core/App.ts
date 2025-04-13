@@ -24,8 +24,9 @@ import { resolve } from 'path';
 
 import { AppWindow } from './AppWindow';
 
+const logger = log.scope('App');
+
 export class App {
-  private logger = log.scope('App');
   private static trayIcon = nativeImage
     .createFromPath(
       resolve(
@@ -61,32 +62,40 @@ export class App {
 
   private async initialize() {
     await app.whenReady();
+    logger.log('App ready.');
     await this.setupWindows();
+    logger.log('Windows setup complete.');
     this.singleInstanceLock();
 
     this.updateManager = new UpdateManager({ app: this });
     if (config.IS_DEV) {
       this.destroySplashAndShowMain();
+      logger.log('Ignore update check in dev mode.');
     } else {
+      logger.log('Starting auto update check...');
       await this.updateManager.autoUpdateStart(this.splash!, () => {
         this.destroySplashAndShowMain();
       });
+      logger.log('Auto update check complete.');
     }
 
     this.setupTray();
+    logger.log('Tray setup complete.');
     this.initializeModules();
+    logger.log('Modules initialized.');
     registerStoreIpcHandlers({
       onSet: (key, data) => {
         if (key === 'shortcuts') {
+          logger.log('Module shortcuts update started.');
           globalShortcut.unregisterAll();
           for (const Module of this.modules) {
             this.registerModuleShortcuts(Module.getShortcuts(), data);
           }
+          logger.log('Module shortcuts update complete.');
         }
       },
     });
-
-    this.logger.info('App initialized.');
+    logger.log('Complete initialization.');
   }
 
   destroySplashAndShowMain() {
@@ -133,7 +142,6 @@ export class App {
     this.main.win.on('resize', () => {
       setStoreData(STORE_KEY_MAP.mainBounds, this.main.win.getBounds());
     });
-    this.logger.info('Main window created.');
   }
   private async createSplashWindow() {
     this.splash = await AppWindow.create({
@@ -143,7 +151,6 @@ export class App {
       resizable: false,
       html: 'splash',
     });
-    this.logger.info('Splash window created.');
   }
   private async createSnapshotWindow() {
     this.snapshot = await AppWindow.create({
@@ -156,7 +163,6 @@ export class App {
       fullscreen: true,
       html: 'snapshot',
     });
-    this.logger.info('Snapshot window created.');
   }
   async addPinWindow(
     x: number,
@@ -186,7 +192,6 @@ export class App {
     });
     const id = appWin.win.id;
     mainIpc.send(appWin.win.webContents, 'window:getId', id);
-    this.logger.info(`Pin window created. (id:${id})`);
   }
   private async setupWindows() {
     await this.createMainWindow();
@@ -288,14 +293,11 @@ export class App {
       if (disabled) continue;
       try {
         globalShortcut.register(accelerator, shortcut.callback);
-        this.logger.debug(
+        logger.log(
           `${shortcut.key}(${accelerator}) : ${userSetting?.enabled ? 'enabled' : 'disabled'}`
         );
       } catch (error) {
-        this.logger.error(
-          `Failed to change ${shortcut.key}: ${accelerator}`,
-          error
-        );
+        logger.log(`Failed to change ${shortcut.key}: ${accelerator}`, error);
       }
     }
   }

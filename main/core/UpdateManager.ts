@@ -4,15 +4,14 @@ import { App } from '@main/core/App';
 import log from 'electron-log/main';
 import { AppWindow } from '@main/core/AppWindow';
 
+const logger = log.scope('UpdateManager');
+
 export class UpdateManager {
   app: App;
   isUpdateAvailable = false;
-  private logger = log.scope('UpdateManager');
   constructor(props: { app: App }) {
     this.app = props.app;
-
-    autoUpdater.logger = this.logger;
-
+    autoUpdater.logger = logger;
     autoUpdater.disableWebInstaller = true;
   }
 
@@ -21,13 +20,13 @@ export class UpdateManager {
       this.setupListeners(splashWindow, onFinish);
       await autoUpdater.checkForUpdates();
     } catch (e) {
-      this.logger.error('autoUpdater.checkForUpdates();. ' + e);
+      logger.error('autoUpdater.checkForUpdates();. ' + e);
     }
   }
 
   private setupListeners(splashWindow: AppWindow, onFinish: () => void) {
     autoUpdater.on('checking-for-update', () => {
-      this.logger.info('[1] Checking for update...');
+      logger.info('[1] Checking for update...');
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', {
         status: 'checking',
@@ -35,7 +34,7 @@ export class UpdateManager {
     });
 
     autoUpdater.on('update-available', () => {
-      this.logger.info('[1] Update available.');
+      logger.info('[1] Update available.');
       this.isUpdateAvailable = true;
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', {
@@ -44,7 +43,7 @@ export class UpdateManager {
     });
 
     autoUpdater.on('update-not-available', () => {
-      this.logger.info('[1] Update not available.');
+      logger.info('[1] Update not available.');
       this.isUpdateAvailable = false;
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', {
@@ -54,15 +53,15 @@ export class UpdateManager {
     });
 
     autoUpdater.on('error', (err) => {
-      this.logger.error('[1] Error in auto-updater. ' + err);
+      logger.error('[1] Error in auto-updater. ' + err);
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', { status: 'error' });
       onFinish();
     });
 
     autoUpdater.on('download-progress', (progressObj) => {
-      this.logger.info(`[1] Download progress...`);
-      this.logger.info(progressObj);
+      logger.info(`[1] Download progress...`);
+      logger.info(progressObj);
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', {
         status: 'downloading',
@@ -71,8 +70,8 @@ export class UpdateManager {
     });
 
     autoUpdater.on('update-downloaded', (info) => {
-      this.logger.info(`[1] Update downloaded`);
-      this.logger.info(info);
+      logger.info(`[1] Update downloaded`);
+      logger.info(info);
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', { status: 'done' });
       autoUpdater.quitAndInstall(false, true);
