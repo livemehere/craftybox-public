@@ -1,30 +1,27 @@
 import { autoUpdater } from 'electron-updater';
 import { mainIpc } from '@electron-buddy/ipc/main';
-import { App } from '@main/core/App';
 import log from 'electron-log/main';
 import { AppWindow } from '@main/core/AppWindow';
 
 const logger = log.scope('UpdateManager');
 
 export class UpdateManager {
-  app: App;
   isUpdateAvailable = false;
-  constructor(props: { app: App }) {
-    this.app = props.app;
+  constructor() {
     autoUpdater.logger = logger;
     autoUpdater.disableWebInstaller = true;
   }
 
-  async autoUpdateStart(splashWindow: AppWindow, onFinish: () => void) {
+  async autoUpdateStart(splashWindow: AppWindow, onSkip: () => void) {
     try {
-      this.setupListeners(splashWindow, onFinish);
+      this.setupListeners(splashWindow, onSkip);
       await autoUpdater.checkForUpdates();
     } catch (e) {
       logger.error('autoUpdater.checkForUpdates();. ' + e);
     }
   }
 
-  private setupListeners(splashWindow: AppWindow, onFinish: () => void) {
+  private setupListeners(splashWindow: AppWindow, onSkip: () => void) {
     autoUpdater.on('checking-for-update', () => {
       logger.info('[1] Checking for update...');
       if (!splashWindow) return;
@@ -49,14 +46,14 @@ export class UpdateManager {
       mainIpc.send(splashWindow.win.webContents, 'update', {
         status: 'disable',
       });
-      onFinish();
+      onSkip();
     });
 
     autoUpdater.on('error', (err) => {
       logger.error('[1] Error in auto-updater. ' + err);
       if (!splashWindow) return;
       mainIpc.send(splashWindow.win.webContents, 'update', { status: 'error' });
-      onFinish();
+      onSkip();
     });
 
     autoUpdater.on('download-progress', (progressObj) => {

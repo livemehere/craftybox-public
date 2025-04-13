@@ -1,7 +1,8 @@
 import { config } from '@main/config';
-import { BrowserWindow, nativeImage } from 'electron';
+import { BrowserWindow } from 'electron';
+import { constants } from '@main/constants';
 
-import { join, resolve } from 'path';
+import { join } from 'path';
 
 type HtmlType = 'index' | 'snapshot' | 'splash' | 'pin';
 interface AppWindowConfig {
@@ -25,14 +26,6 @@ interface AppWindowConfig {
 }
 
 export class AppWindow {
-  private static icon = nativeImage
-    .createFromPath(
-      resolve(
-        __dirname,
-        `${config.IS_DEV ? '../' : ''}assets/icons/${config.IS_MAC ? 'icon.png' : 'icon.ico'}`
-      )
-    )
-    .resize({ width: 64, height: 64 });
   readonly win: BrowserWindow;
   readonly html: HtmlType;
   constructor(config: AppWindowConfig) {
@@ -46,7 +39,7 @@ export class AppWindow {
       maxHeight: config.maxHeight,
       minWidth: config.minWidth,
       minHeight: config.minHeight,
-      icon: AppWindow.icon,
+      icon: constants.WINDOW_ICON_IMAGE,
       frame: config.frame,
       transparent: config.transparent,
       resizable: config.resizable,

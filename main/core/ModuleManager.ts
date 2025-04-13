@@ -14,10 +14,10 @@ import { App } from './App';
 const logger = log.scope('ModuleManager');
 
 export class ModuleManager {
-  moduleClasses: AppModuleClass[] = [];
+  readyModules: AppModuleClass[] = [];
   instances: AppModule[] = [];
-  constructor(moduleClasses: AppModuleClass[]) {
-    this.moduleClasses = moduleClasses;
+  constructor(initialModules: AppModuleClass[]) {
+    this.readyModules = initialModules;
   }
 
   async initialize(app: App) {
@@ -27,7 +27,7 @@ export class ModuleManager {
     );
     const promises = [];
 
-    this.instances = this.moduleClasses.map((Module) => new Module(app));
+    this.instances = this.readyModules.map((Module) => new Module(app));
     logger.log(`${this.instances.length} modules detected.`);
     for (const Module of this.instances) {
       const promise = async () => {

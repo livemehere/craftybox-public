@@ -1,5 +1,6 @@
 import { shell } from 'electron';
 import { App } from '@main/core/App';
+import { mainIpc } from '@electron-buddy/ipc/main';
 
 import { AppModule } from './AppModule';
 
@@ -8,62 +9,58 @@ export class WindowModule extends AppModule {
     super(app, 'WindowModule');
   }
 
-  async registerShortcuts() {
-    // 윈도우 모듈은 현재 사용하는 단축키가 없음
-  }
-
   async registerIpcHandlers() {
-    this.registerIpcHandler('window:ready', (type) => {
+    mainIpc.handle('window:ready', async (type) => {
       switch (type) {
         case 'main':
-          this.app.destroySplashAndShowMain();
+          this.app.windowManager.destroySplashAndShowMain();
           break;
         default:
           break;
       }
     });
 
-    this.registerIpcHandler('window:hide', (winType) => {
+    mainIpc.handle('window:hide', async (winType) => {
       switch (winType) {
         case 'snapshot':
-          return this.app.snapshot.win.hide();
+          return this.app.windowManager.snapshot.win.hide();
         case 'main':
-          return this.app.main.win.hide();
+          return this.app.windowManager.main.win.hide();
       }
     });
 
-    this.registerIpcHandler('window:minimize', () => {
-      return this.app.main.win.minimize();
+    mainIpc.handle('window:minimize', async () => {
+      return this.app.windowManager.main.win.minimize();
     });
 
-    this.registerIpcHandler('window:maximize', () => {
-      if (this.app.main.win.isMaximized()) {
-        return this.app.main.win.unmaximize();
+    mainIpc.handle('window:maximize', async () => {
+      if (this.app.windowManager.main.win.isMaximized()) {
+        return this.app.windowManager.main.win.unmaximize();
       } else {
-        return this.app.main.win.maximize();
+        return this.app.windowManager.main.win.maximize();
       }
     });
 
-    this.registerIpcHandler(
+    mainIpc.handle(
       'window:createPin',
-      ({ x, y, width, height, base64 }) => {
-        return this.app.addPinWindow(x, y, width, height, base64);
+      async ({ x, y, width, height, base64 }) => {
+        return this.app.windowManager.addPinWindow(x, y, width, height, base64);
       }
     );
 
-    this.registerIpcHandler('window:showPin', ({ id }) => {
-      return this.app.showPinWindow(id);
+    mainIpc.handle('window:showPin', async ({ id }) => {
+      return this.app.windowManager.showPinWindow(id);
     });
 
-    this.registerIpcHandler('window:showMain', () => {
-      return this.app.main.win.show();
+    mainIpc.handle('window:showMain', async () => {
+      return this.app.windowManager.main.win.show();
     });
 
-    this.registerIpcHandler('window:destroy', ({ id }) => {
-      return this.app.destroyPinWindow(id);
+    mainIpc.handle('window:destroy', async ({ id }) => {
+      return this.app.windowManager.destroyPinWindow(id);
     });
 
-    this.registerIpcHandler('url:openExternal', ({ url }) => {
+    mainIpc.handle('url:openExternal', async ({ url }) => {
       return shell
         .openExternal(url)
         .then(() => ({ success: true }))

@@ -1,8 +1,6 @@
 import { LogFunctions } from 'electron-log';
 import log from 'electron-log/main';
-import { mainIpc } from '@electron-buddy/ipc/main';
 import { App } from '@main/core/App';
-import { InvokeMap } from '@shared/types/electron-buddy';
 
 export type TModuleShortcut = {
   key: `shortcut:${string}`;
@@ -10,7 +8,18 @@ export type TModuleShortcut = {
   callback: () => void;
 };
 
-export abstract class AppModule {
+export interface IAppModule {
+  name: string;
+  initialize(): Promise<void>;
+  registerIpcHandlers(): Promise<void>;
+  getShortcuts(): TModuleShortcut[];
+}
+
+export type AppModuleClass = {
+  new (app: App): AppModule;
+};
+
+export abstract class AppModule implements IAppModule {
   readonly name: string;
   protected logger: LogFunctions;
   protected app: App;
@@ -21,21 +30,13 @@ export abstract class AppModule {
     this.name = name;
   }
 
-  initialize() {
+  async initialize() {
     return Promise.resolve();
   }
-  registerIpcHandlers() {
+  async registerIpcHandlers() {
     return Promise.resolve();
   }
   getShortcuts(): TModuleShortcut[] {
     return [];
-  }
-
-  protected registerIpcHandler<T extends keyof InvokeMap>(
-    channel: T,
-    handler: (data: InvokeMap[T]['payload']) => InvokeMap[T]['response']
-  ): void {
-    mainIpc.handle(channel, handler);
-    this.logger.debug(`Registered IPC handler for ${String(channel)}`);
   }
 }

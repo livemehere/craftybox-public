@@ -17,7 +17,7 @@ export class SnapshotModule extends AppModule {
         fallbackAccelerator: 'Control+1',
         callback: this.handleCaptureWithRenderer.bind(
           this,
-          this.app.snapshot.win
+          this.app.windowManager.snapshot.win
         ),
       },
     ];
