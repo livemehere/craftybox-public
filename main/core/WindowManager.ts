@@ -47,6 +47,8 @@ export class WindowManager {
       resizable: true,
       initialShow: false,
       html: 'index',
+      minWidth: 1280,
+      minHeight: 720,
     });
     this.main.win.on('close', () => {
       /* snapshot window still alive, then force quit when main window closed */
