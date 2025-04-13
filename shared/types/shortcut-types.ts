@@ -1,8 +1,7 @@
-export type TShortcutKeys = 'capture:cursor' | 'color-picker:open';
-export type Shortcuts = {
-  key: TShortcutKeys;
+import type { TModuleShortcut } from '@main/modules/BaseModule';
+
+export type TUserShortcutSettings = {
+  key: TModuleShortcut['key'];
   value: string;
-  label: string;
   enabled: boolean;
-  description: string;
 }[];
