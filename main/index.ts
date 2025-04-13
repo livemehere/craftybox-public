@@ -1,9 +1,12 @@
 import { app } from 'electron';
 import log from 'electron-log/main';
-import { AppManager } from '@main/managers/AppManager';
+import { App } from '@main/core/App';
 
 log.initialize();
-AppManager.create().catch((e) => {
+log.info('Starting application...');
+
+App.create().catch((e) => {
+  log.error('Failed to create AppManager');
   log.error(e);
   app.quit();
 });

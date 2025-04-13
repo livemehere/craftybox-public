@@ -1,9 +1,47 @@
 import { BrowserWindow, globalShortcut, screen } from 'electron';
 import { Monitor } from 'node-screenshots';
 import { mainIpc } from '@electron-buddy/ipc/main';
+import { App } from '@main/core/App';
+import { Shortcuts } from '@shared/types/shortcut-types';
+import { STORE_KEY_MAP } from '@shared/constants';
+import { getStoreData } from '@shared/Store/main';
 
-export class SnapshotModule {
-  constructor() {}
+import { BaseModule } from './BaseModule';
+
+export class SnapshotModule extends BaseModule {
+  constructor(appManager: App) {
+    super(appManager, 'SnapshotModule');
+    this.shortcutHandlers = {
+      'capture:cursor': this.handleCaptureWithRenderer.bind(
+        this,
+        appManager.snapshot.win
+      ),
+    };
+  }
+
+  initialize(): void {
+    this.registerIpcHandlers();
+    this.registerShortcuts();
+  }
+
+  registerIpcHandlers(): void {
+    // 스냅샷 관련 IPC 핸들러 등록
+  }
+
+  registerShortcuts(): void {
+    const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
+
+    const captureShortcut = shortcuts.find(
+      (shortcut) => shortcut.key === 'capture:cursor' && shortcut.enabled
+    );
+
+    if (captureShortcut) {
+      this.registerShortcut(
+        captureShortcut.value,
+        this.shortcutHandlers['capture:cursor']!
+      );
+    }
+  }
 
   getCurrentCursorMonitor() {
     const point = screen.getCursorScreenPoint();
@@ -13,7 +51,7 @@ export class SnapshotModule {
   handleCaptureWithRenderer(snapshotWin: BrowserWindow) {
     const monitor = this.getCurrentCursorMonitor();
     if (!monitor) {
-      alert('monitor not found');
+      this.logger.error('Monitor not found');
       return;
     }
     const image = monitor?.captureImageSync();
