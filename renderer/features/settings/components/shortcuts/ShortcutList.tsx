@@ -45,7 +45,7 @@ const ShortcutList = () => {
   return (
     <>
       {changeTarget && <ShortCutInputOverlay char={curChar} />}
-      <div className={'flex flex-col gap-6'}>
+      <div className={'flex flex-col gap-6 rounded-lg bg-neutral-900 p-4'}>
         {shortcuts?.map((shortcut) => {
           return (
             <ShortCutItem

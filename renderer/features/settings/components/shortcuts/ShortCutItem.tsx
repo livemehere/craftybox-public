@@ -38,7 +38,7 @@ const ShortCutItem = ({
       <section className={'flex items-center gap-4'}>
         <div
           className={
-            'flex min-w-[200px] cursor-pointer items-center justify-center gap-2 rounded-md bg-neutral-900 p-2 hover:bg-neutral-900/80'
+            'flex min-w-[200px] cursor-pointer items-center justify-center gap-2 rounded-md bg-neutral-800/70 p-2 hover:bg-neutral-800/50'
           }
           onClick={() => {
             onChangeTargetKey(shortcut.key);

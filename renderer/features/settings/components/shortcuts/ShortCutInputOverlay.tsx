@@ -24,7 +24,7 @@ export const ShortCutInputOverlay = ({ char }: Props) => {
         }}
         className={'flex flex-col items-center justify-center gap-6 text-xl'}
       >
-        <div>사용할 단축키를 그대로 입력하세요</div>
+        <div>Press the key you want to set (e.g {`"ctrl+shift+s"`})</div>
         <div
           ref={scope}
           className={
