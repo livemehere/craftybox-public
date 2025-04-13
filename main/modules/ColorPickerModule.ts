@@ -1,12 +1,12 @@
 import { App } from '@main/core/App';
 import { mainIpc } from '@electron-buddy/ipc/main';
-import { Shortcuts } from '@shared/types/shortcut-types';
+import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
 import { getStoreData } from '@shared/Store/main';
 
-import { BaseModule } from './BaseModule';
+import { AppModule } from './AppModule';
 
-export class ColorPickerModule extends BaseModule {
+export class ColorPickerModule extends AppModule {
   constructor(app: App) {
     super(app, 'ColorPickerModule');
     this.shortcutHandlers = {
@@ -19,7 +19,10 @@ export class ColorPickerModule extends BaseModule {
   }
 
   async registerShortcuts() {
-    const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
+    const shortcuts = getStoreData<TUserShortcutSettings>(
+      STORE_KEY_MAP.shortcuts,
+      []
+    );
 
     const colorPickerShortcut = shortcuts.find(
       (shortcut) => shortcut.key === 'color-picker:open' && shortcut.enabled

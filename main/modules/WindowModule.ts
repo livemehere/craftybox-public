@@ -1,9 +1,9 @@
 import { shell } from 'electron';
 import { App } from '@main/core/App';
 
-import { BaseModule } from './BaseModule';
+import { AppModule } from './AppModule';
 
-export class WindowModule extends BaseModule {
+export class WindowModule extends AppModule {
   constructor(app: App) {
     super(app, 'WindowModule');
   }

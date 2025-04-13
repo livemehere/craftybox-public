@@ -2,40 +2,29 @@ import { BrowserWindow, globalShortcut, screen } from 'electron';
 import { Monitor } from 'node-screenshots';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { App } from '@main/core/App';
-import { Shortcuts } from '@shared/types/shortcut-types';
-import { STORE_KEY_MAP } from '@shared/constants';
-import { getStoreData } from '@shared/Store/main';
 
-import { BaseModule } from './BaseModule';
+import { AppModule, TModuleShortcut } from './AppModule';
 
-export class SnapshotModule extends BaseModule {
+export class SnapshotModule extends AppModule {
   constructor(app: App) {
     super(app, 'SnapshotModule');
-    this.shortcutHandlers = {
-      'capture:cursor': this.handleCaptureWithRenderer.bind(
-        this,
-        this.app.snapshot.win
-      ),
-    };
+  }
+
+  override getShortcuts(): TModuleShortcut[] {
+    return [
+      {
+        key: 'shortcut:capture:cursor',
+        fallbackAccelerator: 'Control+1',
+        callback: this.handleCaptureWithRenderer.bind(
+          this,
+          this.app.snapshot.win
+        ),
+      },
+    ];
   }
 
   async registerIpcHandlers() {
     // 스냅샷 관련 IPC 핸들러 등록
-  }
-
-  async registerShortcuts() {
-    const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, []);
-
-    const captureShortcut = shortcuts.find(
-      (shortcut) => shortcut.key === 'capture:cursor' && shortcut.enabled
-    );
-
-    if (captureShortcut) {
-      this.registerShortcut(
-        captureShortcut.value,
-        this.shortcutHandlers['capture:cursor']!
-      );
-    }
   }
 
   getCurrentCursorMonitor() {

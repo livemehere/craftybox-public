@@ -7,15 +7,18 @@ import {
   Tray,
 } from 'electron';
 import { UpdateManager } from '@main/core/UpdateManager';
-import { IModule } from '@main/modules/BaseModule';
-import { TShortcutKeys, Shortcuts } from '@shared/types/shortcut-types';
+import { AppModule, TModuleShortcut } from '@main/modules/AppModule';
+import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
 import { getStoreData, setStoreData } from '@shared/Store/main';
 import registerStoreIpcHandlers from '@shared/Store/main';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { config } from '@main/config';
 import log from 'electron-log/main';
-import { bundleModules } from '@main/modules';
+import { ColorPickerModule } from '@main/modules/ColorPickerModule';
+import { PlatformModule } from '@main/modules/PlatformModule';
+import { SnapshotModule } from '@main/modules/SnapshotModule';
+import { WindowModule } from '@main/modules/WindowModule';
 
 import { resolve } from 'path';
 
@@ -41,23 +44,11 @@ export class App {
 
   updateManager!: UpdateManager;
 
-  private moduleMap = new Map<string, IModule>();
-
-  private readonly defaultShortcuts: Shortcuts = [
-    {
-      key: 'capture:cursor',
-      value: 'Control+1',
-      label: '캡쳐하기',
-      enabled: true,
-      description: '현재 마우스 커서가 위치한 모니터를 캡쳐합니다.',
-    },
-    {
-      key: 'color-picker:open',
-      value: 'Control+2',
-      label: '색상 추출',
-      enabled: true,
-      description: '현재 마우스 커서가 위치한 화면의 색상을 추출합니다.',
-    },
+  modules: AppModule[] = [
+    new PlatformModule(this),
+    new SnapshotModule(this),
+    new WindowModule(this),
+    new ColorPickerModule(this),
   ];
 
   private constructor() {}
@@ -71,6 +62,7 @@ export class App {
   private async initialize() {
     await app.whenReady();
     await this.setupWindows();
+    this.singleInstanceLock();
 
     this.updateManager = new UpdateManager({ app: this });
     if (config.IS_DEV) {
@@ -81,12 +73,19 @@ export class App {
       });
     }
 
-    this.initializeModules();
-    this.initializeShortcuts();
-    this.registerShortcutIpcHandlers();
     this.setupTray();
+    this.initializeModules();
+    registerStoreIpcHandlers({
+      onSet: (key, data) => {
+        if (key === 'shortcuts') {
+          globalShortcut.unregisterAll();
+          for (const Module of this.modules) {
+            this.registerModuleShortcuts(Module.getShortcuts(), data);
+          }
+        }
+      },
+    });
 
-    this.singleInstanceLock();
     this.logger.info('App initialized.');
   }
 
@@ -260,107 +259,44 @@ export class App {
       });
     }
   }
+
   private async initializeModules() {
+    const userSettings = getStoreData<TUserShortcutSettings>(
+      STORE_KEY_MAP.shortcuts,
+      []
+    );
     const promises = [];
-    for (const Module of bundleModules) {
-      const instance = new Module(this);
-      promises.push(instance.initialize());
-      this.moduleMap.set(instance.name, instance);
+    for (const Module of this.modules) {
+      const promise = async () => {
+        await Module.initialize();
+        await Module.registerIpcHandlers();
+        this.registerModuleShortcuts(Module.getShortcuts(), userSettings);
+      };
+      promises.push(promise);
     }
     await Promise.all(promises);
   }
 
-  private initializeShortcuts(): void {
-    const storedShortcuts = getStoreData<Shortcuts>(
-      STORE_KEY_MAP.shortcuts,
-      this.defaultShortcuts
-    );
-    const mergedShortcuts = this.mergeWithDefaults(storedShortcuts);
-
-    setStoreData(STORE_KEY_MAP.shortcuts, mergedShortcuts);
-
-    registerStoreIpcHandlers({
-      onSet: (key, data) => {
-        if (key.includes('shortcuts')) {
-          this.registerGlobalShortcuts(data as Shortcuts);
-        }
-      },
-    });
-  }
-
-  private registerShortcutIpcHandlers(): void {
-    // shortcut:set IPC 핸들러 등록
-    mainIpc.handle(
-      'shortcut:set',
-      ({ key, register }: { key: TShortcutKeys; register: boolean }) =>
-        this.toggleShortcut(key, register)
-    );
-  }
-
-  private registerGlobalShortcuts(shortcuts: Shortcuts): void {
-    globalShortcut.unregisterAll();
-
-    shortcuts.forEach((shortcut) => {
-      if (!shortcut.enabled) return;
-
+  private registerModuleShortcuts(
+    shortcuts: TModuleShortcut[],
+    userSettings: TUserShortcutSettings
+  ): void {
+    for (const shortcut of shortcuts) {
+      const userSetting = userSettings.find((u) => u.key === shortcut.key);
+      const accelerator = userSetting?.value ?? shortcut.fallbackAccelerator;
+      const disabled = userSetting && !userSetting.enabled;
+      if (disabled) continue;
       try {
-        // 모든 모듈에서 단축키 핸들러 찾기
-        let handler: (() => void) | undefined;
-
-        for (const module of this.modules.values()) {
-          const moduleHandlers = module.getShortcutHandlers();
-          if (moduleHandlers[shortcut.key]) {
-            handler = moduleHandlers[shortcut.key];
-            break;
-          }
-        }
-
-        if (handler) {
-          globalShortcut.register(shortcut.value, handler);
-          this.logger.info(
-            `Registered shortcut: ${shortcut.value} for ${shortcut.key}`
-          );
-        }
+        globalShortcut.register(accelerator, shortcut.callback);
+        this.logger.debug(
+          `${shortcut.key}(${accelerator}) : ${userSetting?.enabled ? 'enabled' : 'disabled'}`
+        );
       } catch (error) {
-        this.logger.error(`단축키 등록 실패: ${shortcut.value}`, error);
+        this.logger.error(
+          `Failed to change ${shortcut.key}: ${accelerator}`,
+          error
+        );
       }
-    });
-  }
-
-  private async toggleShortcut(
-    key: TShortcutKeys,
-    enabled: boolean
-  ): Promise<void> {
-    const shortcuts = getStoreData<Shortcuts>(
-      STORE_KEY_MAP.shortcuts,
-      this.defaultShortcuts
-    );
-    const targetShortcut = shortcuts.find((shortcut) => shortcut.key === key);
-
-    if (!targetShortcut) return;
-
-    const updatedShortcuts = shortcuts.map((shortcut) =>
-      shortcut.key === key ? { ...shortcut, enabled } : shortcut
-    );
-
-    setStoreData(STORE_KEY_MAP.shortcuts, updatedShortcuts);
-    this.registerGlobalShortcuts(updatedShortcuts);
-  }
-
-  private mergeWithDefaults(storedShortcuts: Shortcuts): Shortcuts {
-    return this.defaultShortcuts.map((defaultShortcut) => {
-      const userShortcut = storedShortcuts.find(
-        (shortcut) => shortcut.key === defaultShortcut.key
-      );
-
-      if (!userShortcut) {
-        return defaultShortcut;
-      }
-
-      return {
-        ...defaultShortcut,
-        ...userShortcut,
-      };
-    });
+    }
   }
 }

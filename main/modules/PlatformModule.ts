@@ -1,9 +1,9 @@
 import { App } from '@main/core/App';
 import { TPlatform } from '@shared/types/os-types';
 
-import { BaseModule } from './BaseModule';
+import { AppModule } from './AppModule';
 
-export class PlatformModule extends BaseModule {
+export class PlatformModule extends AppModule {
   constructor(app: App) {
     super(app, 'PlatformModule');
   }
