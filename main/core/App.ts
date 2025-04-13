@@ -20,9 +20,9 @@ export class App {
   private constructor() {}
 
   static async create() {
-    const appManager = new App();
-    await appManager.initialize();
-    return appManager;
+    const app = new App();
+    await app.initialize();
+    return app;
   }
 
   private async initialize() {

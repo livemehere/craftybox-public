@@ -1,10 +1,54 @@
-import { shell } from 'electron';
 import { App } from '@main/core/App';
 import { mainIpc } from '@electron-buddy/ipc/main';
 
-import { AppModule } from './AppModule';
+import { BaseModule } from './BaseModule';
 
-export class WindowModule extends AppModule {
+export type WindowModuleInvokeMap = {
+  'window:ready': {
+    payload: 'main';
+    response: void;
+  };
+  'window:hide': {
+    payload: 'snapshot' | 'main';
+    response: void;
+  };
+  'window:destroyPin': {
+    payload: {
+      id: number;
+    };
+    response: void;
+  };
+  'window:minimize': {
+    payload: null;
+    response: void;
+  };
+  'window:maximize': {
+    payload: null;
+    response: void;
+  };
+  'window:createPin': {
+    payload: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      base64: string;
+    };
+    response: void;
+  };
+  'window:showPin': {
+    payload: {
+      id: number;
+    };
+    response: void;
+  };
+  'window:showMain': {
+    payload: null;
+    response: void;
+  };
+};
+
+export class WindowModule extends BaseModule {
   constructor(app: App) {
     super(app, 'WindowModule');
   }
@@ -56,18 +100,8 @@ export class WindowModule extends AppModule {
       return this.app.windowManager.main.win.show();
     });
 
-    mainIpc.handle('window:destroy', async ({ id }) => {
+    mainIpc.handle('window:destroyPin', async ({ id }) => {
       return this.app.windowManager.destroyPinWindow(id);
-    });
-
-    mainIpc.handle('url:openExternal', async ({ url }) => {
-      return shell
-        .openExternal(url)
-        .then(() => ({ success: true }))
-        .catch((error) => {
-          this.logger.error('Failed to open URL in external browser', error);
-          return { success: false, error: (error as Error).message };
-        });
     });
   }
 }

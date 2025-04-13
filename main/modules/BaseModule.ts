@@ -15,11 +15,11 @@ export interface IAppModule {
   getShortcuts(): TModuleShortcut[];
 }
 
-export type AppModuleClass = {
-  new (app: App): AppModule;
+export type BaseModuleClass = {
+  new (app: App): BaseModule;
 };
 
-export abstract class AppModule implements IAppModule {
+export abstract class BaseModule implements IAppModule {
   readonly name: string;
   protected logger: LogFunctions;
   protected app: App;

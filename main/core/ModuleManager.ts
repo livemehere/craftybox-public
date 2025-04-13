@@ -1,8 +1,8 @@
 import {
-  AppModule,
-  AppModuleClass,
+  BaseModule,
+  BaseModuleClass,
   TModuleShortcut,
-} from '@main/modules/AppModule';
+} from '@main/modules/BaseModule';
 import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { globalShortcut } from 'electron';
 import log from 'electron-log/main';
@@ -14,9 +14,9 @@ import { App } from './App';
 const logger = log.scope('ModuleManager');
 
 export class ModuleManager {
-  readyModules: AppModuleClass[] = [];
-  instances: AppModule[] = [];
-  constructor(initialModules: AppModuleClass[]) {
+  readyModules: BaseModuleClass[] = [];
+  instances: BaseModule[] = [];
+  constructor(initialModules: BaseModuleClass[]) {
     this.readyModules = initialModules;
   }
 

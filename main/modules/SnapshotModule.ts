@@ -3,9 +3,9 @@ import { Monitor } from 'node-screenshots';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { App } from '@main/core/App';
 
-import { AppModule, TModuleShortcut } from './AppModule';
+import { BaseModule, TModuleShortcut } from './BaseModule';
 
-export class SnapshotModule extends AppModule {
+export class SnapshotModule extends BaseModule {
   constructor(app: App) {
     super(app, 'SnapshotModule');
   }

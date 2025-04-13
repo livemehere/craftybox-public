@@ -3,7 +3,7 @@ import { TPlatform } from '@shared/types/os-types';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { app, shell } from 'electron';
 
-import { AppModule } from './AppModule';
+import { BaseModule } from './BaseModule';
 
 export type CommonModuleInvokeMap = {
   'common:platform': {
@@ -18,9 +18,18 @@ export type CommonModuleInvokeMap = {
     payload: string;
     response: string;
   };
+  'common:openExternal': {
+    payload: {
+      url: string;
+    };
+    response: {
+      success: boolean;
+      error?: string;
+    };
+  };
 };
 
-export class CommonModule extends AppModule {
+export class CommonModule extends BaseModule {
   constructor(app: App) {
     super(app, 'CommonModule');
   }
@@ -36,6 +45,16 @@ export class CommonModule extends AppModule {
 
     mainIpc.handle('common:openFile', async (path) => {
       return shell.openPath(path);
+    });
+
+    mainIpc.handle('common:openExternal', async ({ url }) => {
+      return shell
+        .openExternal(url)
+        .then(() => ({ success: true }))
+        .catch((error) => {
+          this.logger.error('Failed to open URL in external browser', error);
+          return { success: false, error: (error as Error).message };
+        });
     });
   }
 }

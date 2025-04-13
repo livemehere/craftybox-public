@@ -1,12 +1,13 @@
-import { AppModuleClass } from './AppModule';
+import { BaseModuleClass } from './BaseModule';
 import { CommonModule, CommonModuleInvokeMap } from './CommonModule';
 import { SnapshotModule } from './SnapshotModule';
-import { WindowModule } from './WindowModule';
+import { WindowModule, WindowModuleInvokeMap } from './WindowModule';
 
-export const bundleModules: AppModuleClass[] = [
+export const bundleModules: BaseModuleClass[] = [
   CommonModule,
   SnapshotModule,
   WindowModule,
 ];
 
-export type BundleModuleInvokeMap = CommonModuleInvokeMap;
+export type BundleModuleInvokeMap = CommonModuleInvokeMap &
+  WindowModuleInvokeMap;
