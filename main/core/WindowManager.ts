@@ -12,7 +12,6 @@ export class WindowManager {
   main!: AppWindow;
   snapshot!: AppWindow;
   pins: AppWindow[] = [];
-  constructor() {}
 
   async initialize() {
     await this.createMainWindow();
@@ -36,7 +35,7 @@ export class WindowManager {
   }
 
   private async createMainWindow() {
-    const bounds = getStoreData(STORE_KEY_MAP.mainBounds, {
+    const { data: bounds } = getStoreData(STORE_KEY_MAP.mainBounds, {
       x: 0,
       y: 0,
       width: 1280,

@@ -5,6 +5,22 @@ import { App } from '@main/core/App';
 
 import { BaseModule, TModuleShortcut } from './BaseModule';
 
+export type SnapshotModuleMessageMap = {
+  'snapshot:get': {
+    response: {
+      base64: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      scaleFactor: number;
+    }; // base64
+  };
+  'snapshot:reset': {
+    response: void;
+  };
+};
+
 export class SnapshotModule extends BaseModule {
   constructor(app: App) {
     super(app, 'SnapshotModule');

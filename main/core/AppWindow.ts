@@ -74,7 +74,6 @@ export class AppWindow {
   private setupDevTools() {
     if (!config.IS_DEV) return;
     this.win.webContents.on('before-input-event', (event, input) => {
-      event.preventDefault();
       if (input.key === 'F12' && input.type === 'keyDown') {
         if (!this.win.webContents.isDevToolsOpened()) {
           this.win.webContents.openDevTools();

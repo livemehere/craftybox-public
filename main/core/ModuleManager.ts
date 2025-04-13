@@ -7,7 +7,7 @@ import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { globalShortcut } from 'electron';
 import log from 'electron-log/main';
 import { STORE_KEY_MAP } from '@shared/constants';
-import { getStoreData } from '@shared/Store/main';
+import { getStoreData, setStoreData } from '@shared/Store/main';
 
 import { App } from './App';
 
@@ -16,15 +16,17 @@ const logger = log.scope('ModuleManager');
 export class ModuleManager {
   readyModules: BaseModuleClass[] = [];
   instances: BaseModule[] = [];
+  shortcuts: TUserShortcutSettings = [];
   constructor(initialModules: BaseModuleClass[]) {
     this.readyModules = initialModules;
   }
 
   async initialize(app: App) {
-    const userSettings = getStoreData<TUserShortcutSettings>(
+    const { data: userSettings } = getStoreData<TUserShortcutSettings>(
       STORE_KEY_MAP.shortcuts,
       []
     );
+    logger.log('prev userSettings', userSettings);
     const promises = [];
 
     this.instances = this.readyModules.map((Module) => new Module(app));
@@ -33,18 +35,25 @@ export class ModuleManager {
       const promise = async () => {
         await Module.initialize();
         await Module.registerIpcHandlers();
-        this.registerModuleShortcuts(Module.getShortcuts(), userSettings);
+        const registerShortcuts = this.registerModuleShortcuts(
+          Module.getShortcuts(),
+          userSettings
+        );
+        this.shortcuts.push(...registerShortcuts);
         logger.log(`${Module.name} initialized.`);
       };
       promises.push(promise());
     }
     await Promise.all(promises);
+    logger.log('final userSettings', this.shortcuts);
+    setStoreData(STORE_KEY_MAP.shortcuts, this.shortcuts);
   }
 
   private registerModuleShortcuts(
     shortcuts: TModuleShortcut[],
     userSettings: TUserShortcutSettings
-  ): void {
+  ): TUserShortcutSettings {
+    const finalShortcuts: TUserShortcutSettings = [];
     for (const shortcut of shortcuts) {
       const userSetting = userSettings.find((u) => u.key === shortcut.key);
       const accelerator = userSetting?.value ?? shortcut.fallbackAccelerator;
@@ -53,12 +62,18 @@ export class ModuleManager {
       try {
         globalShortcut.register(accelerator, shortcut.callback);
         logger.log(
-          `${shortcut.key}(${accelerator}) : ${disabled ? 'disabled' : 'enabled'}`
+          `Added ${shortcut.key}(${accelerator}) : ${disabled ? 'disabled' : 'enabled'}`
         );
+        finalShortcuts.push({
+          key: shortcut.key,
+          value: accelerator,
+          enabled: !disabled,
+        });
       } catch (error) {
         logger.log(`Failed to change ${shortcut.key}: ${accelerator}`, error);
       }
     }
+    return finalShortcuts;
   }
 
   reRegisterShortcuts(userSettings: TUserShortcutSettings) {

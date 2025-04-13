@@ -30,12 +30,17 @@ export abstract class BaseModule implements IAppModule {
     this.name = name;
   }
 
+  /** if you need to initialize something, override this method */
   async initialize() {
     return Promise.resolve();
   }
+
+  /** if you need to register ipc handlers, override this method */
   async registerIpcHandlers() {
     return Promise.resolve();
   }
+
+  /** if you need to register global shortcuts, override this method */
   getShortcuts(): TModuleShortcut[] {
     return [];
   }

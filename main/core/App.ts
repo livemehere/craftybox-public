@@ -4,6 +4,7 @@ import registerStoreIpcHandlers from '@shared/Store/main';
 import { config } from '@main/config';
 import log from 'electron-log/main';
 import { bundleModules } from '@main/modules';
+import { STORE_KEY_MAP } from '@shared/constants';
 
 import { constants } from './../constants';
 import { ModuleManager } from './ModuleManager';
@@ -35,8 +36,8 @@ export class App {
 
     registerStoreIpcHandlers({
       onSet: (key, data) => {
-        if (key === 'shortcuts') {
-          this.moduleManager.reRegisterShortcuts(data);
+        if (key === STORE_KEY_MAP.shortcuts) {
+          this.moduleManager.reRegisterShortcuts(data.data);
         }
       },
     });
