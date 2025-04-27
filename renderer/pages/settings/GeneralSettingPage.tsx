@@ -4,7 +4,7 @@ import SettingItem from '@/features/settings/components/SettingItem';
 
 const GeneralSettingPage = () => {
   return (
-    <div className={'page-wrapper-with-padding'}>
+    <div className={'h-full'}>
       <SettingItem title={`Version`}>{PKG_JSON.version}</SettingItem>
     </div>
   );

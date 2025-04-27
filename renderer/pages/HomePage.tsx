@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
     <div
-      className={'page-wrapper flex items-center justify-center text-sm'}
+      className={'flex h-full items-center justify-center text-sm'}
       data-testid="home-page"
     >
       <h1>CraftyBox</h1>

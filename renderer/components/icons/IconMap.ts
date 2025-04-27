@@ -1,19 +1,18 @@
 import { ComponentProps, FunctionComponent } from 'react';
-
+import EditIcon from '@/assets/svg/edit.svg?react';
+import ExpandIcon from '@/assets/svg/expand.svg?react';
+import HambergerIcon from '@/assets/svg/hamberger.svg?react';
 import LoadingIcon from '@/assets/svg/loading.svg?react';
+import RecordIcon from '@/assets/svg/record.svg?react';
+import SettingsIcon from '@/assets/svg/settings.svg?react';
 
-export type IconKeys = 'loading';
+export type IconKeys = 'edit' | 'expand' | 'hamberger' | 'loading' | 'record' | 'settings'
 
-export const IconMap: Record<
-  IconKeys,
-  FunctionComponent<
-    ComponentProps<'svg'> & {
-      title?: string;
-      titleId?: string;
-      desc?: string;
-      descId?: string;
-    }
-  >
-> = {
-  loading: LoadingIcon,
+export const IconMap: Record<IconKeys, FunctionComponent<ComponentProps<'svg'> & { title?: string; titleId?: string; desc?: string; descId?: string }>> = {
+'edit': EditIcon,
+'expand': ExpandIcon,
+'hamberger': HambergerIcon,
+'loading': LoadingIcon,
+'record': RecordIcon,
+'settings': SettingsIcon
 };

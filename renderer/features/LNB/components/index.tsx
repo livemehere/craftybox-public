@@ -1,72 +1,102 @@
-import { Space } from '@fewings/react/components';
-import { motion, Variants } from 'motion/react';
-import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai/index';
+import { NavLink } from 'react-router';
 
-import { cn } from '@/utils/cn';
-import { usePlatform } from '@/queries/usePlatform';
 import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
+import { Icon } from '@/components/icons/Icon';
+import { IconKeys } from '@/components/icons/IconMap';
+import { cn } from '@/utils/cn';
 
-import AppButtons from './AppButtons';
-import MenuItem from './MenuItem';
-import { LNB_MENUS } from '../schema';
+const menu: {
+  iconName: IconKeys;
+  name: string;
+  path: string;
+  iconClass?: string;
+  colorType: 'stroke' | 'fill';
+  end?: boolean;
+}[] = [
+  {
+    iconName: 'expand',
+    name: 'SCREENSHOT',
+    path: '/tools/screenshot',
+    iconClass: 'p-3',
+    colorType: 'stroke',
+  },
+  {
+    iconName: 'record',
+    name: 'RECORDING',
+    path: '/tools/recording',
+    colorType: 'stroke',
+  },
+  {
+    iconName: 'edit',
+    name: 'EDIT',
+    path: '/tools/edit',
+    colorType: 'stroke',
+  },
+  {
+    end: true,
+    iconName: 'settings',
+    name: 'SETTINGS',
+    path: '/settings',
+    iconClass: 'p-3',
+    colorType: 'fill',
+  },
+];
 
-const VARIANTS: Variants = {
-  open: {
-    width: 'var(--side-bar-width)',
-    minWidth: 'var(--side-bar-width)',
-    borderWidth: 1,
-  },
-  close: {
-    width: 0,
-    minWidth: 0,
-    borderRightWidth: 0,
-    paddingLeft: 0,
-    paddingRight: 0,
-    borderWidth: 0,
-  },
-};
+const EXPAND_WIDTH = 224;
+const COLLAPSE_WIDTH = 64;
 
 const LNB = () => {
-  const open = useAtomValue(lnbOpenAtom);
-  const platform = usePlatform();
+  const [open, setSideBarOpen] = useAtom(lnbOpenAtom);
+  const toggleSideBar = () => setSideBarOpen((prev) => !prev);
 
   return (
-    <motion.aside
-      className={cn(
-        'overflow-hidden rounded-l-xl border-neutral-700 bg-neutral-900/98 px-2 py-3',
-        'whitespace-nowrap'
-      )}
-      initial={open ? 'open' : 'close'}
-      animate={open ? 'open' : 'close'}
-      variants={VARIANTS}
-      transition={{
-        duration: 0.2,
-        type: 'spring',
-        stiffness: 300,
-        damping: 40,
-      }}
+    <aside
+      className={'flex flex-col overflow-hidden rounded-l-xl px-12 py-15'}
+      style={{ width: open ? EXPAND_WIDTH : COLLAPSE_WIDTH }}
     >
-      {platform === 'darwin' && <AppButtons />}
-      {/*<CurrentUser />*/}
-      <Space y={12} />
-      {LNB_MENUS.map((category, index) => (
-        <section className={'mb-3'} key={index}>
-          <label className={'pl-2 text-xs opacity-70'}>
-            {category.category}
-          </label>
-          <div className={'mt-2 space-y-0.5'}>
-            {category.children.map((item, index) => (
-              <MenuItem
-                key={index}
-                parentPathKey={category.pathKey}
-                item={item}
-                depth={1}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
-    </motion.aside>
+      <div className={'flex items-center gap-8'}>
+        <button className={'pressable'} onClick={toggleSideBar}>
+          <Icon name={'hamberger'} />
+        </button>
+        {open && <span className={'leading-15 font-bold'}>CRAFTYBOX</span>}
+      </div>
+
+      <ul className={'mt-18 flex flex-1 flex-col gap-2'}>
+        {menu.map((item, index) => (
+          <li
+            key={item.path}
+            style={{
+              marginTop: item.end ? 'auto' : undefined,
+            }}
+          >
+            <NavLink to={item.path} key={index}>
+              {({ isActive }) => (
+                <div
+                  className={cn(
+                    'pressable typo-body2 flex items-center gap-14 px-8 py-6',
+                    {
+                      'text-app-primary': isActive,
+                    }
+                  )}
+                >
+                  <Icon
+                    name={item.iconName}
+                    className={cn(item.iconClass, {
+                      '[&_path]:fill-app-primary':
+                        isActive && item.colorType === 'fill',
+                      '[&_path]:stroke-app-primary':
+                        isActive && item.colorType === 'stroke',
+                    })}
+                  />
+                  {open && <span>{item.name}</span>}
+                </div>
+              )}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 };
 

@@ -3,7 +3,7 @@ import ActiveTimer from '@/features/timer/components/ActiveTimer';
 
 const TimerPage = () => {
   return (
-    <div className={'page-wrapper flex px-4 pb-4'}>
+    <div className={'flex h-full px-4 pb-4'}>
       <section className={'flex flex-1 items-center justify-center'}>
         <ActiveTimer />
       </section>

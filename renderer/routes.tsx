@@ -8,8 +8,10 @@ const HomePage = lazy(() => import('@/pages/HomePage'));
 
 /* tools */
 const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
-const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
-const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
+const RecordingPage = lazy(() => import('@/pages/tools/RecordingPage'));
+const EditPage = lazy(() => import('@/pages/tools/EditPage'));
+// const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
+// const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
 const GeneralSettingPage = lazy(
@@ -59,15 +61,25 @@ export const routes: RouteObject[] = [
             Component: ScreenShotPage,
           },
           {
-            path: 'timer',
-            id: 'Timer',
-            Component: TimerPage,
+            path: 'recording',
+            id: 'Recording',
+            Component: RecordingPage,
           },
           {
-            path: 'color-picker',
-            id: 'ColorPicker',
-            Component: ColorPickerPage,
+            path: 'edit',
+            id: 'Edit',
+            Component: EditPage,
           },
+          // {
+          //   path: 'timer',
+          //   id: 'Timer',
+          //   Component: TimerPage,
+          // },
+          // {
+          //   path: 'color-picker',
+          //   id: 'ColorPicker',
+          //   Component: ColorPickerPage,
+          // },
         ],
       },
       {

@@ -82,7 +82,7 @@ export default function ArchivePage() {
   );
 
   return (
-    <div className="page-wrapper-with-padding">
+    <div className="h-full">
       <h1 className="mb-2 text-3xl font-bold">Archive</h1>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">아카이브 목록</h2>

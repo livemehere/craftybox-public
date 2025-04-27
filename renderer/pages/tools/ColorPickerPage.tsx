@@ -1,8 +1,6 @@
 const ColorPickerPage = () => {
   return (
-    <div
-      className={'page-wrapper-with-padding flex items-center justify-center'}
-    >
+    <div className={'flex h-full items-center justify-center'}>
       <h1>COMING SOON</h1>
     </div>
   );

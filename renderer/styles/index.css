@@ -6,19 +6,24 @@
 
 @theme {
   --color-app-black:#141517;
+  --color-app-gray:#1e2022;
+  --color-app-soft-gray:#353638;
+  --color-app-primary:#04cd85;
+  --color-app-secondary:#dfe2ea;
+  --color-app-tertiary:#c9cedc;
+
+  --spacing:1px;
 }
 
 @layer base {
-  :root {
-    --side-bar-width: 224px;
-  }
-
   body {
     font-family: 'Pretendard', sans-serif;
+    overflow: hidden;
     @apply bg-app-black text-white;
   }
 
   * {
+    font-family: inherit;
     user-select: none;
     outline: none;
     &::-webkit-scrollbar {

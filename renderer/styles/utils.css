@@ -8,6 +8,6 @@
   }
 
   .pressable {
-    @apply rounded hover:bg-neutral-700 data-[active="true"]:bg-neutral-700;
+    @apply rounded hover:bg-app-soft-gray data-[active="true"]:bg-app-soft-gray cursor-pointer;
   }
 }
