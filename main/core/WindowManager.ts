@@ -43,7 +43,6 @@ export class WindowManager {
     });
     this.main = await AppWindow.create({
       ...bounds,
-      transparent: true,
       resizable: true,
       initialShow: false,
       html: 'index',

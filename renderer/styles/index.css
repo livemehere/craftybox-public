@@ -4,14 +4,18 @@
 @import './components/typo.css';
 @import './utils.css';
 
+@theme {
+  --color-app-black:#141517;
+}
+
 @layer base {
   :root {
-    --side-bar-width: 250px;
+    --side-bar-width: 224px;
   }
 
   body {
-    font-family: 'Spoqa Han Sans Neo';
-    @apply text-neutral-50;
+    font-family: 'Pretendard', sans-serif;
+    @apply bg-app-black text-white;
   }
 
   * {
@@ -29,9 +33,5 @@
     &::-webkit-scrollbar-track {
       @apply rounded-sm bg-neutral-800;
     }
-  }
-
-  button {
-    @apply cursor-pointer;
   }
 }
