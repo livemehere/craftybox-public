@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
+import { produce } from 'immer';
 import useStore from '@shared/Store/react/useStore';
 import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
-import { produce } from 'immer';
 
-import useCaptureInput from '@/features/settings/hooks/useCaptureInput';
-import { ShortCutInputOverlay } from '@/features/settings/components/shortcuts/ShortCutInputOverlay';
-import ShortCutItem from '@/features/settings/components/shortcuts/ShortCutItem';
+import { ShortCutInputOverlay } from '@/features/Settings-Shortcut/components/ShortCutInputOverlay';
+import useCaptureInput from '@/features/Settings-Shortcut/hooks/useCaptureInput';
 
-const ShortcutList = () => {
-  const [changeTarget, setChangeTarget] = useState<string | null>(null);
+import ShortCutItem from './ShortCutItem';
+
+export default function ShortCutSettings() {
   const { data: shortcuts, setData: setShortcuts } =
     useStore<TUserShortcutSettings>(STORE_KEY_MAP.shortcuts, []);
 
+  const [changeTarget, setChangeTarget] = useState<string | null>(null);
   const { curChar, reset } = useCaptureInput({
     active: !!changeTarget,
     onEnd: (v) => {
@@ -22,13 +23,6 @@ const ShortcutList = () => {
       setChangeTarget(null);
     },
   });
-
-  useEffect(() => {
-    if (curChar === 'Escape') {
-      reset();
-      setChangeTarget(null);
-    }
-  }, [curChar]);
 
   const onChangeShortcut = (key: string, value: string, enabled?: boolean) => {
     setShortcuts(
@@ -42,10 +36,17 @@ const ShortcutList = () => {
     );
   };
 
+  useEffect(() => {
+    if (curChar === 'Escape') {
+      reset();
+      setChangeTarget(null);
+    }
+  }, [curChar]);
+
   return (
-    <>
+    <div>
       {changeTarget && <ShortCutInputOverlay char={curChar} />}
-      <div className={'flex flex-col gap-6 rounded-lg bg-neutral-900 p-4'}>
+      <div className={'flex flex-col gap-24'}>
         {shortcuts?.map((shortcut) => {
           return (
             <ShortCutItem
@@ -57,8 +58,6 @@ const ShortcutList = () => {
           );
         })}
       </div>
-    </>
+    </div>
   );
-};
-
-export default ShortcutList;
+}

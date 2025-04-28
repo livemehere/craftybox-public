@@ -14,12 +14,7 @@ const EditPage = lazy(() => import('@/pages/tools/EditPage'));
 // const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
-const GeneralSettingPage = lazy(
-  () => import('@/pages/settings/GeneralSettingPage')
-);
-const ShortCutSettingPage = lazy(
-  () => import('@/pages/settings/ShortCutSettingPage')
-);
+const SettingsPage = lazy(() => import('@/pages/settings'));
 
 /* workspace */
 const ArchivePage = lazy(() => import('@/pages/workspace/ArchivePage'));
@@ -38,18 +33,7 @@ export const routes: RouteObject[] = [
       {
         path: 'settings',
         id: 'Settings',
-        children: [
-          {
-            index: true,
-            id: 'General',
-            Component: GeneralSettingPage,
-          },
-          {
-            path: 'shortcuts',
-            id: 'Shortcuts',
-            Component: ShortCutSettingPage,
-          },
-        ],
+        Component: SettingsPage,
       },
       {
         path: 'tools',

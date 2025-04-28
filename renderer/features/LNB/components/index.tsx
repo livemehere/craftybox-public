@@ -55,8 +55,8 @@ const LNB = () => {
       className={'flex flex-col overflow-hidden rounded-l-xl px-12 py-15'}
       style={{ width: open ? EXPAND_WIDTH : COLLAPSE_WIDTH }}
     >
-      <div className={'flex items-center gap-8'}>
-        <button className={'pressable'} onClick={toggleSideBar}>
+      <div className={'drag-zone flex items-center gap-8'}>
+        <button className={'pressable no-drag-zone'} onClick={toggleSideBar}>
           <Icon name={'hamberger'} />
         </button>
         {open && <span className={'leading-15 font-bold'}>CRAFTYBOX</span>}

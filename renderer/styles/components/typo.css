@@ -3,6 +3,18 @@
     @apply text-xs text-neutral-300;
   }
 
+  .heading1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.22px;
+  }
+
+  .heading2 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.18px;
+  }
+
   .typo-body1 {
     font-size: 15px;
     font-style: normal;

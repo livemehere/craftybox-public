@@ -9,7 +9,7 @@ const SettingItem = ({ title, children }: Props) => {
   return (
     <div
       className={
-        'bg-black-300 flex w-full justify-between rounded-lg bg-neutral-900 p-4 text-sm'
+        'typo-body1 flex w-full justify-between rounded-lg px-14 py-20'
       }
     >
       <span>{title}</span>
