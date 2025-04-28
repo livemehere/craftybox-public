@@ -8,9 +8,7 @@ type Props = {
 const SettingItem = ({ title, children }: Props) => {
   return (
     <div
-      className={
-        'typo-body1 flex w-full justify-between rounded-lg px-14 py-20'
-      }
+      className={'typo-body1 flex w-full justify-between rounded-lg px-14 py-8'}
     >
       <span>{title}</span>
       <span className={'opacity-80'}>{children}</span>

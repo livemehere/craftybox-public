@@ -15,7 +15,7 @@ export default function Tab({
         <button
           key={tab.key}
           className={cn(
-            'typo-body1 rounded-b-2 hover:bg-app-gray cursor-pointer rounded-t border-b-2 border-transparent px-12 py-8 uppercase',
+            'typo-body2 rounded-b-2 hover:bg-app-gray cursor-pointer rounded-t border-b-2 border-transparent px-12 py-8 uppercase',
             {
               'border-white': activeKey === tab.key,
             }
