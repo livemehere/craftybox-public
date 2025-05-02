@@ -38,6 +38,17 @@ export type SnapshotModuleInvokeMap = {
       appIcon?:string;
     }[]
   }
+  "snapshot:capture":{
+    payload:{
+      type:'screen'|'window';
+      id:string;
+      width:number;
+      height:number;
+    },
+    response:{
+      dataUrl:string;
+    }
+  }
 }
 
 export class SnapshotModule extends BaseModule {
@@ -62,19 +73,19 @@ export class SnapshotModule extends BaseModule {
     // 스냅샷 관련 IPC 핸들러 등록
 
     mainIpc.handle('snapshot:list', async ({type})=>{
+      const sources = await desktopCapturer.getSources({
+        types:[type],
+        thumbnailSize: {
+          width: 1280,
+          height: 720,
+        },
+        fetchWindowIcons:true,
+      })
       if(type === 'screen'){
-        const res = await desktopCapturer.getSources({
-          types:[type],
-          thumbnailSize: {
-            width: 1280,
-            height: 720,
-          },
-          fetchWindowIcons:true,
-        })
         const displays = screen.getAllDisplays();
         return Array.from({length: displays.length},(_,i)=>{
           const display = displays[i];
-          const source = res[i];
+          const source = sources[i];
           return {
             id:source.id,
             name:source.name,
@@ -88,10 +99,38 @@ export class SnapshotModule extends BaseModule {
           }
         })
       }else{
-        // TODO: window
-        return [];
+        return sources.map((source) => {
+          return {
+            id: source.id,
+            name: source.name,
+            x: 0,
+            y: 0,
+            width:0,
+            height:0,
+            scaleFactor: 1,
+            dataUrl: source.thumbnail.toDataURL(),
+            appIcon: source.appIcon?.toDataURL(),
+          };
+        }
+        );
       }
+    })
 
+    mainIpc.handle('snapshot:capture', async ({type,id,width,height})=>{
+      const sources = await desktopCapturer.getSources({
+        types:[type],
+        thumbnailSize: {
+          width,
+          height,
+        },
+      })
+      const source = sources.find((source) => source.id === id);
+      if(!source){
+        throw new Error('Source not found');
+      }
+      return {
+        dataUrl:source.thumbnail.toDataURL(),
+      }
     })
 
   }

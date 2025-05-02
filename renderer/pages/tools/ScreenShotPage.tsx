@@ -46,29 +46,65 @@ function ItemList({ type }: { type: Tabs }) {
   });
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,300px)] gap-4">
-      {data?.map(({ id, x, y, width, height, dataUrl, name }) => (
-        <div key={id}>
-          <img
-            src={dataUrl}
-            alt={name}
-            className="aspect-video w-full rounded-lg"
-          />
-          <div className="mt-8 flex">
-            <div className="bg-app-gray mr-10 h-40 w-40 rounded-full">
-              <MdOutlineMonitor className="h-full w-full p-8" />
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-12">
+      {data?.map(
+        ({ id, width, height, dataUrl, name, appIcon, scaleFactor }) => (
+          <div
+            key={id}
+            onClick={async () => {
+              const { dataUrl } = await rendererIpc.invoke('snapshot:capture', {
+                type,
+                id,
+                width: width * scaleFactor || 1280,
+                height: height * scaleFactor || 720,
+              });
+
+              const blob = await fetch(dataUrl).then((res) => res.blob());
+              navigator.clipboard.write([
+                new ClipboardItem({
+                  [blob.type]: blob,
+                }),
+              ]);
+
+              console.log(
+                `copied, ${width * scaleFactor}x${height * scaleFactor}, ${id}`
+              );
+            }}
+          >
+            <div className="h-180 w-full rounded-lg bg-neutral-950">
+              <img
+                src={dataUrl}
+                alt={name}
+                className="h-full w-full object-contain"
+              />
             </div>
-            <div>
-              <p className="typo-body1 text-app-secondary font-bold">{name}</p>
-              <p className="typo-body2 text-app-tertiary mt-4">
-                {width}
-                <span className="opacity-50"> x </span>
-                {height}
-              </p>
+            <div className="mt-8 flex">
+              <div className="bg-app-gray mr-10 h-40 w-40 shrink-0 rounded-full">
+                {appIcon ? (
+                  <img
+                    src={appIcon}
+                    alt="app-icon"
+                    className="h-full w-full object-contain p-8"
+                  />
+                ) : (
+                  <MdOutlineMonitor className="h-full w-full p-8" />
+                )}
+              </div>
+              <div className="overflow-hidden">
+                <p className="typo-body1 text-app-secondary truncate font-bold">
+                  {name}
+                </p>
+                <p className="typo-body2 text-app-tertiary mt-4">{id}</p>
+                <p className="typo-body2 text-app-tertiary mt-2">
+                  {width}
+                  <span className="opacity-50"> x </span>
+                  {height}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   );
 }
