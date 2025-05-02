@@ -1,8 +1,4 @@
 @layer components {
-  .typo-desc {
-    @apply text-xs text-neutral-300;
-  }
-
   .heading1 {
     font-size: 22px;
     font-weight: 700;

@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 
 import GeneralSettings from '@/features/Settings-General/components/GeneralSettings';
 import ShortCutSettings from '@/features/Settings-Shortcut/components/ShortCutSettings';
-import Tab from '@/components/Tab';
+import NavTabs from '@/components/NavTabs';
 
 type SettingsQueryParams = {
   tab: 'general' | 'shortcuts';
@@ -29,7 +29,7 @@ export default function SettingsPage() {
     <div className={'h-full px-30 py-20'}>
       <h1 className={'heading1'}>Settings</h1>
       <Space y={22} />
-      <Tab
+      <NavTabs
         tabs={tabs}
         activeKey={qs.tab}
         onChange={(key) => setQs({ tab: key as SettingsQueryParams['tab'] })}

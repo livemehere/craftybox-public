@@ -1,6 +1,6 @@
 import { cn } from '@/utils/cn';
 
-export default function Tab({
+export default function NavTabs({
   tabs,
   activeKey,
   onChange,

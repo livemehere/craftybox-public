@@ -1,4 +1,4 @@
-import { BrowserWindow, globalShortcut, screen } from 'electron';
+import { BrowserWindow, desktopCapturer, globalShortcut, screen } from 'electron';
 import { Monitor } from 'node-screenshots';
 import { mainIpc } from '@electron-buddy/ipc/main';
 import { App } from '@main/core/App';
@@ -21,6 +21,25 @@ export type SnapshotModuleMessageMap = {
   };
 };
 
+export type SnapshotModuleInvokeMap = {
+  "snapshot:list":{
+    payload: {
+      type:'screen'|'window';
+    },
+    response:{
+      id:string;
+      name:string;
+      x:number;
+      y:number;
+      width:number;
+      height:number;
+      scaleFactor:number;
+      dataUrl:string; 
+      appIcon?:string;
+    }[]
+  }
+}
+
 export class SnapshotModule extends BaseModule {
   constructor(app: App) {
     super(app, 'SnapshotModule');
@@ -41,6 +60,40 @@ export class SnapshotModule extends BaseModule {
 
   async registerIpcHandlers() {
     // 스냅샷 관련 IPC 핸들러 등록
+
+    mainIpc.handle('snapshot:list', async ({type})=>{
+      if(type === 'screen'){
+        const res = await desktopCapturer.getSources({
+          types:[type],
+          thumbnailSize: {
+            width: 1280,
+            height: 720,
+          },
+          fetchWindowIcons:true,
+        })
+        const displays = screen.getAllDisplays();
+        return Array.from({length: displays.length},(_,i)=>{
+          const display = displays[i];
+          const source = res[i];
+          return {
+            id:source.id,
+            name:source.name,
+            x:display.bounds.x,
+            y:display.bounds.y,
+            width:display.bounds.width,
+            height:display.bounds.height,
+            scaleFactor:display.scaleFactor,
+            dataUrl:source.thumbnail.toDataURL(),
+            appIcon:source.appIcon?.toDataURL(),
+          }
+        })
+      }else{
+        // TODO: window
+        return [];
+      }
+
+    })
+
   }
 
   getCurrentCursorMonitor() {

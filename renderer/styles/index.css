@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import './components/page.css';
 @import './components/buttons.css';
 @import './components/typo.css';
 @import './utils.css';
