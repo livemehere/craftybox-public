@@ -3,6 +3,7 @@ import { Provider } from 'jotai';
 
 import { OverlayProvider } from '@/lib/overlay';
 import TimerProvider from '@/features/timer/TimerProvider';
+import ToastProvider from '@/lib/toast/ToastProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,7 +21,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <Provider>
       <QueryClientProvider client={queryClient}>
         <OverlayProvider>
-          <TimerProvider>{children}</TimerProvider>
+          <ToastProvider>
+            <TimerProvider>{children}</TimerProvider>
+          </ToastProvider>
         </OverlayProvider>
       </QueryClientProvider>
     </Provider>

@@ -7,6 +7,7 @@ import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 
 import Tabs from '@/components/Tabs';
+import { useToast } from '@/lib/toast/ToastContext';
 
 type Tabs = 'screen' | 'window';
 type QsState = {
@@ -62,6 +63,7 @@ function CaptureTarget({
   appIcon,
   scaleFactor,
 }: CaptureTargetProps) {
+  const { pushMessage } = useToast();
   const [hover, setHover] = useState(false);
   const finalScaleFactor = scaleFactor || 1;
 
@@ -85,11 +87,14 @@ function CaptureTarget({
   const copyToClipboard = async () => {
     const dataUrl = await getDataUrl();
     const blob = await fetch(dataUrl).then((res) => res.blob());
-    navigator.clipboard.write([
+    await navigator.clipboard.write([
       new ClipboardItem({
         [blob.type]: blob,
       }),
     ]);
+    pushMessage('Copied to clipboard', {
+      type: 'success',
+    });
   };
 
   const download = async () => {
