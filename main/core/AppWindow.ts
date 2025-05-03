@@ -81,6 +81,10 @@ export class AppWindow {
           this.win.webContents.closeDevTools();
         }
       }
+
+      if((input.meta || input.control) && input.code === 'KeyC' && input.shift){
+        this.win.webContents.devToolsWebContents?.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
+      }
     });
   }
 
