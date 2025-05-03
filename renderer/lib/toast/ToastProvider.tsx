@@ -53,7 +53,7 @@ export default function ToastProvider({
                 key={msg.id}
                 layout
                 className={cn(
-                  'typo-body2 border-app-soft-gray relative cursor-pointer rounded border-b bg-black/50 px-28 py-16 inset-shadow-xs backdrop-blur-lg hover:bg-black/70',
+                  'typo-body2 border-app-soft-gray relative cursor-pointer rounded border-b bg-white/5 px-28 py-16 inset-shadow-xs backdrop-blur-lg hover:bg-black/70',
                   {
                     [SHADOW_MAP[msg.type as keyof typeof SHADOW_MAP]]: msg.type,
                   }

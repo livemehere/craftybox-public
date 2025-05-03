@@ -76,8 +76,8 @@ export class SnapshotModule extends BaseModule {
       const sources = await desktopCapturer.getSources({
         types:[type],
         thumbnailSize: {
-          width: 1280,
-          height: 720,
+          width: 720,
+          height: 480,
         },
         fetchWindowIcons:true,
       })
