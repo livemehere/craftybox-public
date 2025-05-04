@@ -52,7 +52,9 @@ const LNB = () => {
 
   return (
     <aside
-      className={'flex flex-col overflow-hidden rounded-l-xl px-12 py-15'}
+      className={
+        'flex shrink-0 flex-col overflow-hidden rounded-l-xl px-12 py-15'
+      }
       style={{ width: open ? EXPAND_WIDTH : COLLAPSE_WIDTH }}
     >
       <div className={'drag-zone flex items-center gap-8'}>

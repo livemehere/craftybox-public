@@ -1,5 +1,4 @@
 import { ComponentProps, FunctionComponent } from 'react';
-
 import ConstraintIcon from '@/assets/svg/constraint.svg?react';
 import EditIcon from '@/assets/svg/edit.svg?react';
 import ExpandIcon from '@/assets/svg/expand.svg?react';

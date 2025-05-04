@@ -28,6 +28,7 @@ export default function SettingsPage() {
   return (
     <div className={'h-full px-30 py-20'}>
       <h1 className={'heading1'}>Settings</h1>
+      
       <Space y={22} />
       <NavTabs
         tabs={tabs}

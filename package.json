@@ -94,6 +94,7 @@
     "jotai-optics": "^0.4.0",
     "motion": "^11.15.0",
     "node-screenshots": "^0.2.1",
+    "pixi.js": "^8.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hotkeys-hook": "^4.6.1",
