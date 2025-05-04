@@ -5,9 +5,10 @@ import { PixiContext } from '@/lib/pixi/PixiContext';
 
 interface Props {
   children: React.ReactNode;
+  resizeDeps?: any[];
 }
 
-const PixiProvider = ({ children }: Props) => {
+const PixiProvider = ({ children, resizeDeps = [] }: Props) => {
   const [app, setApp] = useState<Application | null>(null);
   const [canvasEl, setCanvasEl] = useState<HTMLCanvasElement | null>(null);
   const [init, setInit] = useState(false);
@@ -19,7 +20,9 @@ const PixiProvider = ({ children }: Props) => {
       canvas: canvasEl,
       resolution: window.devicePixelRatio > 1 ? 2 : 1,
       resizeTo: canvasEl.parentElement!,
+      background: '#141517',
     });
+    newApp.stage.interactive = true;
     setApp(newApp);
     setInit(true);
     console.log('init pixi app');
@@ -36,6 +39,11 @@ const PixiProvider = ({ children }: Props) => {
       }
     };
   }, [canvasEl]);
+
+  useEffect(() => {
+    if (!app) return;
+    app.resize();
+  }, [...resizeDeps]);
 
   return (
     <PixiContext.Provider

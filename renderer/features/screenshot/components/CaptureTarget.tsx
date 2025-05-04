@@ -4,11 +4,13 @@ import { useMemo, useState } from 'react';
 import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 import { TbFaceIdError } from 'react-icons/tb';
+import { useNavigate } from 'react-router';
 
 import { useToast } from '@/lib/toast/ToastContext';
 import { Icon } from '@/components/icons/Icon';
 import { getAspectRatio } from '@/utils/size';
 import { ScreenShotPageQsState } from '@/pages/tools/ScreenShotPage';
+import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
 
 interface CaptureTargetProps {
   id: string;
@@ -29,6 +31,7 @@ export default function CaptureTarget({
   appIcon,
   originScaleFactor,
 }: CaptureTargetProps) {
+  const navigate = useNavigate();
   const { pushMessage } = useToast();
   const [hover, setHover] = useState(false);
   const [pending, setPending] = useState(false);
@@ -108,17 +111,15 @@ export default function CaptureTarget({
       setPending(false);
     }
   };
+
   const download = async () => {
     try {
       setPending(true);
       const dataUrl = await getDataUrl();
-      const blob = await fetch(dataUrl).then((res) => res.blob());
-      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = dataUrl;
       a.download = `${name}.png`;
       a.click();
-      URL.revokeObjectURL(url);
       a.remove();
     } catch (e) {
       if (e instanceof Error) {
@@ -129,6 +130,12 @@ export default function CaptureTarget({
     } finally {
       setPending(false);
     }
+  };
+
+  const goEdit = async () => {
+    const dataUrl = await getDataUrl();
+    localStorage.setItem(SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY, dataUrl);
+    navigate('/tools/edit');
   };
 
   const btnClassName =
@@ -176,6 +183,12 @@ export default function CaptureTarget({
                   </button>
                   <button className={btnClassName} onClick={download}>
                     <FiDownload />
+                  </button>
+                  <button className={btnClassName} onClick={goEdit}>
+                    <Icon
+                      name={'edit'}
+                      className="h-18 w-18 [&_path]:stroke-white"
+                    />
                   </button>
                 </div>
                 <input
