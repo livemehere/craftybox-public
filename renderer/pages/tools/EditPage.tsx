@@ -1,9 +1,11 @@
 import { Graphics } from 'pixi.js';
+import { useAtomValue } from 'jotai';
 
 import PixiProvider from '@/lib/pixi/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi/components/PixiCanvas';
 import { usePixiTicker } from '@/lib/pixi/hooks/usePixiTicker';
 import { usePixiApp } from '@/lib/pixi/hooks/usePixiApp';
+import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
 
 const EditPage = () => {
   return (
@@ -19,6 +21,15 @@ const EditPage = () => {
 export default EditPage;
 
 function Runner() {
+  const open = useAtomValue(lnbOpenAtom);
+  usePixiApp(
+    (app) => {
+      app.resize();
+      console.log('resize app');
+    },
+    [open]
+  );
+
   usePixiApp((app) => {
     const g = new Graphics();
     g.rect(0, 0, 100, 100).fill('red');
@@ -27,6 +38,9 @@ function Runner() {
     g.position.set(100, 100);
     g.label = 'target';
     console.log('create rect');
+    return () => {
+      g.destroy();
+    };
   });
 
   usePixiTicker((app) => {
