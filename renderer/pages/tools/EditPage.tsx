@@ -48,7 +48,7 @@ type EditMode = 'select' | 'move' | 'rect';
 function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
   const containerRef = useRef<Container | null>(null);
   const imgSpriteRef = useRef<Sprite | null>(null);
-  const [mode, setMode] = useState<EditMode>('rect');
+  const [mode, setMode] = useState<EditMode>('move');
 
   // drawing control
   usePixiApp(
@@ -204,6 +204,9 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
 
       // set img center
       sprite.position.set(-texture.width / 2, -texture.height / 2);
+
+      // set viewport center
+      app.stage.position.set(app.screen.width / 2, app.screen.height / 2);
 
       containerRef.current = container;
     })();
