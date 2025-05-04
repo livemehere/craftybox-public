@@ -5,7 +5,10 @@ import { useCallbackRef } from '@fewings/react/hooks';
 import { usePixi } from '@/lib/pixi/PixiContext';
 
 let seq = 0;
-export function usePixiApp(cb: (app: Application) => (() => void) | void) {
+export function usePixiApp(
+  cb: (app: Application) => (() => void) | void,
+  deps: any[] = []
+) {
   const { app } = usePixi();
   const _cb = useCallbackRef(cb);
 
@@ -17,5 +20,5 @@ export function usePixiApp(cb: (app: Application) => (() => void) | void) {
       clear?.();
       console.log(`remove usePixiAppHook ${--seq}`);
     };
-  }, [app]);
+  }, [app, ...deps]);
 }
