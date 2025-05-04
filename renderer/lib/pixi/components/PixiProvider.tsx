@@ -18,6 +18,7 @@ const PixiProvider = ({ children }: Props) => {
     await newApp.init({
       canvas: canvasEl,
       resolution: window.devicePixelRatio > 1 ? 2 : 1,
+      resizeTo: canvasEl.parentElement!,
     });
     setApp(newApp);
     setInit(true);
