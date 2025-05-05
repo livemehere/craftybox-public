@@ -62,6 +62,9 @@ importers:
       node-screenshots:
         specifier: ^0.2.1
         version: 0.2.1
+      pixi-filters:
+        specifier: ^6.1.2
+        version: 6.1.2(pixi.js@8.9.2)
       pixi.js:
         specifier: ^8.9.2
         version: 8.9.2
@@ -1539,6 +1542,9 @@ packages:
 
   '@types/glob@8.1.0':
     resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==, tarball: https://registry.npmjs.org/@types/glob/-/glob-8.1.0.tgz}
+
+  '@types/gradient-parser@0.1.5':
+    resolution: {integrity: sha512-r7K3NkJz3A95WkVVmjs0NcchhHstC2C/VIYNX4JC6tieviUNo774FFeOHjThr3Vw/WCeMP9kAT77MKbIRlO/4w==, tarball: https://registry.npmjs.org/@types/gradient-parser/-/gradient-parser-0.1.5.tgz}
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
@@ -3788,6 +3794,11 @@ packages:
   picomatch@4.0.2:
     resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
     engines: {node: '>=12'}
+
+  pixi-filters@6.1.2:
+    resolution: {integrity: sha512-zGyrMTcfapSIS8We+8RPzxIYkrUhn0KamRFA9qWwxggOk/guJcW05djg8xNvmNsCxn6LzxK5sODeEFIf9SF5Xg==, tarball: https://registry.npmjs.org/pixi-filters/-/pixi-filters-6.1.2.tgz}
+    peerDependencies:
+      pixi.js: '>=8.0.0-0'
 
   pixi.js@8.9.2:
     resolution: {integrity: sha512-oLFBkOOA/O6OpT5T8o05AxgZB9x9yWNzEQ+WTNZZFoCvfU2GdT4sFTjpVFuHQzgZPmAm/1IFhKdNiXVnlL8PRw==, tarball: https://registry.npmjs.org/pixi.js/-/pixi.js-8.9.2.tgz}
@@ -6136,6 +6147,8 @@ snapshots:
     dependencies:
       '@types/minimatch': 5.1.2
       '@types/node': 22.10.1
+
+  '@types/gradient-parser@0.1.5': {}
 
   '@types/http-cache-semantics@4.0.4': {}
 
@@ -8754,6 +8767,11 @@ snapshots:
   picomatch@2.3.1: {}
 
   picomatch@4.0.2: {}
+
+  pixi-filters@6.1.2(pixi.js@8.9.2):
+    dependencies:
+      '@types/gradient-parser': 0.1.5
+      pixi.js: 8.9.2
 
   pixi.js@8.9.2:
     dependencies:

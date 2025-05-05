@@ -6,7 +6,7 @@ import {
   Point,
   Sprite,
 } from 'pixi.js';
-import { useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { useMemo, useRef, useState } from 'react';
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
@@ -15,6 +15,7 @@ import { FiDownload } from 'react-icons/fi';
 import { BiRectangle } from 'react-icons/bi';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useForceUpdate } from '@fewings/react/hooks';
+import { OutlineFilter } from 'pixi-filters';
 
 import PixiProvider from '@/lib/pixi/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi/components/PixiCanvas';
@@ -29,6 +30,11 @@ import { useToast } from '@/lib/toast/ToastContext';
 import Grid from '@/lib/pixi/components/ui/Grid';
 
 const CONTAINER_LABEL = 'edit-container';
+
+const hoverObjAtom = atom<Container | null>(null);
+hoverObjAtom.debugLabel = 'hover obj';
+const selectedObjAtom = atom<Container | null>(null);
+selectedObjAtom.debugLabel = 'selected obj';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -291,42 +297,61 @@ function ObjectTree() {
   return (
     <div
       className={
-        'bg-app-gray absolute top-8 bottom-8 left-8 w-280 rounded-lg py-12'
+        'bg-app-gray absolute top-8 bottom-8 left-8 w-280 rounded-lg py-12 shadow shadow-white/10'
       }
     >
       <section className={'px-16 py-8'}>Layer</section>
       {app?.stage.children.map((child) => (
-        <PixiObjectTree container={child} key={child.uid} />
+        <TreeItem container={child} key={child.uid} />
       ))}
     </div>
   );
 }
 
-function PixiObjectTree({
+function TreeItem({
   container,
   depth = 0,
 }: {
   container: Container<ContainerChild>;
   depth?: number;
 }) {
+  const [hoverObjId, setHoverObjId] = useAtom(hoverObjAtom);
+  const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
+  usePixiEffect(
+    (app) => {
+      if (hoverObjId) {
+        console.log('set filter');
+        hoverObjId.filters = [new OutlineFilter(1, 0xff0000)];
+      }
+      return () => {
+        if (hoverObjId) {
+          hoverObjId.filters = [];
+        }
+      };
+    },
+    [hoverObjId]
+  );
+
   return (
     <div className={'hover:bg-app-soft-gray'}>
       <div
         style={{ paddingLeft: depth * 10 }}
-        className={
-          'typo-body2 hover:border-app-primary flex h-32 items-center border-y-1 border-transparent'
-        }
+        className={cn(
+          'typo-body2 hover:border-app-primary flex h-32 items-center border-y-1 border-transparent',
+          {
+            'bg-app-primary/80': container === selectedObj,
+          }
+        )}
+        onMouseEnter={() => setHoverObjId(container)}
+        onMouseLeave={() => setHoverObjId(null)}
+        onClick={() => setSelectedObj(container)}
       >
         <div className={'pl-16'}>{container.label}</div>
       </div>
       <div style={{ paddingLeft: depth * 10 }}>
         {container.children.map((child) => {
           return (
-            <PixiObjectTree
-              container={child}
-              depth={depth + 1}
-              key={child.uid}
-            />
+            <TreeItem container={child} depth={depth + 1} key={child.uid} />
           );
         })}
       </div>
