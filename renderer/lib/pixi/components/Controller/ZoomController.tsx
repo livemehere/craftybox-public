@@ -12,8 +12,9 @@ const ZoomController = ({ enable = true }: { enable?: boolean }) => {
         e.preventDefault();
 
         const isCtrl = e.ctrlKey || e.metaKey;
+        if (!isCtrl) return;
 
-        const scaleStep = isCtrl ? 0.01 : 0.1;
+        const scaleStep = 0.1;
         const minScale = 0.1;
         const maxScale = 5;
 
