@@ -297,7 +297,7 @@ function ObjectTree() {
   return (
     <div
       className={
-        'bg-app-gray absolute top-8 bottom-8 left-8 w-280 rounded-lg py-12 shadow shadow-white/10'
+        'bg-app-gray absolute top-14 bottom-14 left-14 w-280 rounded-lg py-12 shadow shadow-white/10'
       }
     >
       <section className={'px-16 py-8'}>Layer</section>
