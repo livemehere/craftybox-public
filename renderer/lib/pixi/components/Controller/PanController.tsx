@@ -5,10 +5,10 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
   usePixiEffect(
     (app) => {
       if (!enable) {
-        document.body.style.cursor = 'default';
+        app.stage.cursor = 'default';
         return;
       }
-      document.body.style.cursor = 'grab';
+      app.stage.cursor = 'grab';
       let isDown = false;
       let startX: number;
       let startY: number;
@@ -17,7 +17,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
         isDown = true;
         startX = e.clientX;
         startY = e.clientY;
-        document.body.style.cursor = 'grabbing';
+        app.stage.cursor = 'grabbing';
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -33,7 +33,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
 
       const onMouseUp = () => {
         isDown = false;
-        document.body.style.cursor = 'grab';
+        app.stage.cursor = 'grab';
       };
 
       window.addEventListener('mousedown', onMouseDown);
