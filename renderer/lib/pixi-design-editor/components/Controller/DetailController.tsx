@@ -12,6 +12,7 @@ import {
 } from '@/lib/pixi-design-editor/stores';
 import { useToast } from '@/lib/toast/ToastContext';
 import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-design-editor/custom-events';
 
 const DetailController = () => {
   const { app } = usePixi();
@@ -22,7 +23,10 @@ const DetailController = () => {
     width: 0,
     height: 0,
   });
+  const [updateSeq, setUpdateSeq] = useState(0);
   const update = useForceUpdate();
+
+  // useOnEvent('selected-object-change',()=> update());
 
   // save original object properties for mutate `Graphics` object in each input
   useEffect(() => {
@@ -33,6 +37,14 @@ const DetailController = () => {
         height: selectedObj.height,
       });
     }
+
+    const handler = () => {
+      setUpdateSeq((prev) => prev + 1);
+    };
+    selectedObj.on(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
+    return () => {
+      selectedObj.off(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
+    };
   }, [selectedObj]);
 
   const getDataUrl = async () => {
@@ -94,7 +106,10 @@ const DetailController = () => {
       <hr className={hrClassName} />
 
       {selectedObj && (
-        <section className={'typo-body2'} key={selectedObj.uid}>
+        <section
+          className={'typo-body2'}
+          key={`${selectedObj.uid}-${updateSeq}`}
+        >
           <h3 className={'p-16'}>{selectedObj.label}</h3>
           <hr className={hrClassName} />
           <div className={'p-16'}>Position</div>

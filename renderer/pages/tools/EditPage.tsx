@@ -1,6 +1,6 @@
 import { Assets, Container, Sprite } from 'pixi.js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import PixiProvider from '@/lib/pixi-design-editor/components/PixiProvider';
@@ -15,15 +15,18 @@ import {
   EditMode,
   exportContainerAtom,
   modeAtom,
+  selectedObjAtom,
 } from '@/lib/pixi-design-editor/stores';
 import DetailController from '@/lib/pixi-design-editor/components/Controller/DetailController';
 import PixiExecutor from '@/lib/pixi-design-editor/components/PixiExecutor';
 import HandToolsController from '@/lib/pixi-design-editor/components/Controller/HandToolsController';
 import InteractionController from '@/lib/pixi-design-editor/components/Controller/InteractionController';
+import { makeHighLight } from '@/lib/pixi-design-editor/utils';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
   const setEditingContainer = useSetAtom(exportContainerAtom);
+  const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
   const prevMode = useRef<EditMode | undefined>(undefined);
@@ -59,6 +62,21 @@ const EditPage = () => {
   useHotkeys('h', () => setMode('move'));
   /** drawing */
   useHotkeys('r', () => setMode('draw-rect'));
+
+  /** if not select mode, resolve current selected obj */
+  useEffect(() => {
+    if (mode !== 'select') {
+      setSelectedObj(null);
+    }
+  }, [mode]);
+
+  useEffect(() => {
+    if (!selectedObj) return;
+    const restore = makeHighLight(selectedObj);
+    return () => {
+      restore();
+    };
+  }, [selectedObj]);
 
   return (
     <PixiProvider resizeDeps={[open]}>

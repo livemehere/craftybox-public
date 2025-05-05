@@ -1,7 +1,5 @@
 import { useForceUpdate } from '@fewings/react/hooks';
 import { useAtomValue } from 'jotai';
-import { Filter } from 'pixi.js';
-import { OutlineFilter } from 'pixi-filters';
 
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
@@ -10,12 +8,14 @@ import {
   hoverObjAtom,
 } from '@/lib/pixi-design-editor/stores';
 import TreeItem from '@/lib/pixi-design-editor/components/PixiTreeView/TreeItem';
+import { makeHighLight } from '@/lib/pixi-design-editor/utils';
 
 const PixiTreeView = () => {
   const { app } = usePixi();
   const update = useForceUpdate();
   const editingContainer = useAtomValue(exportContainerAtom);
 
+  /** watch `stage`, `editingContainer` children change and update tree ui */
   usePixiEffect(
     (app) => {
       if (!editingContainer) return;
@@ -40,20 +40,9 @@ const PixiTreeView = () => {
   const hoverObj = useAtomValue(hoverObjAtom);
   usePixiEffect(() => {
     if (!hoverObj) return;
-    const target = hoverObj;
-    let prevFilters: Filter[] = [];
-    prevFilters = (
-      Array.isArray(target.filters) ? [...target.filters] : [target.filters]
-    ).filter(Boolean);
-    target.filters = [
-      ...prevFilters,
-      new OutlineFilter({
-        thickness: 1,
-        color: 0xff0000,
-      }),
-    ];
+    const restore = makeHighLight(hoverObj);
     return () => {
-      target.filters = prevFilters;
+      restore();
     };
   }, [hoverObj]);
 

@@ -7,6 +7,7 @@ import {
   selectedObjAtom,
 } from '@/lib/pixi-design-editor/stores';
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-design-editor/custom-events';
 
 const InteractionController = () => {
   const editingContainer = useAtomValue(exportContainerAtom);
@@ -16,7 +17,8 @@ const InteractionController = () => {
   /** drag and drop */
   usePixiEffect(
     (app) => {
-      if (!selectedObj || mode !== 'select') return;
+      if (!selectedObj) return;
+      setMode('select');
 
       let isDragging = false;
       let startX = 0;
@@ -48,6 +50,8 @@ const InteractionController = () => {
 
         selectedObj.x = originalObjX + dx;
         selectedObj.y = originalObjY + dy;
+
+        selectedObj.emit(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE);
       };
 
       const handleUp = () => {
@@ -64,7 +68,7 @@ const InteractionController = () => {
         app.canvas.removeEventListener('pointerup', handleUp);
       };
     },
-    [selectedObj, mode]
+    [selectedObj]
   );
 
   /** create shapes */
