@@ -38,10 +38,10 @@ const ZoomController = ({ enable = true }: { enable?: boolean }) => {
         app.stage.position.y += dy;
       };
 
-      window.addEventListener('wheel', onWheel, { passive: false });
+      app.canvas.addEventListener('wheel', onWheel, { passive: false });
 
       return () => {
-        window.removeEventListener('wheel', onWheel);
+        app.canvas.removeEventListener('wheel', onWheel);
       };
     },
     [enable]
