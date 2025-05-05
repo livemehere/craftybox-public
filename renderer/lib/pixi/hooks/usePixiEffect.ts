@@ -5,7 +5,7 @@ import { useCallbackRef } from '@fewings/react/hooks';
 import { usePixi } from '@/lib/pixi/PixiContext';
 
 let seq = 0;
-export function usePixiApp(
+export function usePixiEffect(
   cb: (app: Application) => (() => void) | void,
   deps: any[] = []
 ) {
