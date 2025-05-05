@@ -49,3 +49,22 @@ input[type='range'] {
   border-radius: 5px;
   outline: none;
 }
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  .app-input{
+      @apply bg-app-soft-gray text-white rounded-md;
+      @apply focus:outline-none focus:ring-1 focus:ring-app-primary;
+      @apply px-12 py-8;
+  }
+}
+

@@ -69,6 +69,7 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
   const imgSpriteRef = useRef<Sprite | null>(null);
   const [mode, setMode] = useState<EditMode>('select');
   const prevMode = useRef(mode);
+  const setSelectedObj = useSetAtom(selectedObjAtom);
 
   // movable while space bar is pressed
   useHotkeys('space', () => {
@@ -88,6 +89,7 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
       keydown: false,
     }
   );
+
   useHotkeys('h', () => setMode('move'));
   useHotkeys('v', () => setMode('select'));
   useHotkeys('r', () => setMode('rect'));
@@ -176,6 +178,8 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
       app.stage.position.set(app.screen.width / 2, app.screen.height / 2);
 
       setEditingContainer(container);
+
+      setSelectedObj(sprite);
     })();
     return () => {
       editingContainer?.destroy();
@@ -227,6 +231,7 @@ function EditSideBar() {
   const { app } = usePixi();
   const { pushMessage } = useToast();
   const editingContainer = useAtomValue(editingContainerAtom);
+  const selectedObj = useAtomValue(selectedObjAtom);
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');
@@ -259,6 +264,14 @@ function EditSideBar() {
   const btnClassName =
     'bg-app-soft-gray rounded px-12 py-6 hover:bg-[#414244] cursor-pointer';
 
+  const hrClassName = 'border-[0.5px] border-white/10';
+
+  const inputClassName = cn(
+    'flex items-center gap-6',
+    'bg-app-soft-gray rounded px-12 py-6 w-full typo-body2',
+    '[&:has(input:focus)]:outline-1 outline-app-primary'
+  );
+
   return (
     <aside
       className={
@@ -276,7 +289,40 @@ function EditSideBar() {
         </button>
       </section>
 
-      {/*<hr className={'border-[0.5px] border-white/10'} />*/}
+      <hr className={hrClassName} />
+
+      {selectedObj && (
+        <section className={'typo-body2'} key={selectedObj.uid}>
+          <div className={'p-16'}>{selectedObj.label}</div>
+          <hr className={hrClassName} />
+          <div className={'px-16 pt-16'}>Position</div>
+          <div className={'flex items-center justify-between gap-8 p-16'}>
+            <label className={inputClassName}>
+              <span className={'text-white/50'}>X</span>
+              <input
+                className={'w-full'}
+                type="number"
+                defaultValue={selectedObj.x}
+                onChange={(e) => {
+                  selectedObj.x = Number(e.target.value);
+                }}
+              />
+            </label>
+
+            <label className={inputClassName}>
+              <span className={'text-white/50'}>Y</span>
+              <input
+                className={'w-full'}
+                type="number"
+                defaultValue={selectedObj.y}
+                onChange={(e) => {
+                  selectedObj.y = Number(e.target.value);
+                }}
+              />
+            </label>
+          </div>
+        </section>
+      )}
     </aside>
   );
 }
