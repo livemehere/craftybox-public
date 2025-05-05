@@ -1,6 +1,5 @@
 import { Application } from 'pixi.js';
 import { useEffect } from 'react';
-import { useCallbackRef } from '@fewings/react/hooks';
 
 import { usePixi } from '@/lib/pixi/PixiContext';
 
@@ -10,11 +9,10 @@ export function usePixiEffect(
   deps: any[] = []
 ) {
   const { app } = usePixi();
-  const _cb = useCallbackRef(cb);
 
   useEffect(() => {
     if (!app) return;
-    const clear = _cb(app);
+    const clear = cb(app);
     console.log(`call usePixiAppHook ${++seq}`);
     return () => {
       clear?.();

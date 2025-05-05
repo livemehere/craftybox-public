@@ -2,11 +2,12 @@ import {
   Assets,
   Container,
   ContainerChild,
+  Filter,
   Graphics,
   Point,
   Sprite,
 } from 'pixi.js';
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useMemo, useRef, useState } from 'react';
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
@@ -29,12 +30,12 @@ import { usePixi } from '@/lib/pixi/PixiContext';
 import { useToast } from '@/lib/toast/ToastContext';
 import Grid from '@/lib/pixi/components/ui/Grid';
 
-const CONTAINER_LABEL = 'edit-container';
-
 const hoverObjAtom = atom<Container | null>(null);
 hoverObjAtom.debugLabel = 'hover obj';
 const selectedObjAtom = atom<Container | null>(null);
 selectedObjAtom.debugLabel = 'selected obj';
+const editingContainerAtom = atom<Container | null>(null);
+editingContainerAtom.debugLabel = 'editing container';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -64,7 +65,7 @@ export default EditPage;
 
 type EditMode = 'select' | 'move' | 'rect';
 function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
-  const containerRef = useRef<Container | null>(null);
+  const [editingContainer, setEditingContainer] = useAtom(editingContainerAtom);
   const imgSpriteRef = useRef<Sprite | null>(null);
   const [mode, setMode] = useState<EditMode>('select');
   const prevMode = useRef(mode);
@@ -87,20 +88,21 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
       keydown: false,
     }
   );
+  useHotkeys('h', () => setMode('move'));
+  useHotkeys('v', () => setMode('select'));
+  useHotkeys('r', () => setMode('rect'));
 
   // drawing control
   usePixiEffect(
     (app) => {
       if (mode === 'move' || mode === 'select') return;
+      if (!editingContainer) return;
 
       let isDrawing = false;
       let graphics: Graphics;
 
       console.log('start mode', mode);
       const handleDown = (e: PointerEvent) => {
-        const container = containerRef.current;
-        if (!container) return;
-
         isDrawing = true;
         graphics = new Graphics();
 
@@ -109,7 +111,7 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
         const y = e.clientY - bounds.top;
         const localPos = app.stage.toLocal(new Point(x, y));
         graphics.position.set(localPos.x, localPos.y);
-        container.addChild(graphics);
+        editingContainer.addChild(graphics);
         console.log('added', graphics.x, graphics.y);
       };
 
@@ -151,14 +153,14 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
         app.canvas.removeEventListener('pointerup', handleUp);
       };
     },
-    [mode]
+    [mode, editingContainer]
   );
 
   usePixiEffect((app) => {
     (async () => {
       if (!imgUrl) return;
       const container = new Container();
-      container.label = CONTAINER_LABEL;
+      container.label = 'Export';
       const texture = await Assets.load(imgUrl);
       const sprite = new Sprite(texture);
       imgSpriteRef.current = sprite;
@@ -173,10 +175,10 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
       // set viewport center
       app.stage.position.set(app.screen.width / 2, app.screen.height / 2);
 
-      containerRef.current = container;
+      setEditingContainer(container);
     })();
     return () => {
-      containerRef.current?.destroy();
+      editingContainer?.destroy();
     };
   });
 
@@ -224,12 +226,12 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
 function EditSideBar() {
   const { app } = usePixi();
   const { pushMessage } = useToast();
+  const editingContainer = useAtomValue(editingContainerAtom);
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');
-    const container = app.stage.getChildByLabel(CONTAINER_LABEL);
-    if (!container) throw new Error('container is not found');
-    return app.renderer.extract.base64(container);
+    if (!editingContainer) throw new Error('container is not found');
+    return app.renderer.extract.base64(editingContainer);
   };
 
   const handleCopy = async () => {
@@ -282,17 +284,48 @@ function EditSideBar() {
 function ObjectTree() {
   const { app } = usePixi();
   const update = useForceUpdate();
-  usePixiEffect((app) => {
-    const handler = () => {
-      update();
-    };
-    app.stage.on('childAdded', handler);
-    app.stage.on('childRemoved', handler);
+  const editingContainer = useAtomValue(editingContainerAtom);
+
+  usePixiEffect(
+    (app) => {
+      if (!editingContainer) return;
+      const handler = () => {
+        update();
+      };
+      app.stage.on('childAdded', handler);
+      app.stage.on('childRemoved', handler);
+      editingContainer.on('childAdded', handler);
+      editingContainer.on('childRemoved', handler);
+      return () => {
+        editingContainer.off('childAdded', handler);
+        editingContainer.off('childRemoved', handler);
+        app.stage.off('childAdded', handler);
+        app.stage.off('childRemoved', handler);
+      };
+    },
+    [editingContainer]
+  );
+
+  /** highlight `Container` in view that hover in tree. */
+  const hoverObj = useAtomValue(hoverObjAtom);
+  usePixiEffect(() => {
+    if (!hoverObj) return;
+    const target = hoverObj;
+    let prevFilters: Filter[] = [];
+    prevFilters = (
+      Array.isArray(target.filters) ? [...target.filters] : [target.filters]
+    ).filter(Boolean);
+    target.filters = [
+      ...prevFilters,
+      new OutlineFilter({
+        thickness: 1,
+        color: 0xff0000,
+      }),
+    ];
     return () => {
-      app.stage.off('childAdded', handler);
-      app.stage.off('childRemoved', handler);
+      target.filters = prevFilters;
     };
-  }, []);
+  }, [hoverObj]);
 
   return (
     <div
@@ -315,22 +348,8 @@ function TreeItem({
   container: Container<ContainerChild>;
   depth?: number;
 }) {
-  const [hoverObjId, setHoverObjId] = useAtom(hoverObjAtom);
+  const setHoverObj = useSetAtom(hoverObjAtom);
   const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
-  usePixiEffect(
-    (app) => {
-      if (hoverObjId) {
-        console.log('set filter');
-        hoverObjId.filters = [new OutlineFilter(1, 0xff0000)];
-      }
-      return () => {
-        if (hoverObjId) {
-          hoverObjId.filters = [];
-        }
-      };
-    },
-    [hoverObjId]
-  );
 
   return (
     <div className={'hover:bg-app-soft-gray'}>
@@ -342,8 +361,8 @@ function TreeItem({
             'bg-app-primary/80': container === selectedObj,
           }
         )}
-        onMouseEnter={() => setHoverObjId(container)}
-        onMouseLeave={() => setHoverObjId(null)}
+        onMouseEnter={() => setHoverObj(container)}
+        onMouseLeave={() => setHoverObj(null)}
         onClick={() => setSelectedObj(container)}
       >
         <div className={'pl-16'}>{container.label}</div>

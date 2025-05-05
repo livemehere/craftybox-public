@@ -9,16 +9,18 @@ const Grid = () => {
   usePixiEffect((app) => {
     const g = new Graphics();
     g.alpha = 0.2;
-    g.label = 'grid-background';
+    g.label = 'Grid Background';
     app.stage.addChild(g);
 
     // center point (0,0)
     const centerPoint = new Graphics();
+    centerPoint.label = 'Center (0,0)';
     centerPoint.pivot.set(2.5, 2.5);
     centerPoint.rect(0, 0, 5, 5).fill('red');
     app.stage.addChild(centerPoint);
 
     const centerLine = new Graphics();
+    centerLine.label = 'Axis';
     centerLine.alpha = 0.5;
     app.stage.addChild(centerLine);
 
