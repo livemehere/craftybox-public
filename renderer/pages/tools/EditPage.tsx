@@ -1,28 +1,32 @@
-import { Assets, Container, Graphics, Point, Sprite } from 'pixi.js';
+import { Assets, Container, Sprite } from 'pixi.js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useMemo, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import PixiProvider from '@/lib/pixi-design-editor/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-design-editor/components/PixiCanvas';
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
 import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
 import ZoomController from '@/lib/pixi-design-editor/components/Controller/ZoomController';
 import PanController from '@/lib/pixi-design-editor/components/Controller/PanController';
 import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
-import TreeView from '@/lib/pixi-design-editor/components/TreeView/TreeView';
-import { exportContainerAtom, modeAtom } from '@/lib/pixi-design-editor/stores';
+import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
+import {
+  EditMode,
+  exportContainerAtom,
+  modeAtom,
+} from '@/lib/pixi-design-editor/stores';
 import DetailController from '@/lib/pixi-design-editor/components/Controller/DetailController';
 import PixiExecutor from '@/lib/pixi-design-editor/components/PixiExecutor';
 import HandToolsController from '@/lib/pixi-design-editor/components/Controller/HandToolsController';
+import InteractionController from '@/lib/pixi-design-editor/components/Controller/InteractionController';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
   const setEditingContainer = useSetAtom(exportContainerAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
-  const prevMode = useRef(mode);
+  const prevMode = useRef<EditMode | undefined>(undefined);
 
   const imgUrl = useMemo(() => {
     const targetUrl = localStorage.getItem(
@@ -32,25 +36,25 @@ const EditPage = () => {
     return targetUrl || null;
   }, []);
 
-  // movable while space bar is pressed
+  /* toggle move mode while pressing space */
   useHotkeys('space', () => {
     if (mode === 'move') return;
     prevMode.current = mode;
     setMode('move');
-    console.log('prevmode is ', prevMode.current);
   });
   useHotkeys(
     'space',
     () => {
-      setMode(prevMode.current);
-      console.log('restore mode to ', prevMode.current);
+      if (prevMode.current) {
+        setMode(prevMode.current);
+        prevMode.current = undefined;
+      }
     },
     {
       keyup: true,
       keydown: false,
     }
   );
-
   useHotkeys('v', () => setMode('select'));
   useHotkeys('h', () => setMode('move'));
   /* drawing */
@@ -59,23 +63,25 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
-        <QuickImgEditor />
-        <ZoomController />
+        <ZoomController enable={true} />
         <PanController enable={mode === 'move'} />
         <Grid />
-        <TreeView />
+        <PixiTreeView />
         <PixiCanvas />
         <HandToolsController />
         <DetailController />
+        <InteractionController />
+        {/* initialize with Image */}
         <PixiExecutor
           cb={(app) => {
             let editingContainer: Container | null = null;
             (async () => {
               if (!imgUrl) return;
               const container = new Container();
-              container.label = 'Export';
+              container.label = 'Frame';
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
+              sprite.label = 'Image';
 
               // add.
               container.addChild(sprite);
@@ -105,75 +111,3 @@ const EditPage = () => {
 };
 
 export default EditPage;
-
-function QuickImgEditor() {
-  const editingContainer = useAtomValue(exportContainerAtom);
-  const [mode, setMode] = useAtom(modeAtom);
-
-  // drawing control
-  usePixiEffect(
-    (app) => {
-      if (mode === 'move' || mode === 'select') return;
-      if (!editingContainer) return;
-
-      let isDrawing = false;
-      let graphics: Graphics;
-
-      console.log('start mode', mode);
-      const handleDown = (e: PointerEvent) => {
-        isDrawing = true;
-        graphics = new Graphics();
-
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-        const localPos = app.stage.toLocal(new Point(x, y));
-        graphics.position.set(localPos.x, localPos.y);
-        editingContainer.addChild(graphics);
-        console.log('added graphics', graphics.x, graphics.y);
-      };
-
-      const handleMove = (e: PointerEvent) => {
-        if (!isDrawing) return;
-
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-        const localPos = app.stage.toLocal(new Point(x, y));
-        const dx = localPos.x - graphics.x;
-        const dy = localPos.y - graphics.y;
-
-        switch (mode) {
-          case 'rect':
-            graphics.clear();
-            graphics.rect(0, 0, dx, dy).stroke({
-              width: 4,
-              color: '#ff0000',
-              alignment: 1,
-            });
-
-            break;
-          default:
-            throw new Error('invalid drawing mode: ' + mode);
-        }
-      };
-
-      const handleUp = () => {
-        isDrawing = false;
-      };
-
-      app.canvas.addEventListener('pointerdown', handleDown);
-      app.canvas.addEventListener('pointermove', handleMove);
-      app.canvas.addEventListener('pointerup', handleUp);
-
-      return () => {
-        app.canvas.removeEventListener('pointerdown', handleDown);
-        app.canvas.removeEventListener('pointermove', handleMove);
-        app.canvas.removeEventListener('pointerup', handleUp);
-      };
-    },
-    [mode, editingContainer]
-  );
-
-  return null;
-}

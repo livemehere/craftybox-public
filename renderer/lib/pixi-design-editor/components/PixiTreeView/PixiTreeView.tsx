@@ -9,9 +9,9 @@ import {
   exportContainerAtom,
   hoverObjAtom,
 } from '@/lib/pixi-design-editor/stores';
-import TreeItem from '@/lib/pixi-design-editor/components/TreeView/TreeItem';
+import TreeItem from '@/lib/pixi-design-editor/components/PixiTreeView/TreeItem';
 
-const TreeView = () => {
+const PixiTreeView = () => {
   const { app } = usePixi();
   const update = useForceUpdate();
   const editingContainer = useAtomValue(exportContainerAtom);
@@ -71,4 +71,4 @@ const TreeView = () => {
   );
 };
 
-export default TreeView;
+export default PixiTreeView;
