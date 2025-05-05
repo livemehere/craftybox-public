@@ -8,7 +8,7 @@ import {
   Sprite,
 } from 'pixi.js';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
 import { TbCopy } from 'react-icons/tb';
@@ -31,11 +31,8 @@ import { useToast } from '@/lib/toast/ToastContext';
 import Grid from '@/lib/pixi/components/ui/Grid';
 
 const hoverObjAtom = atom<Container | null>(null);
-hoverObjAtom.debugLabel = 'hover obj';
 const selectedObjAtom = atom<Container | null>(null);
-selectedObjAtom.debugLabel = 'selected obj';
 const editingContainerAtom = atom<Container | null>(null);
-editingContainerAtom.debugLabel = 'editing container';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -132,7 +129,8 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
             graphics.clear();
             graphics.rect(0, 0, dx, dy).stroke({
               width: 4,
-              color: 'red',
+              color: '#ff0000',
+              alignment: 1,
             });
 
             break;
@@ -232,6 +230,20 @@ function EditSideBar() {
   const { pushMessage } = useToast();
   const editingContainer = useAtomValue(editingContainerAtom);
   const selectedObj = useAtomValue(selectedObjAtom);
+  const [originalObjInfo, setOriginalObjInfo] = useState({
+    width: 0,
+    height: 0,
+  });
+  const update = useForceUpdate();
+  useEffect(() => {
+    if (!selectedObj) return;
+    if (selectedObj instanceof Graphics) {
+      setOriginalObjInfo({
+        width: selectedObj.width,
+        height: selectedObj.height,
+      });
+    }
+  }, [selectedObj]);
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');
@@ -268,7 +280,7 @@ function EditSideBar() {
 
   const inputClassName = cn(
     'flex items-center gap-6',
-    'bg-app-soft-gray rounded px-12 py-6 w-full typo-body2',
+    'bg-app-soft-gray rounded px-12 py-6 w-full',
     '[&:has(input:focus)]:outline-1 outline-app-primary'
   );
 
@@ -293,16 +305,16 @@ function EditSideBar() {
 
       {selectedObj && (
         <section className={'typo-body2'} key={selectedObj.uid}>
-          <div className={'p-16'}>{selectedObj.label}</div>
+          <h3 className={'p-16'}>{selectedObj.label}</h3>
           <hr className={hrClassName} />
           <div className={'px-16 pt-16'}>Position</div>
-          <div className={'flex items-center justify-between gap-8 p-16'}>
+          <div className={'flex items-center justify-between gap-4 p-16'}>
             <label className={inputClassName}>
               <span className={'text-white/50'}>X</span>
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.x}
+                defaultValue={selectedObj.x.toFixed(2)}
                 onChange={(e) => {
                   selectedObj.x = Number(e.target.value);
                 }}
@@ -314,13 +326,101 @@ function EditSideBar() {
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.y}
+                defaultValue={selectedObj.y.toFixed(2)}
                 onChange={(e) => {
                   selectedObj.y = Number(e.target.value);
                 }}
               />
             </label>
           </div>
+
+          <hr className={hrClassName} />
+          <div className={'px-16 pt-16'}>Layout</div>
+          <div className={'flex items-center justify-between gap-4 p-16'}>
+            <label className={inputClassName}>
+              <span className={'text-white/50'}>W</span>
+              <input
+                className={'w-full'}
+                type="number"
+                defaultValue={selectedObj.width.toFixed(2)}
+                onChange={(e) => {
+                  selectedObj.width = Number(e.target.value);
+                }}
+              />
+            </label>
+
+            <label className={inputClassName}>
+              <span className={'text-white/50'}>H</span>
+              <input
+                className={'w-full'}
+                type="number"
+                defaultValue={selectedObj.height.toFixed(2)}
+                onChange={(e) => {
+                  selectedObj.height = Number(e.target.value);
+                }}
+              />
+            </label>
+          </div>
+
+          {selectedObj instanceof Graphics && (
+            <>
+              <hr className={hrClassName} />
+              <h3 className={'p-16'}>Stroke</h3>
+              <div className={'flex flex-col items-center gap-4 p-16'}>
+                <label className={cn(inputClassName, 'px-4 py-2')}>
+                  <input
+                    className={'w-24'}
+                    type="color"
+                    defaultValue={`#${selectedObj.strokeStyle.color.toString(16)}`}
+                    onChange={(e) => {
+                      const color = e.target.value;
+                      const { width } = selectedObj.strokeStyle;
+                      selectedObj
+                        .clear()
+                        .rect(
+                          0,
+                          0,
+                          originalObjInfo.width,
+                          originalObjInfo.height
+                        )
+                        .stroke({
+                          width,
+                          color,
+                        });
+                      update();
+                    }}
+                  />
+                  <span>{`#${selectedObj.strokeStyle.color.toString(16)}`}</span>
+                </label>
+                <label className={inputClassName}>
+                  <span className={'text-white/50'}>Width</span>
+                  <input
+                    className={'w-full'}
+                    type="number"
+                    defaultValue={selectedObj.strokeStyle.width}
+                    onChange={(e) => {
+                      const width = Number(e.target.value);
+                      const color = selectedObj.strokeStyle.color;
+                      selectedObj
+                        .clear()
+                        .rect(
+                          0,
+                          0,
+                          originalObjInfo.width,
+                          originalObjInfo.height
+                        )
+                        .stroke({
+                          width,
+                          color,
+                          alignment: 1,
+                        });
+                      update();
+                    }}
+                  />
+                </label>
+              </div>
+            </>
+          )}
         </section>
       )}
     </aside>
