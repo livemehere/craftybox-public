@@ -1,4 +1,11 @@
-import { Assets, Container, Graphics, Point, Sprite } from 'pixi.js';
+import {
+  Assets,
+  Container,
+  ContainerChild,
+  Graphics,
+  Point,
+  Sprite,
+} from 'pixi.js';
 import { useAtomValue } from 'jotai';
 import { useMemo, useRef, useState } from 'react';
 import { LuMousePointer2 } from 'react-icons/lu';
@@ -6,10 +13,12 @@ import { PiHandGrabbing } from 'react-icons/pi';
 import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 import { BiRectangle } from 'react-icons/bi';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useForceUpdate } from '@fewings/react/hooks';
 
 import PixiProvider from '@/lib/pixi/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi/components/PixiCanvas';
-import { usePixiApp } from '@/lib/pixi/hooks/usePixiApp';
+import { usePixiEffect } from '@/lib/pixi/hooks/usePixiEffect';
 import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
 import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
 import { cn } from '@/utils/cn';
@@ -17,6 +26,7 @@ import ZoomController from '@/lib/pixi/components/Controller/ZoomController';
 import PanController from '@/lib/pixi/components/Controller/PanController';
 import { usePixi } from '@/lib/pixi/PixiContext';
 import { useToast } from '@/lib/toast/ToastContext';
+import Grid from '@/lib/pixi/components/ui/Grid';
 
 const CONTAINER_LABEL = 'edit-container';
 
@@ -35,6 +45,8 @@ const EditPage = () => {
       <div className={'relative h-full w-full'}>
         <QuickImgEditor imgUrl={imgUrl} />
         <ZoomController />
+        <Grid />
+        <ObjectTree />
         <PixiCanvas />
         <EditSideBar />
       </div>
@@ -48,10 +60,30 @@ type EditMode = 'select' | 'move' | 'rect';
 function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
   const containerRef = useRef<Container | null>(null);
   const imgSpriteRef = useRef<Sprite | null>(null);
-  const [mode, setMode] = useState<EditMode>('move');
+  const [mode, setMode] = useState<EditMode>('select');
+  const prevMode = useRef(mode);
+
+  // movable while space bar is pressed
+  useHotkeys('space', () => {
+    if (mode === 'move') return;
+    prevMode.current = mode;
+    setMode('move');
+    console.log('prevmode is ', prevMode.current);
+  });
+  useHotkeys(
+    'space',
+    () => {
+      setMode(prevMode.current);
+      console.log('restore mode to ', prevMode.current);
+    },
+    {
+      keyup: true,
+      keydown: false,
+    }
+  );
 
   // drawing control
-  usePixiApp(
+  usePixiEffect(
     (app) => {
       if (mode === 'move' || mode === 'select') return;
 
@@ -116,80 +148,7 @@ function QuickImgEditor({ imgUrl }: { imgUrl: string | null }) {
     [mode]
   );
 
-  usePixiApp((app) => {
-    const g = new Graphics();
-    g.alpha = 0.2;
-    app.stage.addChild(g);
-
-    // center point (0,0)
-    const centerPoint = new Graphics();
-    centerPoint.pivot.set(2.5, 2.5);
-    centerPoint.rect(0, 0, 5, 5).fill('red');
-    app.stage.addChild(centerPoint);
-
-    const centerLine = new Graphics();
-    centerLine.alpha = 0.5;
-    app.stage.addChild(centerLine);
-
-    const update = () => {
-      g.clear();
-      centerLine.clear();
-
-      const gridSize = Math.pow(
-        2,
-        Math.round(Math.log2(100 / app.stage.scale.x))
-      );
-      const viewWidth = app.screen.width / app.stage.scale.x;
-      const viewHeight = app.screen.height / app.stage.scale.y;
-
-      const offsetX = -app.stage.position.x / app.stage.scale.x;
-      const offsetY = -app.stage.position.y / app.stage.scale.y;
-
-      const startX = Math.floor(offsetX / gridSize) * gridSize;
-      const startY = Math.floor(offsetY / gridSize) * gridSize;
-      const endX = offsetX + viewWidth;
-      const endY = offsetY + viewHeight;
-
-      for (let x = startX; x <= endX; x += gridSize) {
-        g.moveTo(x, offsetY);
-        g.lineTo(x, endY);
-      }
-
-      for (let y = startY; y <= endY; y += gridSize) {
-        g.moveTo(offsetX, y);
-        g.lineTo(endX, y);
-      }
-
-      g.stroke({
-        pixelLine: true,
-        width: 1,
-        color: '#fff',
-      });
-
-      // center line
-      centerLine.moveTo(0, offsetY);
-      centerLine.lineTo(0, endY);
-      centerLine.moveTo(offsetX, 0);
-      centerLine.lineTo(endX, 0);
-
-      centerLine.stroke({
-        pixelLine: true,
-        width: 1,
-        color: '#fff',
-      });
-
-      centerPoint.scale.set(1 / app.stage.scale.x);
-    };
-
-    const ticker = app.ticker.add(update);
-
-    return () => {
-      ticker.destroy();
-      g.destroy();
-    };
-  });
-
-  usePixiApp((app) => {
+  usePixiEffect((app) => {
     (async () => {
       if (!imgUrl) return;
       const container = new Container();
@@ -311,5 +270,66 @@ function EditSideBar() {
 
       {/*<hr className={'border-[0.5px] border-white/10'} />*/}
     </aside>
+  );
+}
+
+function ObjectTree() {
+  const { app } = usePixi();
+  const update = useForceUpdate();
+  usePixiEffect((app) => {
+    const handler = () => {
+      update();
+    };
+    app.stage.on('childAdded', handler);
+    app.stage.on('childRemoved', handler);
+    return () => {
+      app.stage.off('childAdded', handler);
+      app.stage.off('childRemoved', handler);
+    };
+  }, []);
+
+  return (
+    <div
+      className={
+        'bg-app-gray absolute top-8 bottom-8 left-8 w-280 rounded-lg py-12'
+      }
+    >
+      <section className={'px-16 py-8'}>Layer</section>
+      {app?.stage.children.map((child) => (
+        <PixiObjectTree container={child} key={child.uid} />
+      ))}
+    </div>
+  );
+}
+
+function PixiObjectTree({
+  container,
+  depth = 0,
+}: {
+  container: Container<ContainerChild>;
+  depth?: number;
+}) {
+  return (
+    <div className={'hover:bg-app-soft-gray'}>
+      <div
+        style={{ paddingLeft: depth * 10 }}
+        className={
+          'typo-body2 hover:border-app-primary flex h-32 items-center border-y-1 border-transparent'
+        }
+      >
+        <div className={'pl-16'}>{container.label}</div>
+      </div>
+      <div style={{ paddingLeft: depth * 10 }}>
+        {container.children.map((child) => {
+          return (
+            <PixiObjectTree
+              container={child}
+              depth={depth + 1}
+              key={child.uid}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }
