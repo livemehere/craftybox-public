@@ -5,7 +5,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
   usePixiEffect(
     (app) => {
       if (!enable) {
-        app.stage.cursor = 'default';
+        app.canvas.style.cursor = 'default';
         return;
       }
       app.canvas.style.cursor = 'grab';

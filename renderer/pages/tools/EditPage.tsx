@@ -58,7 +58,7 @@ const EditPage = () => {
   useHotkeys('v', () => setMode('select'));
   useHotkeys('h', () => setMode('move'));
   /** drawing */
-  useHotkeys('r', () => setMode('rect'));
+  useHotkeys('r', () => setMode('draw-rect'));
 
   return (
     <PixiProvider resizeDeps={[open]}>

@@ -5,7 +5,6 @@ import { Graphics } from 'pixi.js';
 import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 import { cn } from '@/utils/cn';
 import {
   exportContainerAtom,
@@ -35,59 +34,6 @@ const DetailController = () => {
       });
     }
   }, [selectedObj]);
-
-  usePixiEffect(
-    (app) => {
-      if (!selectedObj) return;
-
-      let isDragging = false;
-      let startX = 0;
-      let startY = 0;
-      let originalObjX = 0;
-      let originalObjY = 0;
-
-      const handleDown = (e: PointerEvent) => {
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-
-        isDragging = true;
-        startX = x;
-        startY = y;
-        originalObjX = selectedObj.x;
-        originalObjY = selectedObj.y;
-      };
-
-      const handleMove = (e: PointerEvent) => {
-        if (!isDragging) return;
-
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-
-        const dx = (x - startX) / app.stage.scale.x;
-        const dy = (y - startY) / app.stage.scale.y;
-
-        selectedObj.x = originalObjX + dx;
-        selectedObj.y = originalObjY + dy;
-      };
-
-      const handleUp = () => {
-        isDragging = false;
-      };
-
-      app.canvas.addEventListener('pointerdown', handleDown);
-      app.canvas.addEventListener('pointermove', handleMove);
-      app.canvas.addEventListener('pointerup', handleUp);
-
-      return () => {
-        app.canvas.removeEventListener('pointerdown', handleDown);
-        app.canvas.removeEventListener('pointermove', handleMove);
-        app.canvas.removeEventListener('pointerup', handleUp);
-      };
-    },
-    [selectedObj]
-  );
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');

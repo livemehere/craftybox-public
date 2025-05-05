@@ -17,7 +17,7 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   },
   {
     icon: <BiRectangle className={'h-20 w-20'} />,
-    mode: 'rect',
+    mode: 'draw-rect',
   },
 ];
 

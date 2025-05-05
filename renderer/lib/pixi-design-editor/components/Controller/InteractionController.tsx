@@ -1,14 +1,73 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { Graphics, Point } from 'pixi.js';
 
-import { exportContainerAtom, modeAtom } from '@/lib/pixi-design-editor/stores';
+import {
+  exportContainerAtom,
+  modeAtom,
+  selectedObjAtom,
+} from '@/lib/pixi-design-editor/stores';
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 
 const InteractionController = () => {
   const editingContainer = useAtomValue(exportContainerAtom);
   const [mode, setMode] = useAtom(modeAtom);
+  const selectedObj = useAtomValue(selectedObjAtom);
 
-  // drawing control
+  /** drag and drop */
+  usePixiEffect(
+    (app) => {
+      if (!selectedObj || mode !== 'select') return;
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let originalObjX = 0;
+      let originalObjY = 0;
+
+      const handleDown = (e: PointerEvent) => {
+        const bounds = app.canvas.getBoundingClientRect();
+        const x = e.clientX - bounds.left;
+        const y = e.clientY - bounds.top;
+
+        isDragging = true;
+        startX = x;
+        startY = y;
+        originalObjX = selectedObj.x;
+        originalObjY = selectedObj.y;
+      };
+
+      const handleMove = (e: PointerEvent) => {
+        if (!isDragging) return;
+
+        const bounds = app.canvas.getBoundingClientRect();
+        const x = e.clientX - bounds.left;
+        const y = e.clientY - bounds.top;
+
+        const dx = (x - startX) / app.stage.scale.x;
+        const dy = (y - startY) / app.stage.scale.y;
+
+        selectedObj.x = originalObjX + dx;
+        selectedObj.y = originalObjY + dy;
+      };
+
+      const handleUp = () => {
+        isDragging = false;
+      };
+
+      app.canvas.addEventListener('pointerdown', handleDown);
+      app.canvas.addEventListener('pointermove', handleMove);
+      app.canvas.addEventListener('pointerup', handleUp);
+
+      return () => {
+        app.canvas.removeEventListener('pointerdown', handleDown);
+        app.canvas.removeEventListener('pointermove', handleMove);
+        app.canvas.removeEventListener('pointerup', handleUp);
+      };
+    },
+    [selectedObj, mode]
+  );
+
+  /** create shapes */
   usePixiEffect(
     (app) => {
       if (mode === 'move' || mode === 'select') return;
@@ -42,7 +101,7 @@ const InteractionController = () => {
         const dy = localPos.y - graphics.y;
 
         switch (mode) {
-          case 'rect':
+          case 'draw-rect':
             graphics.clear();
             graphics.rect(0, 0, dx, dy).stroke({
               width: 4,
