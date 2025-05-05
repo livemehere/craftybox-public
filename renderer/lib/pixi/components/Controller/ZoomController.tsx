@@ -1,11 +1,11 @@
-import { usePixiApp } from '@/lib/pixi/hooks/usePixiApp';
+import { usePixiEffect } from '@/lib/pixi/hooks/usePixiEffect';
 
 /**
  * @description zoom `app.stage` based on current mouse position using wheel event
  */
 const ZoomController = ({ enable = true }: { enable?: boolean }) => {
   // zoom
-  usePixiApp(
+  usePixiEffect(
     (app) => {
       if (!enable) return;
       const onWheel = (e: WheelEvent) => {

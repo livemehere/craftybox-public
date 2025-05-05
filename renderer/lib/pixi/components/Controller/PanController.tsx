@@ -1,8 +1,8 @@
-import { usePixiApp } from '@/lib/pixi/hooks/usePixiApp';
+import { usePixiEffect } from '@/lib/pixi/hooks/usePixiEffect';
 
 const PanController = ({ enable = true }: { enable?: boolean }) => {
   // pan
-  usePixiApp(
+  usePixiEffect(
     (app) => {
       if (!enable) {
         document.body.style.cursor = 'default';
