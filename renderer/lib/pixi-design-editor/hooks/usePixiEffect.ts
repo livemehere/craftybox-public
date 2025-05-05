@@ -1,7 +1,7 @@
 import { Application } from 'pixi.js';
 import { useEffect } from 'react';
 
-import { usePixi } from '@/lib/pixi/PixiContext';
+import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
 
 let seq = 0;
 export function usePixiEffect(

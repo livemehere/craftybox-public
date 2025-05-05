@@ -1,6 +1,6 @@
 import { Graphics } from 'pixi.js';
 
-import { usePixiEffect } from '@/lib/pixi/hooks/usePixiEffect';
+import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 
 /**
  * display infinite grid background

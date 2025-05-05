@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Application, Ticker } from 'pixi.js';
 import { useCallbackRef } from '@fewings/react/hooks';
 
-import { usePixi } from '@/lib/pixi/PixiContext';
+import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
 
 let seq = 0;
 export function usePixiTicker(cb: (app: Application, ticker: Ticker) => void) {

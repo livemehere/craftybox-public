@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-import { usePixi } from '@/lib/pixi/PixiContext';
+import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
 
 const PixiCanvas = () => {
   const { setCanvasEl, init } = usePixi();

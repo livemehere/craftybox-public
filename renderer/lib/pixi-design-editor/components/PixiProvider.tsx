@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Application } from 'pixi.js';
 
-import { PixiContext } from '@/lib/pixi/PixiContext';
+import { PixiContext } from '@/lib/pixi-design-editor/PixiContext';
 
 interface Props {
   children: React.ReactNode;

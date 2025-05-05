@@ -1,4 +1,4 @@
-import { usePixiEffect } from '@/lib/pixi/hooks/usePixiEffect';
+import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 
 const PanController = ({ enable = true }: { enable?: boolean }) => {
   // pan
