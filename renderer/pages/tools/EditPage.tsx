@@ -7,7 +7,7 @@ import PixiProvider from '@/lib/pixi-design-editor/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-design-editor/components/PixiCanvas';
 import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
 import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
-import ZoomController from '@/lib/pixi-design-editor/components/Controller/ZoomController';
+import WheelController from '@/lib/pixi-design-editor/components/Controller/WheelController';
 import PanController from '@/lib/pixi-design-editor/components/Controller/PanController';
 import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
 import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
@@ -63,7 +63,7 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
-        <ZoomController enable={true} />
+        <WheelController enable={true} />
         <PanController enable={mode === 'move'} />
         <Grid />
         <PixiTreeView />

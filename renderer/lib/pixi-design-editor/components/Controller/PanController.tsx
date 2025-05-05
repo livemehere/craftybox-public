@@ -8,7 +8,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
         app.stage.cursor = 'default';
         return;
       }
-      app.stage.cursor = 'grab';
+      app.canvas.style.cursor = 'grab';
       let isDown = false;
       let startX: number;
       let startY: number;
@@ -17,7 +17,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
         isDown = true;
         startX = e.clientX;
         startY = e.clientY;
-        app.stage.cursor = 'grabbing';
+        app.canvas.style.cursor = 'grabbing';
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -33,7 +33,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
 
       const onMouseUp = () => {
         isDown = false;
-        app.stage.cursor = 'grab';
+        app.canvas.style.cursor = 'grab';
       };
 
       window.addEventListener('mousedown', onMouseDown);
