@@ -3,12 +3,8 @@ import { useAtomValue } from 'jotai';
 
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
-import {
-  exportContainerAtom,
-  hoverObjAtom,
-} from '@/lib/pixi-design-editor/stores';
+import { exportContainerAtom } from '@/lib/pixi-design-editor/stores';
 import TreeItem from '@/lib/pixi-design-editor/components/PixiTreeView/TreeItem';
-import { makeHighLight } from '@/lib/pixi-design-editor/utils';
 
 const PixiTreeView = () => {
   const { app } = usePixi();
@@ -35,16 +31,6 @@ const PixiTreeView = () => {
     },
     [editingContainer]
   );
-
-  /** highlight `Container` in view that hover in tree. */
-  const hoverObj = useAtomValue(hoverObjAtom);
-  usePixiEffect(() => {
-    if (!hoverObj) return;
-    const restore = makeHighLight(hoverObj);
-    return () => {
-      restore();
-    };
-  }, [hoverObj]);
 
   return (
     <div

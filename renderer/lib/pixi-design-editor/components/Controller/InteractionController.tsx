@@ -17,8 +17,7 @@ const InteractionController = () => {
   /** drag and drop */
   usePixiEffect(
     (app) => {
-      if (!selectedObj) return;
-      setMode('select');
+      if (!selectedObj || mode !== 'select') return;
 
       let isDragging = false;
       let startX = 0;
@@ -68,7 +67,7 @@ const InteractionController = () => {
         app.canvas.removeEventListener('pointerup', handleUp);
       };
     },
-    [selectedObj]
+    [selectedObj, mode]
   );
 
   /** create shapes */
