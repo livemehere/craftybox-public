@@ -15,6 +15,7 @@ export default function TreeItem({
 }) {
   const setHoverObj = useSetAtom(hoverObjAtom);
   const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
+  const isSelected = selectedObj === container;
 
   return (
     <div className={'hover:bg-app-soft-gray'}>
@@ -23,7 +24,7 @@ export default function TreeItem({
         className={cn(
           'typo-body2 hover:border-app-primary flex h-32 items-center border-1 border-transparent',
           {
-            'bg-app-primary/80': container === selectedObj,
+            'bg-app-primary/80': isSelected,
           }
         )}
         onMouseEnter={() => setHoverObj(container)}
@@ -35,13 +36,16 @@ export default function TreeItem({
             <svg width="8" height="17" fill="none" className={'-translate-y-8'}>
               <path
                 d="M0.5 0V15.5C0.5 16.0523 0.947715 16.5 1.5 16.5H8"
-                stroke="gray"
+                stroke={isSelected ? 'white' : 'gray'}
                 strokeLinejoin="round"
               />
             </svg>
           ) : (
             <svg width="8" height="32" fill="none">
-              <path d="M0.5 0V16.5M0.5 32V16.5M0.5 16.5H8" stroke="gray" />
+              <path
+                d="M0.5 0V16.5M0.5 32V16.5M0.5 16.5H8"
+                stroke={isSelected ? 'white' : 'gray'}
+              />
             </svg>
           )}
           {container.label}
