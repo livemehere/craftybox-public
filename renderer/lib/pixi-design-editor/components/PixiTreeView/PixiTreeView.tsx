@@ -64,8 +64,12 @@ const PixiTreeView = () => {
       }
     >
       <section className={'px-16 py-8'}>Layer</section>
-      {app?.stage.children.map((child) => (
-        <TreeItem container={child} key={child.uid} />
+      {app?.stage.children.map((child, i) => (
+        <TreeItem
+          container={child}
+          key={child.uid}
+          isLast={i === app.stage.children.length - 1}
+        />
       ))}
     </div>
   );

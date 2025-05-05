@@ -36,7 +36,7 @@ const EditPage = () => {
     return targetUrl || null;
   }, []);
 
-  /* toggle move mode while pressing space */
+  /** toggle move mode while pressing space */
   useHotkeys('space', () => {
     if (mode === 'move') return;
     prevMode.current = mode;
@@ -57,7 +57,7 @@ const EditPage = () => {
   );
   useHotkeys('v', () => setMode('select'));
   useHotkeys('h', () => setMode('move'));
-  /* drawing */
+  /** drawing */
   useHotkeys('r', () => setMode('rect'));
 
   return (
@@ -71,7 +71,7 @@ const EditPage = () => {
         <HandToolsController />
         <DetailController />
         <InteractionController />
-        {/* initialize with Image */}
+        {/** initialize with Image */}
         <PixiExecutor
           cb={(app) => {
             let editingContainer: Container | null = null;
