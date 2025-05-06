@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { Graphics, Point } from 'pixi.js';
+import { Container, Graphics, Point } from 'pixi.js';
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
 import { BiRectangle } from 'react-icons/bi';
@@ -7,7 +7,6 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useRef } from 'react';
 
 import {
-  rootContainerAtom,
   modeAtom,
   selectedObjAtom,
   EditMode,
@@ -32,9 +31,10 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
     mode: 'draw-rect',
   },
 ];
-
-const InteractionController = () => {
-  const rootContainer = useAtomValue(rootContainerAtom);
+interface Props {
+  target: Container | null;
+}
+const InteractionController = ({ target }: Props) => {
   const hoverObj = useAtomValue(hoverObjAtom);
   const selectedObj = useAtomValue(selectedObjAtom);
 
@@ -90,7 +90,7 @@ const InteractionController = () => {
   usePixiEffect(
     (app) => {
       if (!mode.startsWith('draw-')) return;
-      if (!rootContainer) return;
+      if (!target) return;
 
       let isDrawing = false;
       let graphics: Graphics;
@@ -105,7 +105,7 @@ const InteractionController = () => {
         const y = e.clientY - bounds.top;
         const localPos = app.stage.toLocal(new Point(x, y));
         graphics.position.set(localPos.x, localPos.y);
-        rootContainer.addChild(graphics);
+        app.stage.addChild(graphics);
         console.log('added graphics', graphics.x, graphics.y);
       };
 
@@ -148,7 +148,7 @@ const InteractionController = () => {
         app.canvas.removeEventListener('pointerup', handleUp);
       };
     },
-    [mode, rootContainer]
+    [mode, target]
   );
 
   return (

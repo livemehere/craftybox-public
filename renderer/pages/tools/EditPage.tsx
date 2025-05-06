@@ -22,10 +22,10 @@ import InteractionController from '@/features/edit/design/components/Interaction
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
-  const setRootContainer = useSetAtom(rootContainerAtom);
+  const [rootContainer, setRootContainer] = useAtom(rootContainerAtom);
   const setHoverObj = useSetAtom(hoverObjAtom);
   const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
-  const mode = useAtomValue(modeAtom);
+  const [mode, setMode] = useAtom(modeAtom);
 
   const imgUrl = useMemo(() => {
     const targetUrl = localStorage.getItem(
@@ -47,12 +47,19 @@ const EditPage = () => {
           onHoverContainer={(container) => setHoverObj(container)}
           onClickContainer={(container) => {
             setSelectedObj(container);
+            setMode('select');
           }}
           activeContainer={selectedObj}
+          onDeleteContainer={(container) => {
+            if (container === selectedObj) {
+              setSelectedObj(null);
+            }
+            container.destroy();
+          }}
         />
 
         {/** Design Edit */}
-        <InteractionController />
+        <InteractionController target={rootContainer} />
         <MutatePanel target={selectedObj} />
         <PixiExecutor
           cb={(app) => {

@@ -23,9 +23,10 @@ const MutatePanel = ({ target }: Props) => {
   const [updateSeq, setUpdateSeq] = useState(0);
   const update = useForceUpdate();
 
-  // save original object properties for mutate `Graphics` object in each input
   useEffect(() => {
     if (!target) return;
+
+    /** If it is a Graphics object, caching is necessary because the size may change when the stroke changes */
     if (target instanceof Graphics) {
       setSavedInfoBeforeMutation({
         width: target.width,
@@ -81,6 +82,8 @@ const MutatePanel = ({ target }: Props) => {
     'bg-app-soft-gray rounded px-12 py-6 w-full',
     '[&:has(input:focus)]:outline-1 outline-app-primary'
   );
+
+  console.log('taret', target);
 
   return (
     <aside

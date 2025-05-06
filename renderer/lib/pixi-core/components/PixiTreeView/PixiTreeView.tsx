@@ -10,7 +10,10 @@ import TreeItem, {
 const PixiTreeView = (
   props: Pick<
     TreeItemProps,
-    'activeContainer' | 'onClickContainer' | 'onHoverContainer'
+    | 'activeContainer'
+    | 'onClickContainer'
+    | 'onHoverContainer'
+    | 'onDeleteContainer'
   >
 ) => {
   const { app } = usePixi();
