@@ -1,10 +1,9 @@
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
 import { BiRectangle } from 'react-icons/bi';
-import { useAtom } from 'jotai';
 
 import { cn } from '@/utils/cn';
-import { EditMode, modeAtom } from '@/lib/pixi-design-editor/stores';
+import { EditMode } from '@/lib/pixi-design-editor/stores';
 
 const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   {
@@ -21,9 +20,12 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   },
 ];
 
-const HandToolsController = () => {
-  const [mode, setMode] = useAtom(modeAtom);
+interface Props {
+  mode: EditMode;
+  setMode: (mode: EditMode) => void;
+}
 
+const PixiHandTools = ({ mode, setMode }: Props) => {
   return (
     <div
       className={cn(
@@ -48,4 +50,4 @@ const HandToolsController = () => {
   );
 };
 
-export default HandToolsController;
+export default PixiHandTools;

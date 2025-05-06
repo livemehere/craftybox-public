@@ -16,8 +16,9 @@ import {
 import PixiGrid from '@/lib/pixi-design-editor/components/ui/PixiGrid';
 import PixiPanController from '@/lib/pixi-design-editor/components/Controller/PixiPanController';
 import PixiWheelController from '@/lib/pixi-design-editor/components/Controller/PixiWheelController';
-import HandToolsController from '@/lib/pixi-design-editor/components/Controller/HandToolsController';
+import PixiHandTools from '@/lib/pixi-design-editor/components/Controller/PixiHandTools';
 import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
+import DetailController from '@/lib/pixi-design-editor/components/Controller/DetailController';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -88,8 +89,8 @@ const EditPage = () => {
         <PixiGrid />
         <PixiCanvas />
         <PixiTreeView />
-        <HandToolsController />
-        {/*<DetailController />*/}
+        <PixiHandTools mode={mode} setMode={setMode} />
+        <DetailController />
         {/*<InteractionController />*/}
         {/** initialize with Image */}
         {/*<PixiExecutor*/}
