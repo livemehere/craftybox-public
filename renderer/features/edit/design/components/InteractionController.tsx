@@ -105,7 +105,7 @@ const InteractionController = ({ target }: Props) => {
         const y = e.clientY - bounds.top;
         const localPos = app.stage.toLocal(new Point(x, y));
         graphics.position.set(localPos.x, localPos.y);
-        app.stage.addChild(graphics);
+        target.addChild(graphics);
         console.log('added graphics', graphics.x, graphics.y);
       };
 

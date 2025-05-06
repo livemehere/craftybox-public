@@ -91,6 +91,7 @@ const EditPage = () => {
               if (!imgUrl) return;
               const container = new Container();
               container.label = 'Frame';
+              setLockedContainerUids((prev) => [...prev, container.uid]);
 
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
