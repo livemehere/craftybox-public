@@ -1,26 +1,32 @@
-import { Graphics } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 
-/**
- * display infinite grid background
- */
-const PixiGrid = () => {
+export const GRID_CONTAINER_LABELS = {
+  GRID_BACKGROUND: 'Grid Background',
+  CENTER_POINT: 'Center (0,0)',
+  CENTER_LINE: 'Axis',
+};
+
+interface Props {
+  onCreated?: (containers: Container[]) => void;
+}
+const PixiGrid = ({ onCreated }: Props) => {
   usePixiEffect((app) => {
     const g = new Graphics();
     g.alpha = 0.2;
-    g.label = 'Grid Background';
+    g.label = GRID_CONTAINER_LABELS.GRID_BACKGROUND;
     app.stage.addChild(g);
 
     // center point (0,0)
     const centerPoint = new Graphics();
-    centerPoint.label = 'Center (0,0)';
+    centerPoint.label = GRID_CONTAINER_LABELS.CENTER_POINT;
     centerPoint.pivot.set(2.5, 2.5);
     centerPoint.rect(0, 0, 5, 5).fill('red');
     app.stage.addChild(centerPoint);
 
     const centerLine = new Graphics();
-    centerLine.label = 'Axis';
+    centerLine.label = GRID_CONTAINER_LABELS.CENTER_LINE;
     centerLine.alpha = 0.5;
     app.stage.addChild(centerLine);
 
@@ -75,6 +81,8 @@ const PixiGrid = () => {
     };
 
     app.ticker.add(update);
+
+    onCreated?.([g, centerPoint, centerLine]);
 
     return () => {
       app.ticker.remove(update);

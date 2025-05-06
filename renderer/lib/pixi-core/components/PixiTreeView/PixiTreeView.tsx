@@ -14,6 +14,7 @@ const PixiTreeView = (
     | 'onClickContainer'
     | 'onHoverContainer'
     | 'onDeleteContainer'
+    | 'isLocked'
   >
 ) => {
   const { app } = usePixi();

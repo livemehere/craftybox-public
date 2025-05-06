@@ -5,6 +5,7 @@ import {
   modeAtom,
   selectedObjAtom,
   hoverObjAtom,
+  lockedContainerUidsAtom,
 } from 'renderer/features/edit/design/stores';
 import { Assets, Container, Sprite } from 'pixi.js';
 
@@ -26,6 +27,9 @@ const EditPage = () => {
   const setHoverObj = useSetAtom(hoverObjAtom);
   const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
   const [mode, setMode] = useAtom(modeAtom);
+  const [lockedContainerUids, setLockedContainerUids] = useAtom(
+    lockedContainerUidsAtom
+  );
 
   const imgUrl = useMemo(() => {
     const targetUrl = localStorage.getItem(
@@ -41,7 +45,14 @@ const EditPage = () => {
         {/** Common */}
         <PixiWheelController enable={true} />
         <PixiPanController enable={mode === 'move'} />
-        <PixiGrid />
+        <PixiGrid
+          onCreated={(containers) => {
+            setLockedContainerUids((prev) => [
+              ...prev,
+              ...containers.map((c) => c.uid),
+            ]);
+          }}
+        />
         <PixiCanvas />
         <PixiTreeView
           onHoverContainer={(container) => setHoverObj(container)}
@@ -55,6 +66,12 @@ const EditPage = () => {
               setSelectedObj(null);
             }
             container.destroy();
+          }}
+          isLocked={(container) => {
+            if (lockedContainerUids.includes(container.uid)) {
+              return true;
+            }
+            return false;
           }}
         />
 

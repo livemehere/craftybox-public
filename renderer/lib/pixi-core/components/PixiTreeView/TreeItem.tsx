@@ -1,6 +1,7 @@
 import { Container, ContainerChild } from 'pixi.js';
-import { IoMdCloseCircle } from 'react-icons/io';
 import { useState } from 'react';
+import { IoMdCloseCircle } from 'react-icons/io';
+import { CiLock } from 'react-icons/ci';
 
 import { cn } from '@/utils/cn';
 
@@ -10,6 +11,7 @@ export interface TreeItemProps {
   onDeleteContainer: (container: Container) => void;
 
   activeContainer: Container | null;
+  isLocked?: (container: Container) => boolean;
 
   container: Container<ContainerChild>;
   depth?: number;
@@ -27,9 +29,11 @@ export default function TreeItem({
     onClickContainer,
     activeContainer,
     onDeleteContainer,
+    isLocked,
   } = props;
   const isSelected = activeContainer === container;
   const [isHovered, setIsHovered] = useState(false);
+  const isLock = isLocked?.(container) || false;
 
   return (
     <div className={'hover:bg-app-soft-gray'}>
@@ -84,19 +88,20 @@ export default function TreeItem({
             )}
             <span>{container.label}</span>
           </div>
-          {isHovered && (
-            <button
-              className={
-                'mr-16 cursor-pointer rounded-full p-4 hover:bg-white/10'
-              }
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteContainer(container);
-              }}
-            >
-              <IoMdCloseCircle color={'gray'} />
-            </button>
-          )}
+          <div className={'mr-16 flex items-center gap-4'}>
+            {isLock && <CiLock />}
+            {isHovered && !isLock && (
+              <button
+                className={'cursor-pointer rounded-full p-4 hover:bg-white/10'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteContainer(container);
+                }}
+              >
+                <IoMdCloseCircle color={'gray'} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
       {container.children.length > 0 && (

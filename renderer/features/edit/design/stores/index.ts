@@ -6,3 +6,4 @@ export const hoverObjAtom = atom<Container | null>(null);
 export const selectedObjAtom = atom<Container | null>(null);
 export const rootContainerAtom = atom<Container | null>(null);
 export const modeAtom = atom<EditMode>('select');
+export const lockedContainerUidsAtom = atom<number[]>([]);
