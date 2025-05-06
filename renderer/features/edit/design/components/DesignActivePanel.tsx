@@ -9,12 +9,12 @@ import { cn } from '@/utils/cn';
 import {
   exportContainerAtom,
   selectedObjAtom,
-} from '@/lib/pixi-design-editor/stores';
+} from '@/features/edit/design/stores';
 import { useToast } from '@/lib/toast/ToastContext';
-import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
-import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-design-editor/custom-events';
+import { usePixi } from '@/lib/pixi-core/PixiContext';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 
-const DetailController = () => {
+const DesignActivePanel = () => {
   const { app } = usePixi();
   const { pushMessage } = useToast();
   const editingContainer = useAtomValue(exportContainerAtom);
@@ -236,4 +236,4 @@ const DetailController = () => {
   );
 };
 
-export default DetailController;
+export default DesignActivePanel;

@@ -1,4 +1,4 @@
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
+import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 
 /**
  * @description zoom `app.stage` based on current mouse position using wheel event

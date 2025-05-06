@@ -1,9 +1,9 @@
 import { useForceUpdate } from '@fewings/react/hooks';
 import { Container } from 'pixi.js';
 
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
-import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
-import TreeItem from '@/lib/pixi-design-editor/components/PixiTreeView/TreeItem';
+import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
+import { usePixi } from '@/lib/pixi-core/PixiContext';
+import TreeItem from '@/lib/pixi-core/components/PixiTreeView/TreeItem';
 
 const PixiTreeView = () => {
   const { app } = usePixi();

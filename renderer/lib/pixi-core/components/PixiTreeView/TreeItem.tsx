@@ -1,8 +1,11 @@
 import { Container, ContainerChild } from 'pixi.js';
 import { useAtom, useSetAtom } from 'jotai';
+import {
+  hoverObjAtom,
+  selectedObjAtom,
+} from 'renderer/features/edit/design/stores';
 
 import { cn } from '@/utils/cn';
-import { hoverObjAtom, selectedObjAtom } from '@/lib/pixi-design-editor/stores';
 
 export default function TreeItem({
   container,

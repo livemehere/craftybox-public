@@ -5,9 +5,9 @@ import {
   exportContainerAtom,
   modeAtom,
   selectedObjAtom,
-} from '@/lib/pixi-design-editor/stores';
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
-import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-design-editor/custom-events';
+} from '@/features/edit/design/stores';
+import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 
 const InteractionController = () => {
   const editingContainer = useAtomValue(exportContainerAtom);

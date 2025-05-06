@@ -1,7 +1,7 @@
 import { Application } from 'pixi.js';
 import { useCallbackRef } from '@fewings/react/hooks';
 
-import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
+import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 
 const PixiExecutor = ({
   cb,

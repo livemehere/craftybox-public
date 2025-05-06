@@ -1,24 +1,24 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useMemo, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-
-import PixiProvider from '@/lib/pixi-design-editor/components/PixiProvider';
-import PixiCanvas from '@/lib/pixi-design-editor/components/PixiCanvas';
-import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
-import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
 import {
   EditMode,
   exportContainerAtom,
   hoverObjAtom,
   modeAtom,
   selectedObjAtom,
-} from '@/lib/pixi-design-editor/stores';
-import PixiGrid from '@/lib/pixi-design-editor/components/ui/PixiGrid';
-import PixiPanController from '@/lib/pixi-design-editor/components/Controller/PixiPanController';
-import PixiWheelController from '@/lib/pixi-design-editor/components/Controller/PixiWheelController';
-import PixiHandTools from '@/lib/pixi-design-editor/components/Controller/PixiHandTools';
-import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
-import DetailController from '@/lib/pixi-design-editor/components/Controller/DetailController';
+} from 'renderer/features/edit/design/stores';
+
+import PixiProvider from '@/lib/pixi-core/components/PixiProvider';
+import PixiCanvas from '@/lib/pixi-core/components/PixiCanvas';
+import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
+import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
+import PixiGrid from '@/lib/pixi-core/components/PixiGrid';
+import PixiPanController from '@/lib/pixi-core/components/PixiPanController';
+import PixiWheelController from '@/lib/pixi-core/components/PixiWheelController';
+import DesignHandToolbar from '@/features/edit/design/components/DesignHandToolbar';
+import PixiTreeView from '@/lib/pixi-core/components/PixiTreeView/PixiTreeView';
+import DesignActivePanel from '@/features/edit/design/components/DesignActivePanel';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -84,13 +84,16 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
+        {/** Common */}
         <PixiWheelController enable={true} />
         <PixiPanController enable={mode === 'move'} />
         <PixiGrid />
         <PixiCanvas />
         <PixiTreeView />
-        <PixiHandTools mode={mode} setMode={setMode} />
-        <DetailController />
+
+        {/** Design Edit */}
+        <DesignHandToolbar />
+        <DesignActivePanel />
         {/*<InteractionController />*/}
         {/** initialize with Image */}
         {/*<PixiExecutor*/}
