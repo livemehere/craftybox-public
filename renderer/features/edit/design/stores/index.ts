@@ -7,3 +7,4 @@ export const selectedContainerAtom = atom<Container | null>(null);
 export const rootContainerAtom = atom<Container | null>(null);
 export const modeAtom = atom<EditMode>('select');
 export const lockedContainerUidsAtom = atom<number[]>([]);
+export const outlineContainerAtom = atom<Container | null>(null);

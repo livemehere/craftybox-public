@@ -58,7 +58,7 @@ export default function TreeItem({
           onHoverContainer(null);
           setIsHovered(false);
         }}
-        onClick={() => onClickContainer(container)}
+        onClick={() => !isLock && onClickContainer(container)}
         onKeyDown={(e) => {
           if (e.key === 'Backspace' && !isLock) {
             e.stopPropagation();

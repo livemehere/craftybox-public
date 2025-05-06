@@ -32,10 +32,10 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
 ];
 
 interface Props {
-  target: Container | null;
+  rootContainer: Container | null;
 }
 
-const InteractionController = ({ target }: Props) => {
+const InteractionController = ({ rootContainer }: Props) => {
   const hoverContainer = useAtomValue(hoverContainerAtom);
   const selectedContainer = useAtomValue(selectedContainerAtom);
 
@@ -82,7 +82,7 @@ const InteractionController = ({ target }: Props) => {
   usePixiEffect(
     (app) => {
       if (!mode.startsWith('draw-')) return;
-      if (!target) return;
+      if (!rootContainer) return;
 
       let isDrawing = false;
       let graphics: Graphics;
@@ -97,7 +97,7 @@ const InteractionController = ({ target }: Props) => {
         const y = e.clientY - bounds.top;
         const localPos = app.stage.toLocal(new Point(x, y));
         graphics.position.set(localPos.x, localPos.y);
-        target.addChild(graphics);
+        rootContainer.addChild(graphics);
         console.log('added graphics', graphics.x, graphics.y);
       };
 
@@ -140,7 +140,7 @@ const InteractionController = ({ target }: Props) => {
         app.canvas.removeEventListener('pointerup', handleUp);
       };
     },
-    [mode, target]
+    [mode, rootContainer]
   );
 
   return (

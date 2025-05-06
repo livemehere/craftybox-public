@@ -6,8 +6,9 @@ import {
   selectedContainerAtom,
   hoverContainerAtom,
   lockedContainerUidsAtom,
+  outlineContainerAtom,
 } from 'renderer/features/edit/design/stores';
-import { Assets, BlurFilter, Container, Graphics, Sprite } from 'pixi.js';
+import { Assets, Container, Graphics, Sprite } from 'pixi.js';
 
 import PixiProvider from '@/lib/pixi-core/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-core/components/PixiCanvas';
@@ -27,6 +28,7 @@ const EditPage = () => {
   const [selectedContainer, setSelectedContainer] = useAtom(
     selectedContainerAtom
   );
+  const [outlineContainer, setOutlineContainer] = useAtom(outlineContainerAtom);
   const [hoverContainer, setHoverContainer] = useAtom(hoverContainerAtom);
   const [mode, setMode] = useAtom(modeAtom);
   const [lockedContainerUids, setLockedContainerUids] = useAtom(
@@ -41,6 +43,13 @@ const EditPage = () => {
     return targetUrl || null;
   }, []);
 
+  const addLock = (...containers: Container[]) => {
+    setLockedContainerUids((prev) => [
+      ...prev,
+      ...containers.map((c) => c.uid),
+    ]);
+  };
+
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
@@ -49,10 +58,7 @@ const EditPage = () => {
         <PixiPanController enable={mode === 'move'} />
         <PixiGrid
           onCreated={(containers) => {
-            setLockedContainerUids((prev) => [
-              ...prev,
-              ...containers.map((c) => c.uid),
-            ]);
+            addLock(...containers);
           }}
         />
         <PixiCanvas />
@@ -70,18 +76,15 @@ const EditPage = () => {
             container.destroy();
           }}
           isLocked={(container) => {
-            if (lockedContainerUids.includes(container.uid)) {
-              return true;
-            }
-            return false;
+            return lockedContainerUids.includes(container.uid);
           }}
           displayFilter={(container) => {
-            return container.label !== 'Outline';
+            return container !== outlineContainer;
           }}
         />
 
         {/** Design Edit */}
-        <InteractionController target={rootContainer} />
+        <InteractionController rootContainer={rootContainer} />
         <MutatePanel target={selectedContainer} />
         {/* outline navigator */}
         <PixiExecutor
@@ -90,15 +93,15 @@ const EditPage = () => {
             const outline = new Graphics();
             outline.label = 'Outline';
             app.stage.addChild(outline);
+            setOutlineContainer(outline);
 
             const { x, y, width, height } = hoverContainer;
-            outline.rect(x, y, width, height).stroke({
+            outline.rect(0, 0, width, height).stroke({
               width: 1,
               color: '#04cd85',
               pixelLine: true,
             });
-
-            console.log('hover', hoverContainer);
+            outline.position.set(x, y);
 
             return () => {
               outline.destroy();
@@ -118,17 +121,12 @@ const EditPage = () => {
             (async () => {
               if (!imgUrl) return;
               const container = new Container();
-              container.label = 'Frame';
+              container.label = 'Root Frame';
               setLockedContainerUids((prev) => [...prev, container.uid]);
 
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
-              sprite.filters = [
-                new BlurFilter({
-                  strength: 10,
-                }),
-              ];
-              sprite.label = 'Image';
+              sprite.label = 'Snanpshot';
 
               // add.
               container.addChild(sprite);
