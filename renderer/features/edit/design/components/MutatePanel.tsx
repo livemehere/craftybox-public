@@ -83,8 +83,6 @@ const MutatePanel = ({ target }: Props) => {
     '[&:has(input:focus)]:outline-1 outline-app-primary'
   );
 
-  console.log('taret', target);
-
   return (
     <aside
       className={

@@ -82,7 +82,9 @@ const PixiTreeView = (
         <TreeItem
           container={child}
           key={child.uid}
-          isLast={i === app.stage.children.length - 1}
+          isLast={
+            i === app.stage.children.length - 1 || child.children.length > 0
+          }
           {...props}
         />
       ))}

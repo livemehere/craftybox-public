@@ -89,7 +89,10 @@ export default function TreeItem({
               className={
                 'mr-16 cursor-pointer rounded-full p-4 hover:bg-white/10'
               }
-              onClick={() => onDeleteContainer(container)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteContainer(container);
+              }}
             >
               <IoMdCloseCircle color={'gray'} />
             </button>
@@ -104,7 +107,10 @@ export default function TreeItem({
                 container={child}
                 depth={depth + 1}
                 key={child.uid}
-                isLast={i === container.children.length - 1}
+                isLast={
+                  i === container.children.length - 1 ||
+                  child.children.length > 0
+                }
                 {...props}
               />
             );
