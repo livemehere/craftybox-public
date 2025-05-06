@@ -30,9 +30,18 @@ export default function TreeItem({
             'bg-app-primary/80': isSelected,
           }
         )}
+        tabIndex={0}
         onMouseEnter={() => setHoverObj(container)}
         onMouseLeave={() => setHoverObj(null)}
         onClick={() => setSelectedObj(container)}
+        onKeyDown={(e) => {
+          if (e.key === 'Backspace') {
+            e.stopPropagation();
+            e.preventDefault();
+            container.destroy();
+            setSelectedObj(null);
+          }
+        }}
       >
         <div className={'flex items-center gap-8 pl-16'}>
           {isLast ? (
