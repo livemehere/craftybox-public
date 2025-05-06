@@ -3,7 +3,19 @@ import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 /**
  * @description zoom `app.stage` based on current mouse position using wheel event
  */
-const WheelController = ({ enable = true }: { enable?: boolean }) => {
+const PixiWheelController = ({
+  enable = true,
+  scaleStep = 0.1,
+  minScale = 0.1,
+  maxScale = 5,
+  panStep = 40,
+}: {
+  enable?: boolean;
+  scaleStep?: number;
+  minScale?: number;
+  maxScale?: number;
+  panStep?: number;
+}) => {
   // zoom
   usePixiEffect(
     (app) => {
@@ -11,11 +23,6 @@ const WheelController = ({ enable = true }: { enable?: boolean }) => {
 
       const onWheel = (e: WheelEvent) => {
         e.preventDefault();
-
-        const scaleStep = 0.1;
-        const minScale = 0.1;
-        const maxScale = 5;
-        const panStep = 40;
 
         const isCtrl = e.ctrlKey || e.metaKey;
         const isShift = e.shiftKey;
@@ -57,9 +64,9 @@ const WheelController = ({ enable = true }: { enable?: boolean }) => {
         app.canvas.removeEventListener('wheel', onWheel);
       };
     },
-    [enable]
+    [enable, scaleStep, minScale, maxScale, panStep]
   );
   return null;
 };
 
-export default WheelController;
+export default PixiWheelController;

@@ -5,7 +5,7 @@ import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 /**
  * display infinite grid background
  */
-const Grid = () => {
+const PixiGrid = () => {
   usePixiEffect((app) => {
     const g = new Graphics();
     g.alpha = 0.2;
@@ -84,4 +84,4 @@ const Grid = () => {
   return null;
 };
 
-export default Grid;
+export default PixiGrid;

@@ -13,9 +13,11 @@ import {
   modeAtom,
   selectedObjAtom,
 } from '@/lib/pixi-design-editor/stores';
-import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
-import PanController from '@/lib/pixi-design-editor/components/Controller/PanController';
-import WheelController from '@/lib/pixi-design-editor/components/Controller/WheelController';
+import PixiGrid from '@/lib/pixi-design-editor/components/ui/PixiGrid';
+import PixiPanController from '@/lib/pixi-design-editor/components/Controller/PixiPanController';
+import PixiWheelController from '@/lib/pixi-design-editor/components/Controller/PixiWheelController';
+import HandToolsController from '@/lib/pixi-design-editor/components/Controller/HandToolsController';
+import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -81,12 +83,12 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
-        <WheelController enable={true} />
-        <PanController enable={mode === 'move'} />
-        <Grid />
-        {/*<PixiTreeView />*/}
+        <PixiWheelController enable={true} />
+        <PixiPanController enable={mode === 'move'} />
+        <PixiGrid />
         <PixiCanvas />
-        {/*<HandToolsController />*/}
+        <PixiTreeView />
+        <HandToolsController />
         {/*<DetailController />*/}
         {/*<InteractionController />*/}
         {/** initialize with Image */}

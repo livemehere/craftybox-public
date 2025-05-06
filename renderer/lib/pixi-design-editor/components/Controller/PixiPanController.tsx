@@ -5,7 +5,7 @@ interface Props {
   applyCursor?: boolean;
 }
 
-const PanController = ({ enable = true, applyCursor = true }: Props) => {
+const PixiPanController = ({ enable = true, applyCursor = true }: Props) => {
   // pan
   usePixiEffect(
     (app) => {
@@ -63,4 +63,4 @@ const PanController = ({ enable = true, applyCursor = true }: Props) => {
   return null;
 };
 
-export default PanController;
+export default PixiPanController;

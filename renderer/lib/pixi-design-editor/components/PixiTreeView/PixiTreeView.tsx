@@ -1,36 +1,65 @@
 import { useForceUpdate } from '@fewings/react/hooks';
-import { useAtomValue } from 'jotai';
+import { Container } from 'pixi.js';
 
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
-import { exportContainerAtom } from '@/lib/pixi-design-editor/stores';
 import TreeItem from '@/lib/pixi-design-editor/components/PixiTreeView/TreeItem';
 
 const PixiTreeView = () => {
   const { app } = usePixi();
   const update = useForceUpdate();
-  const editingContainer = useAtomValue(exportContainerAtom);
+
+  const watchChildrenRecursive = (
+    container: Container,
+    handler: () => void
+  ) => {
+    const registered = new WeakSet<Container>();
+
+    const register = (target: Container) => {
+      if (!registered.has(target)) {
+        registered.add(target);
+        target.on('childAdded', childHandler);
+        target.on('childRemoved', childHandler);
+        console.log(`[Tree] watch ${target.label}`);
+      }
+
+      for (const child of target.children) {
+        register(child);
+      }
+    };
+
+    const unregister = (target: Container) => {
+      if (registered.has(target)) {
+        registered.delete(target);
+        target.off('childAdded', childHandler);
+        target.off('childRemoved', childHandler);
+      }
+
+      for (const child of target.children) {
+        unregister(child);
+      }
+    };
+
+    const childHandler = (child: Container) => {
+      handler();
+      register(child);
+    };
+
+    register(container);
+
+    return () => {
+      unregister(container);
+    };
+  };
 
   /** watch `stage`, `editingContainer` children change and update tree ui */
-  usePixiEffect(
-    (app) => {
-      if (!editingContainer) return;
-      const handler = () => {
-        update();
-      };
-      app.stage.on('childAdded', handler);
-      app.stage.on('childRemoved', handler);
-      editingContainer.on('childAdded', handler);
-      editingContainer.on('childRemoved', handler);
-      return () => {
-        editingContainer.off('childAdded', handler);
-        editingContainer.off('childRemoved', handler);
-        app.stage.off('childAdded', handler);
-        app.stage.off('childRemoved', handler);
-      };
-    },
-    [editingContainer]
-  );
+  usePixiEffect((app) => {
+    const clear = watchChildrenRecursive(app.stage, update);
+    update();
+    return () => {
+      clear();
+    };
+  }, []);
 
   return (
     <div
@@ -38,7 +67,7 @@ const PixiTreeView = () => {
         'bg-app-gray absolute top-14 bottom-14 left-14 w-280 rounded-lg py-12 shadow shadow-white/10'
       }
     >
-      <section className={'px-16 py-8'}>Layer</section>
+      <section className={'px-16 py-8'}>Stage</section>
       {app?.stage.children.map((child, i) => (
         <TreeItem
           container={child}
