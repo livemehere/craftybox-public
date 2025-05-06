@@ -14,7 +14,7 @@ import { useToast } from '@/lib/toast/ToastContext';
 import { usePixi } from '@/lib/pixi-core/PixiContext';
 import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 
-const DesignActivePanel = () => {
+const ActiveObjMutatePanel = () => {
   const { app } = usePixi();
   const { pushMessage } = useToast();
   const editingContainer = useAtomValue(exportContainerAtom);
@@ -236,4 +236,4 @@ const DesignActivePanel = () => {
   );
 };
 
-export default DesignActivePanel;
+export default ActiveObjMutatePanel;
