@@ -14,6 +14,8 @@ import {
   selectedObjAtom,
 } from '@/lib/pixi-design-editor/stores';
 import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
+import PanController from '@/lib/pixi-design-editor/components/Controller/PanController';
+import WheelController from '@/lib/pixi-design-editor/components/Controller/WheelController';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -79,8 +81,8 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
-        {/*<WheelController enable={true} />*/}
-        {/*<PanController enable={mode === 'move'} />*/}
+        <WheelController enable={true} />
+        <PanController enable={mode === 'move'} />
         <Grid />
         {/*<PixiTreeView />*/}
         <PixiCanvas />

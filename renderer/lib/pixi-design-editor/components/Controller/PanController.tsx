@@ -1,14 +1,25 @@
 import { usePixiEffect } from '@/lib/pixi-design-editor/hooks/usePixiEffect';
 
-const PanController = ({ enable = true }: { enable?: boolean }) => {
+interface Props {
+  enable?: boolean;
+  applyCursor?: boolean;
+}
+
+const PanController = ({ enable = true, applyCursor = true }: Props) => {
   // pan
   usePixiEffect(
     (app) => {
+      const setCursor = (canvas: HTMLCanvasElement, cursor: string) => {
+        if (applyCursor) {
+          canvas.style.cursor = cursor;
+        }
+      };
+
       if (!enable) {
-        app.canvas.style.cursor = 'default';
+        setCursor(app.canvas, 'default');
         return;
       }
-      app.canvas.style.cursor = 'grab';
+      setCursor(app.canvas, 'grab');
       let isDown = false;
       let startX: number;
       let startY: number;
@@ -17,7 +28,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
         isDown = true;
         startX = e.clientX;
         startY = e.clientY;
-        app.canvas.style.cursor = 'grabbing';
+        setCursor(app.canvas, 'grabbing');
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -33,7 +44,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
 
       const onMouseUp = () => {
         isDown = false;
-        app.canvas.style.cursor = 'grab';
+        setCursor(app.canvas, 'grab');
       };
 
       window.addEventListener('mousedown', onMouseDown);
@@ -46,7 +57,7 @@ const PanController = ({ enable = true }: { enable?: boolean }) => {
         window.removeEventListener('mouseup', onMouseUp);
       };
     },
-    [enable]
+    [enable, applyCursor]
   );
 
   return null;
