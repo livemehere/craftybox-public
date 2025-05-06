@@ -21,6 +21,7 @@ import PixiTreeView from '@/lib/pixi-core/components/PixiTreeView/PixiTreeView';
 import MutatePanel from '@/features/edit/design/components/MutatePanel';
 import PixiExecutor from '@/lib/pixi-core/components/PixiExecutor';
 import InteractionController from '@/features/edit/design/components/InteractionController';
+import { onHover } from '@/lib/pixi-core/utils/hover';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -118,6 +119,8 @@ const EditPage = () => {
         <PixiExecutor
           cb={(app) => {
             let editingContainer: Container | null = null;
+            const clears: (() => void)[] = [];
+
             (async () => {
               if (!imgUrl) return;
               const container = new Container();
@@ -126,7 +129,7 @@ const EditPage = () => {
 
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
-              sprite.label = 'Snanpshot';
+              sprite.label = 'Snapshot';
 
               // add.
               container.addChild(sprite);
@@ -137,9 +140,23 @@ const EditPage = () => {
 
               setRootContainer(container);
               editingContainer = container;
+
+              /** Add hover set events */
+              clears.push(
+                onHover(
+                  sprite,
+                  (e) => {
+                    setHoverContainer(e.currentTarget);
+                  },
+                  () => {
+                    setHoverContainer(null);
+                  }
+                )
+              );
             })();
             return () => {
               editingContainer?.destroy();
+              clears.forEach((clear) => clear());
             };
           }}
           deps={[]}

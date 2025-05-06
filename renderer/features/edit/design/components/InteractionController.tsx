@@ -10,7 +10,6 @@ import {
   modeAtom,
   selectedContainerAtom,
   EditMode,
-  hoverContainerAtom,
 } from '@/features/edit/design/stores';
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 import { cn } from '@/utils/cn';
@@ -36,7 +35,6 @@ interface Props {
 }
 
 const InteractionController = ({ rootContainer }: Props) => {
-  const hoverContainer = useAtomValue(hoverContainerAtom);
   const selectedContainer = useAtomValue(selectedContainerAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
