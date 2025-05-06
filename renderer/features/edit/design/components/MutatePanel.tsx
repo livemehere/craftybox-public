@@ -7,7 +7,7 @@ import { FiDownload } from 'react-icons/fi';
 import { cn } from '@/utils/cn';
 import { useToast } from '@/lib/toast/ToastContext';
 import { usePixi } from '@/lib/pixi-core/PixiContext';
-import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-constants';
 
 interface Props {
   target: Container | null;

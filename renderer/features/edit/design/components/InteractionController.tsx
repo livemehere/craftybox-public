@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { Container, Graphics, Point } from 'pixi.js';
 import { LuMousePointer2 } from 'react-icons/lu';
 import { PiHandGrabbing } from 'react-icons/pi';
@@ -10,10 +10,12 @@ import {
   modeAtom,
   selectedContainerAtom,
   EditMode,
+  hoverContainerAtom,
 } from '@/features/edit/design/stores';
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 import { cn } from '@/utils/cn';
 import { setDraggable } from '@/lib/pixi-core/utils/drag';
+import { onHover } from '@/lib/pixi-core/utils/hover';
 
 const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   {
@@ -35,7 +37,10 @@ interface Props {
 }
 
 const InteractionController = ({ rootContainer }: Props) => {
-  const selectedContainer = useAtomValue(selectedContainerAtom);
+  const [selectedContainer, setSelectedContainer] = useAtom(
+    selectedContainerAtom
+  );
+  const setHoverContainer = useSetAtom(hoverContainerAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
   const prevModeBeforeMove = useRef<EditMode | undefined>(undefined);
@@ -89,6 +94,20 @@ const InteractionController = ({ rootContainer }: Props) => {
       const handleDown = (e: PointerEvent) => {
         isDrawing = true;
         graphics = new Graphics();
+
+        onHover(
+          graphics,
+          (e) => {
+            setHoverContainer(e.currentTarget);
+          },
+          () => {
+            setHoverContainer(null);
+          }
+        );
+
+        graphics.on('mousedown', (e) => {
+          setSelectedContainer(e.currentTarget);
+        });
 
         const bounds = app.canvas.getBoundingClientRect();
         const x = e.clientX - bounds.left;

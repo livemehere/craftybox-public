@@ -1,6 +1,6 @@
 import { Application, Container } from 'pixi.js';
 
-import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
+import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-constants';
 
 export function setDraggable(app: Application, target: Container) {
   let isDragging = false;
@@ -34,7 +34,6 @@ export function setDraggable(app: Application, target: Container) {
     target.x = originalObjX + dx;
     target.y = originalObjY + dy;
 
-    target.emit(PIXI_CUSTOM_EVENTS.CONTAINER_DRAG);
     target.emit(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE);
   };
 

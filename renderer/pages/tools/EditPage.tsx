@@ -22,6 +22,10 @@ import MutatePanel from '@/features/edit/design/components/MutatePanel';
 import PixiExecutor from '@/lib/pixi-core/components/PixiExecutor';
 import InteractionController from '@/features/edit/design/components/InteractionController';
 import { onHover } from '@/lib/pixi-core/utils/hover';
+import {
+  PIXI_CUSTOM_EVENTS,
+  PIXI_CUSTOM_LABELS,
+} from '@/lib/pixi-core/pixi-custom-constants';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -87,35 +91,50 @@ const EditPage = () => {
         {/** Design Edit */}
         <InteractionController rootContainer={rootContainer} />
         <MutatePanel target={selectedContainer} />
-        {/* outline navigator */}
+
+        {/** outline Graphics */}
         <PixiExecutor
           cb={(app) => {
             if (!hoverContainer) return;
             const outline = new Graphics();
-            outline.label = 'Outline';
+            outline.label = PIXI_CUSTOM_LABELS.OUTLINE;
             app.stage.addChild(outline);
             setOutlineContainer(outline);
 
-            const { x, y, width, height } = hoverContainer;
-            outline.rect(0, 0, width, height).stroke({
-              width: 1,
-              color: '#04cd85',
-              pixelLine: true,
-            });
-            outline.position.set(x, y);
+            const drawOutline = () => {
+              outline.clear();
+              const { x, y, width, height } = hoverContainer;
+              outline.rect(0, 0, width, height).stroke({
+                width: 1,
+                color: '#04cd85',
+                pixelLine: true,
+              });
+              outline.position.set(x, y);
+            };
+
+            drawOutline();
+            hoverContainer.on(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, drawOutline);
 
             return () => {
               outline.destroy();
+              hoverContainer.off(
+                PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE,
+                drawOutline
+              );
             };
           }}
           deps={[hoverContainer]}
         />
+
+        {/** viewport center */}
         <PixiExecutor
           cb={(app) => {
             app.stage.x += app.screen.width / 2;
             app.stage.y += app.screen.height / 2;
           }}
         />
+
+        {/** Create RootFrame, Snapshot Image */}
         <PixiExecutor
           cb={(app) => {
             let editingContainer: Container | null = null;
@@ -124,12 +143,12 @@ const EditPage = () => {
             (async () => {
               if (!imgUrl) return;
               const container = new Container();
-              container.label = 'Root Frame';
+              container.label = PIXI_CUSTOM_LABELS.ROOT_FRAME;
               setLockedContainerUids((prev) => [...prev, container.uid]);
 
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
-              sprite.label = 'Snapshot';
+              sprite.label = PIXI_CUSTOM_LABELS.SNAPSHOT;
 
               // add.
               container.addChild(sprite);
@@ -142,17 +161,19 @@ const EditPage = () => {
               editingContainer = container;
 
               /** Add hover set events */
-              clears.push(
-                onHover(
-                  sprite,
-                  (e) => {
-                    setHoverContainer(e.currentTarget);
-                  },
-                  () => {
-                    setHoverContainer(null);
-                  }
-                )
+              // don't need to clear this, because when destroyed, this will be removed.
+              onHover(
+                sprite,
+                (e) => {
+                  setHoverContainer(e.currentTarget);
+                },
+                () => {
+                  setHoverContainer(null);
+                }
               );
+              sprite.on('mousedown', (e) => {
+                setSelectedContainer(e.currentTarget);
+              });
             })();
             return () => {
               editingContainer?.destroy();
