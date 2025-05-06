@@ -11,10 +11,12 @@ import {
   modeAtom,
   selectedObjAtom,
   EditMode,
+  hoverObjAtom,
 } from '@/features/edit/design/stores';
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
-import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 import { cn } from '@/utils/cn';
+import { setDraggable } from '@/lib/pixi-core/utils/drag';
+import { makeHighLight } from '@/lib/pixi-core/utils';
 
 const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   {
@@ -33,23 +35,33 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
 
 const InteractionController = () => {
   const rootContainer = useAtomValue(rootContainerAtom);
+  const hoverObj = useAtomValue(hoverObjAtom);
   const selectedObj = useAtomValue(selectedObjAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
-  const prevMode = useRef<EditMode | undefined>(undefined);
+  const prevModeBeforeMove = useRef<EditMode | undefined>(undefined);
+
+  usePixiEffect(() => {
+    if (!hoverObj) return;
+    const clear = makeHighLight(hoverObj);
+
+    return () => {
+      clear();
+    };
+  }, [hoverObj]);
 
   /** toggle move mode while pressing space */
   useHotkeys('space', () => {
     if (mode === 'move') return;
-    prevMode.current = mode;
+    prevModeBeforeMove.current = mode;
     setMode('move');
   });
   useHotkeys(
     'space',
     () => {
-      if (prevMode.current) {
-        setMode(prevMode.current);
-        prevMode.current = undefined;
+      if (prevModeBeforeMove.current) {
+        setMode(prevModeBeforeMove.current);
+        prevModeBeforeMove.current = undefined;
       }
     },
     {
@@ -66,53 +78,9 @@ const InteractionController = () => {
   usePixiEffect(
     (app) => {
       if (!selectedObj || mode !== 'select') return;
-
-      let isDragging = false;
-      let startX = 0;
-      let startY = 0;
-      let originalObjX = 0;
-      let originalObjY = 0;
-
-      const handleDown = (e: PointerEvent) => {
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-
-        isDragging = true;
-        startX = x;
-        startY = y;
-        originalObjX = selectedObj.x;
-        originalObjY = selectedObj.y;
-      };
-
-      const handleMove = (e: PointerEvent) => {
-        if (!isDragging) return;
-
-        const bounds = app.canvas.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-
-        const dx = (x - startX) / app.stage.scale.x;
-        const dy = (y - startY) / app.stage.scale.y;
-
-        selectedObj.x = originalObjX + dx;
-        selectedObj.y = originalObjY + dy;
-
-        selectedObj.emit(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE);
-      };
-
-      const handleUp = () => {
-        isDragging = false;
-      };
-
-      app.canvas.addEventListener('pointerdown', handleDown);
-      app.canvas.addEventListener('pointermove', handleMove);
-      app.canvas.addEventListener('pointerup', handleUp);
-
+      const clear = setDraggable(app, selectedObj);
       return () => {
-        app.canvas.removeEventListener('pointerdown', handleDown);
-        app.canvas.removeEventListener('pointermove', handleMove);
-        app.canvas.removeEventListener('pointerup', handleUp);
+        clear();
       };
     },
     [selectedObj, mode]
@@ -121,7 +89,7 @@ const InteractionController = () => {
   /** create shapes */
   usePixiEffect(
     (app) => {
-      if (mode === 'move' || mode === 'select') return;
+      if (!mode.startsWith('draw-')) return;
       if (!rootContainer) return;
 
       let isDrawing = false;

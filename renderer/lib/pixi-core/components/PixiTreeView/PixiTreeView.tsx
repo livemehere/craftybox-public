@@ -3,9 +3,16 @@ import { Container } from 'pixi.js';
 
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 import { usePixi } from '@/lib/pixi-core/PixiContext';
-import TreeItem from '@/lib/pixi-core/components/PixiTreeView/TreeItem';
+import TreeItem, {
+  TreeItemProps,
+} from '@/lib/pixi-core/components/PixiTreeView/TreeItem';
 
-const PixiTreeView = () => {
+const PixiTreeView = (
+  props: Pick<
+    TreeItemProps,
+    'activeContainer' | 'onClickContainer' | 'onHoverContainer'
+  >
+) => {
   const { app } = usePixi();
   const update = useForceUpdate();
 
@@ -73,6 +80,7 @@ const PixiTreeView = () => {
           container={child}
           key={child.uid}
           isLast={i === app.stage.children.length - 1}
+          {...props}
         />
       ))}
     </div>

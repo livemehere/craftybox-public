@@ -1,25 +1,26 @@
 import { Container, ContainerChild } from 'pixi.js';
-import { useAtom, useSetAtom } from 'jotai';
-import {
-  hoverObjAtom,
-  selectedObjAtom,
-} from 'renderer/features/edit/design/stores';
 
 import { cn } from '@/utils/cn';
+
+export interface TreeItemProps {
+  onHoverContainer: (container: Container | null) => void;
+  onClickContainer: (container: Container | null) => void;
+  activeContainer: Container | null;
+
+  container: Container<ContainerChild>;
+  depth?: number;
+  isLast: boolean;
+}
 
 export default function TreeItem({
   container,
   depth = 0,
   isLast,
-}: {
-  container: Container<ContainerChild>;
-  depth?: number;
-  isLast: boolean;
-}) {
-  const setHoverObj = useSetAtom(hoverObjAtom);
-  const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
-  const isSelected = selectedObj === container;
-
+  onHoverContainer,
+  onClickContainer,
+  activeContainer,
+}: TreeItemProps) {
+  const isSelected = activeContainer === container;
   return (
     <div className={'hover:bg-app-soft-gray'}>
       <div
@@ -31,15 +32,15 @@ export default function TreeItem({
           }
         )}
         tabIndex={0}
-        onMouseEnter={() => setHoverObj(container)}
-        onMouseLeave={() => setHoverObj(null)}
-        onClick={() => setSelectedObj(container)}
+        onMouseEnter={() => onHoverContainer(container)}
+        onMouseLeave={() => onHoverContainer(null)}
+        onClick={() => onClickContainer(container)}
         onKeyDown={(e) => {
           if (e.key === 'Backspace') {
             e.stopPropagation();
             e.preventDefault();
             container.destroy();
-            setSelectedObj(null);
+            onClickContainer(null);
           }
         }}
       >
@@ -71,6 +72,9 @@ export default function TreeItem({
               depth={depth + 1}
               key={child.uid}
               isLast={i === container.children.length - 1}
+              onHoverContainer={onHoverContainer}
+              onClickContainer={onClickContainer}
+              activeContainer={activeContainer}
             />
           );
         })}

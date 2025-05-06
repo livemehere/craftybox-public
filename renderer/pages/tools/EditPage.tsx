@@ -1,10 +1,10 @@
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useMemo } from 'react';
 import {
   rootContainerAtom,
-  hoverObjAtom,
   modeAtom,
   selectedObjAtom,
+  hoverObjAtom,
 } from 'renderer/features/edit/design/stores';
 import { Assets, Container, Sprite } from 'pixi.js';
 
@@ -23,9 +23,8 @@ import InteractionController from '@/features/edit/design/components/Interaction
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
   const setRootContainer = useSetAtom(rootContainerAtom);
-  const selectedObj = useAtomValue(selectedObjAtom);
-  const hoverObj = useAtomValue(hoverObjAtom);
-
+  const setHoverObj = useSetAtom(hoverObjAtom);
+  const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
   const mode = useAtomValue(modeAtom);
 
   const imgUrl = useMemo(() => {
@@ -36,26 +35,6 @@ const EditPage = () => {
     return targetUrl || null;
   }, []);
 
-  // useEffect(() => {
-  //   let restoreSelectedObj: () => void = () => {};
-  //   let restoreHoverObj: () => void = () => {};
-  //
-  //   if (selectedObj) {
-  //     restoreSelectedObj = makeHighLight(selectedObj);
-  //   }
-  //
-  //   if (hoverObj) {
-  //     restoreHoverObj = makeHighLight(hoverObj);
-  //   }
-  //
-  //   return () => {
-  //     if (selectedObj !== hoverObj) {
-  //       restoreSelectedObj();
-  //       restoreHoverObj();
-  //     }
-  //   };
-  // }, [selectedObj, hoverObj]);
-
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
@@ -64,7 +43,13 @@ const EditPage = () => {
         <PixiPanController enable={mode === 'move'} />
         <PixiGrid />
         <PixiCanvas />
-        <PixiTreeView />
+        <PixiTreeView
+          onHoverContainer={(container) => setHoverObj(container)}
+          onClickContainer={(container) => {
+            setSelectedObj(container);
+          }}
+          activeContainer={selectedObj}
+        />
 
         {/** Design Edit */}
         <InteractionController />
