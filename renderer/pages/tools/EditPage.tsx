@@ -1,4 +1,3 @@
-import { Assets, Container, Sprite } from 'pixi.js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useMemo, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -7,10 +6,6 @@ import PixiProvider from '@/lib/pixi-design-editor/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-design-editor/components/PixiCanvas';
 import { lnbOpenAtom } from '@/features/LNB/stores/lnbOpenAtom';
 import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema';
-import WheelController from '@/lib/pixi-design-editor/components/Controller/WheelController';
-import PanController from '@/lib/pixi-design-editor/components/Controller/PanController';
-import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
-import PixiTreeView from '@/lib/pixi-design-editor/components/PixiTreeView/PixiTreeView';
 import {
   EditMode,
   exportContainerAtom,
@@ -18,10 +13,7 @@ import {
   modeAtom,
   selectedObjAtom,
 } from '@/lib/pixi-design-editor/stores';
-import DetailController from '@/lib/pixi-design-editor/components/Controller/DetailController';
-import PixiExecutor from '@/lib/pixi-design-editor/components/PixiExecutor';
-import HandToolsController from '@/lib/pixi-design-editor/components/Controller/HandToolsController';
-import InteractionController from '@/lib/pixi-design-editor/components/Controller/InteractionController';
+import Grid from '@/lib/pixi-design-editor/components/ui/Grid';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
@@ -87,48 +79,48 @@ const EditPage = () => {
   return (
     <PixiProvider resizeDeps={[open]}>
       <div className={'relative h-full w-full'}>
-        <WheelController enable={true} />
-        <PanController enable={mode === 'move'} />
+        {/*<WheelController enable={true} />*/}
+        {/*<PanController enable={mode === 'move'} />*/}
         <Grid />
-        <PixiTreeView />
+        {/*<PixiTreeView />*/}
         <PixiCanvas />
-        <HandToolsController />
-        <DetailController />
-        <InteractionController />
+        {/*<HandToolsController />*/}
+        {/*<DetailController />*/}
+        {/*<InteractionController />*/}
         {/** initialize with Image */}
-        <PixiExecutor
-          cb={(app) => {
-            let editingContainer: Container | null = null;
-            (async () => {
-              if (!imgUrl) return;
-              const container = new Container();
-              container.label = 'Frame';
-              const texture = await Assets.load(imgUrl);
-              const sprite = new Sprite(texture);
-              sprite.label = 'Image';
+        {/*<PixiExecutor*/}
+        {/*  cb={(app) => {*/}
+        {/*    let editingContainer: Container | null = null;*/}
+        {/*    (async () => {*/}
+        {/*      if (!imgUrl) return;*/}
+        {/*      const container = new Container();*/}
+        {/*      container.label = 'Frame';*/}
+        {/*      const texture = await Assets.load(imgUrl);*/}
+        {/*      const sprite = new Sprite(texture);*/}
+        {/*      sprite.label = 'Image';*/}
 
-              // add.
-              container.addChild(sprite);
-              app.stage.addChild(container);
+        {/*      // add.*/}
+        {/*      container.addChild(sprite);*/}
+        {/*      app.stage.addChild(container);*/}
 
-              // set img center
-              sprite.position.set(-texture.width / 2, -texture.height / 2);
+        {/*      // set img center*/}
+        {/*      sprite.position.set(-texture.width / 2, -texture.height / 2);*/}
 
-              // set viewport center
-              app.stage.position.set(
-                app.screen.width / 2,
-                app.screen.height / 2
-              );
+        {/*      // set viewport center*/}
+        {/*      app.stage.position.set(*/}
+        {/*        app.screen.width / 2,*/}
+        {/*        app.screen.height / 2*/}
+        {/*      );*/}
 
-              setEditingContainer(container);
-              editingContainer = container;
-            })();
-            return () => {
-              editingContainer?.destroy();
-            };
-          }}
-          deps={[]}
-        />
+        {/*      setEditingContainer(container);*/}
+        {/*      editingContainer = container;*/}
+        {/*    })();*/}
+        {/*    return () => {*/}
+        {/*      editingContainer?.destroy();*/}
+        {/*    };*/}
+        {/*  }}*/}
+        {/*  deps={[]}*/}
+        {/*/>*/}
       </div>
     </PixiProvider>
   );

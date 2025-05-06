@@ -11,13 +11,10 @@ export function usePixiTicker(cb: (app: Application, ticker: Ticker) => void) {
 
   useEffect(() => {
     if (!app) return;
-    const ticker = app.ticker.add((ticker) => {
-      _cb(app, ticker);
-    });
-    // console.log(`add ticker handler ${++seq}`);
+    const handler = (ticker: Ticker) => _cb(app, ticker);
+    app.ticker.add(handler);
     return () => {
-      ticker.destroy();
-      // console.log(`remove ticker handler ${--seq}`);
+      app.ticker.remove(handler);
     };
   }, [app]);
 }

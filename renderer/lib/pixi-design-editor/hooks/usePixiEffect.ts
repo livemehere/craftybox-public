@@ -13,10 +13,8 @@ export function usePixiEffect(
   useEffect(() => {
     if (!app) return;
     const clear = cb(app);
-    // console.log(`call usePixiAppHook ${++seq}`);
     return () => {
       clear?.();
-      // console.log(`remove usePixiAppHook ${--seq}`);
     };
   }, [app, ...deps]);
 }

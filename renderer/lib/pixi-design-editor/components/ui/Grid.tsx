@@ -74,10 +74,10 @@ const Grid = () => {
       centerPoint.scale.set(1 / app.stage.scale.x);
     };
 
-    const ticker = app.ticker.add(update);
+    app.ticker.add(update);
 
     return () => {
-      ticker.destroy();
+      app.ticker.remove(update);
       g.destroy();
     };
   });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Application } from 'pixi.js';
 
 import { PixiContext } from '@/lib/pixi-design-editor/PixiContext';
@@ -10,10 +10,10 @@ interface Props {
 
 const PixiProvider = ({ children, resizeDeps = [] }: Props) => {
   const [app, setApp] = useState<Application | null>(null);
+  const appRef = useRef<Application | null>(null);
   const [canvasEl, setCanvasEl] = useState<HTMLCanvasElement | null>(null);
-  const [init, setInit] = useState(false);
 
-  const _initialize = async () => {
+  const createApp = async () => {
     if (!canvasEl) return;
     const newApp = new Application();
     await newApp.init({
@@ -24,33 +24,44 @@ const PixiProvider = ({ children, resizeDeps = [] }: Props) => {
     });
     newApp.stage.interactive = true;
     setApp(newApp);
-    setInit(true);
-    console.log('init pixi app');
+    appRef.current = newApp;
+    console.log('[2] Create pixi app');
+    console.log(
+      `[2] app.stage Size ${newApp.stage.width}x${newApp.stage.height}`
+    );
+    console.log(
+      `[2] app.screen Size ${newApp.screen.width}x${newApp.screen.height}`
+    );
   };
 
+  /** Initialize the Pixi instance when a canvas element is found under the context */
   useEffect(() => {
-    _initialize();
-
-    return () => {
-      if (app) {
-        app.destroy();
-        setApp(null);
-        console.log('destroy pixi app');
-      }
-    };
+    createApp().catch((err) => {
+      console.error('[App] Error creating pixi app', err);
+    });
   }, [canvasEl]);
 
+  /** For cases where resizing is needed but not triggered by screen adjustments */
   useEffect(() => {
     if (!app) return;
     app.resize();
   }, [...resizeDeps]);
+
+  useEffect(() => {
+    return () => {
+      setTimeout(() => {
+        appRef.current?.destroy();
+        appRef.current = null;
+        console.log('[-] Destroy pixi app');
+      }, 0);
+    };
+  }, []);
 
   return (
     <PixiContext.Provider
       value={{
         app,
         setCanvasEl,
-        init,
       }}
     >
       {children}

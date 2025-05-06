@@ -3,16 +3,16 @@ import { useRef } from 'react';
 import { usePixi } from '@/lib/pixi-design-editor/PixiContext';
 
 const PixiCanvas = () => {
-  const { setCanvasEl, init } = usePixi();
+  const { setCanvasEl } = usePixi();
   const initRef = useRef(false);
   return (
     <div className={'h-full w-full'}>
       <canvas
         ref={(el) => {
-          if (!el || init || initRef.current) return;
+          if (!el || initRef.current) return;
           setCanvasEl(el);
           initRef.current = true;
-          console.log('set canvas el');
+          console.log('[1] Set canvas element');
         }}
         className={'h-full w-full'}
       ></canvas>
