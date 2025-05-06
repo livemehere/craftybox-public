@@ -1,13 +1,13 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import {
   rootContainerAtom,
   modeAtom,
-  selectedObjAtom,
-  hoverObjAtom,
+  selectedContainerAtom,
+  hoverContainerAtom,
   lockedContainerUidsAtom,
 } from 'renderer/features/edit/design/stores';
-import { Assets, Container, Sprite } from 'pixi.js';
+import { Assets, BlurFilter, Container, Graphics, Sprite } from 'pixi.js';
 
 import PixiProvider from '@/lib/pixi-core/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-core/components/PixiCanvas';
@@ -24,8 +24,10 @@ import InteractionController from '@/features/edit/design/components/Interaction
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
   const [rootContainer, setRootContainer] = useAtom(rootContainerAtom);
-  const setHoverObj = useSetAtom(hoverObjAtom);
-  const [selectedObj, setSelectedObj] = useAtom(selectedObjAtom);
+  const [selectedContainer, setSelectedContainer] = useAtom(
+    selectedContainerAtom
+  );
+  const [hoverContainer, setHoverContainer] = useAtom(hoverContainerAtom);
   const [mode, setMode] = useAtom(modeAtom);
   const [lockedContainerUids, setLockedContainerUids] = useAtom(
     lockedContainerUidsAtom
@@ -55,15 +57,15 @@ const EditPage = () => {
         />
         <PixiCanvas />
         <PixiTreeView
-          onHoverContainer={(container) => setHoverObj(container)}
+          onHoverContainer={(container) => setHoverContainer(container)}
           onClickContainer={(container) => {
-            setSelectedObj(container);
+            setSelectedContainer(container);
             setMode('select');
           }}
-          activeContainer={selectedObj}
+          activeContainer={selectedContainer}
           onDeleteContainer={(container) => {
-            if (container === selectedObj) {
-              setSelectedObj(null);
+            if (container === selectedContainer) {
+              setSelectedContainer(null);
             }
             container.destroy();
           }}
@@ -73,11 +75,37 @@ const EditPage = () => {
             }
             return false;
           }}
+          displayFilter={(container) => {
+            return container.label !== 'Outline';
+          }}
         />
 
         {/** Design Edit */}
         <InteractionController target={rootContainer} />
-        <MutatePanel target={selectedObj} />
+        <MutatePanel target={selectedContainer} />
+        {/* outline navigator */}
+        <PixiExecutor
+          cb={(app) => {
+            if (!hoverContainer) return;
+            const outline = new Graphics();
+            outline.label = 'Outline';
+            app.stage.addChild(outline);
+
+            const { x, y, width, height } = hoverContainer;
+            outline.rect(x, y, width, height).stroke({
+              width: 1,
+              color: '#04cd85',
+              pixelLine: true,
+            });
+
+            console.log('hover', hoverContainer);
+
+            return () => {
+              outline.destroy();
+            };
+          }}
+          deps={[hoverContainer]}
+        />
         <PixiExecutor
           cb={(app) => {
             app.stage.x += app.screen.width / 2;
@@ -95,6 +123,11 @@ const EditPage = () => {
 
               const texture = await Assets.load(imgUrl);
               const sprite = new Sprite(texture);
+              sprite.filters = [
+                new BlurFilter({
+                  strength: 10,
+                }),
+              ];
               sprite.label = 'Image';
 
               // add.

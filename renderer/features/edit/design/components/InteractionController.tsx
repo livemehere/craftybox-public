@@ -8,14 +8,13 @@ import { useRef } from 'react';
 
 import {
   modeAtom,
-  selectedObjAtom,
+  selectedContainerAtom,
   EditMode,
-  hoverObjAtom,
+  hoverContainerAtom,
 } from '@/features/edit/design/stores';
 import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 import { cn } from '@/utils/cn';
 import { setDraggable } from '@/lib/pixi-core/utils/drag';
-import { makeHighLight } from '@/lib/pixi-core/utils';
 
 const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
   {
@@ -31,24 +30,17 @@ const buttons: { icon: React.ReactNode; mode: EditMode }[] = [
     mode: 'draw-rect',
   },
 ];
+
 interface Props {
   target: Container | null;
 }
+
 const InteractionController = ({ target }: Props) => {
-  const hoverObj = useAtomValue(hoverObjAtom);
-  const selectedObj = useAtomValue(selectedObjAtom);
+  const hoverContainer = useAtomValue(hoverContainerAtom);
+  const selectedContainer = useAtomValue(selectedContainerAtom);
 
   const [mode, setMode] = useAtom(modeAtom);
   const prevModeBeforeMove = useRef<EditMode | undefined>(undefined);
-
-  usePixiEffect(() => {
-    if (!hoverObj) return;
-    const clear = makeHighLight(hoverObj);
-
-    return () => {
-      clear();
-    };
-  }, [hoverObj]);
 
   /** toggle move mode while pressing space */
   useHotkeys('space', () => {
@@ -77,13 +69,13 @@ const InteractionController = ({ target }: Props) => {
   /** drag and drop */
   usePixiEffect(
     (app) => {
-      if (!selectedObj || mode !== 'select') return;
-      const clear = setDraggable(app, selectedObj);
+      if (!selectedContainer || mode !== 'select') return;
+      const clear = setDraggable(app, selectedContainer);
       return () => {
         clear();
       };
     },
-    [selectedObj, mode]
+    [selectedContainer, mode]
   );
 
   /** create shapes */

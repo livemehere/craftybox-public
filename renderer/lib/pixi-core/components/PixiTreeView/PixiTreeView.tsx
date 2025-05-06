@@ -8,17 +8,11 @@ import TreeItem, {
 } from '@/lib/pixi-core/components/PixiTreeView/TreeItem';
 
 const PixiTreeView = (
-  props: Pick<
-    TreeItemProps,
-    | 'activeContainer'
-    | 'onClickContainer'
-    | 'onHoverContainer'
-    | 'onDeleteContainer'
-    | 'isLocked'
-  >
+  props: Omit<TreeItemProps, 'container' | 'depth' | 'isLast'>
 ) => {
   const { app } = usePixi();
   const update = useForceUpdate();
+  const { displayFilter = () => true } = props;
 
   const watchChildrenRecursive = (
     container: Container,
@@ -79,16 +73,18 @@ const PixiTreeView = (
       }
     >
       <section className={'px-16 py-8'}>Stage</section>
-      {app?.stage.children.map((child, i) => (
-        <TreeItem
-          container={child}
-          key={child.uid}
-          isLast={
-            i === app.stage.children.length - 1 || child.children.length > 0
-          }
-          {...props}
-        />
-      ))}
+      {app?.stage.children
+        .filter(displayFilter)
+        .map((child, i) => (
+          <TreeItem
+            container={child}
+            key={child.uid}
+            isLast={
+              i === app.stage.children.length - 1 || child.children.length > 0
+            }
+            {...props}
+          />
+        ))}
     </div>
   );
 };

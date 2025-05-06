@@ -12,6 +12,7 @@ export interface TreeItemProps {
 
   activeContainer: Container | null;
   isLocked?: (container: Container) => boolean;
+  displayFilter?: (container: Container) => boolean;
 
   container: Container<ContainerChild>;
   depth?: number;
@@ -30,10 +31,13 @@ export default function TreeItem({
     activeContainer,
     onDeleteContainer,
     isLocked,
+    displayFilter = () => true,
   } = props;
   const isSelected = activeContainer === container;
   const [isHovered, setIsHovered] = useState(false);
   const isLock = isLocked?.(container) || false;
+
+  const children = container.children.filter(displayFilter);
 
   return (
     <div className={'hover:bg-app-soft-gray'}>
@@ -56,7 +60,7 @@ export default function TreeItem({
         }}
         onClick={() => onClickContainer(container)}
         onKeyDown={(e) => {
-          if (e.key === 'Backspace') {
+          if (e.key === 'Backspace' && !isLock) {
             e.stopPropagation();
             e.preventDefault();
             onDeleteContainer(container);
@@ -104,17 +108,17 @@ export default function TreeItem({
           </div>
         </div>
       </div>
-      {container.children.length > 0 && (
+      {children.length > 0 && (
         <div style={{ paddingLeft: depth * 10 }}>
-          {container.children.map((child, i) => {
+          {children.map((child, i) => {
             return (
               <TreeItem
                 container={child}
                 depth={depth + 1}
                 key={child.uid}
                 isLast={
-                  i === container.children.length - 1 ||
-                  child.children.length > 0
+                  i === children.length - 1 ||
+                  child.children.filter(displayFilter).length > 0
                 }
                 {...props}
               />
