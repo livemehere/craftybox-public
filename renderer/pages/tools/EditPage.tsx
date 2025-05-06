@@ -90,7 +90,7 @@ const EditPage = () => {
 
         {/** Design Edit */}
         <InteractionController rootContainer={rootContainer} />
-        <MutatePanel target={selectedContainer} />
+        <MutatePanel rootContainer={rootContainer} target={selectedContainer} />
 
         {/** outline Graphics */}
         <PixiExecutor

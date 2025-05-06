@@ -113,9 +113,9 @@ const InteractionController = ({ rootContainer }: Props) => {
         const x = e.clientX - bounds.left;
         const y = e.clientY - bounds.top;
         const localPos = app.stage.toLocal(new Point(x, y));
+
         graphics.position.set(localPos.x, localPos.y);
         rootContainer.addChild(graphics);
-        console.log('added graphics', graphics.x, graphics.y);
       };
 
       const handleMove = (e: PointerEvent) => {
@@ -131,11 +131,16 @@ const InteractionController = ({ rootContainer }: Props) => {
         switch (mode) {
           case 'draw-rect':
             graphics.clear();
-            graphics.rect(0, 0, dx, dy).stroke({
-              width: 4,
-              color: '#ff0000',
-              alignment: 1,
-            });
+            graphics
+              .rect(0, 0, dx, dy)
+              .stroke({
+                width: 4,
+                color: '#ff0000',
+                alignment: 1,
+              })
+              .fill({
+                color: 'transparent',
+              });
 
             break;
           default:

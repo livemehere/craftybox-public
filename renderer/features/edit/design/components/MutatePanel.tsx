@@ -11,9 +11,10 @@ import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-constants';
 
 interface Props {
   target: Container | null;
+  rootContainer: Container | null;
 }
 
-const MutatePanel = ({ target }: Props) => {
+const MutatePanel = ({ rootContainer, target }: Props) => {
   const { app } = usePixi();
   const { pushMessage } = useToast();
   const [savedInfoBeforeMutation, setSavedInfoBeforeMutation] = useState({
@@ -44,14 +45,8 @@ const MutatePanel = ({ target }: Props) => {
     };
   }, [target]);
 
-  const getDataUrl = async () => {
-    if (!app) throw new Error('app is not ready');
-    if (!target) throw new Error('container is not found');
-    return app.renderer.extract.base64(target);
-  };
-
-  const handleCopy = async () => {
-    const dataUrl = await getDataUrl();
+  const handleCopy = async (container: Container) => {
+    const dataUrl = await app!.renderer.extract.base64(container);
     const blob = await fetch(dataUrl).then((res) => res.blob());
     await navigator.clipboard.write([
       new ClipboardItem({
@@ -63,8 +58,8 @@ const MutatePanel = ({ target }: Props) => {
     });
   };
 
-  const handleDownload = async () => {
-    const dataUrl = await getDataUrl();
+  const handleDownload = async (container: Container) => {
+    const dataUrl = await app!.renderer.extract.base64(container);
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = 'screenshot.png';
@@ -92,10 +87,16 @@ const MutatePanel = ({ target }: Props) => {
       <section className={'flex items-center justify-end gap-8 p-12'}>
         <div className={'mx-4 h-20 w-2 bg-white/20'}></div>
 
-        <button className={btnClassName} onClick={handleCopy}>
+        <button
+          className={btnClassName}
+          onClick={() => handleCopy(rootContainer!)}
+        >
           <TbCopy className={'text-white/80'} />
         </button>
-        <button className={btnClassName} onClick={handleDownload}>
+        <button
+          className={btnClassName}
+          onClick={() => handleDownload(rootContainer!)}
+        >
           <FiDownload className={'text-white/80'} />
         </button>
       </section>
@@ -220,6 +221,42 @@ const MutatePanel = ({ target }: Props) => {
                       update();
                     }}
                   />
+                </label>
+              </div>
+
+              {/** FILL */}
+              {/* FIXME: Handle cases where transparency is applied */}
+              <hr className={hrClassName} />
+              <h3 className={'p-16'}>Fill</h3>
+              <div className={'flex flex-col items-center gap-8 px-16 pb-16'}>
+                <label className={cn(inputClassName, 'px-4 py-2')}>
+                  <input
+                    className={'w-24'}
+                    type="color"
+                    defaultValue={`#${target.fillStyle.color.toString(16)}`}
+                    onChange={(e) => {
+                      console.log(target.fillStyle);
+                      const color = e.target.value;
+                      const { width } = target.strokeStyle;
+                      target
+                        .clear()
+                        .rect(
+                          0,
+                          0,
+                          savedInfoBeforeMutation.width,
+                          savedInfoBeforeMutation.height
+                        )
+                        .stroke({
+                          width,
+                          color,
+                        })
+                        .fill({
+                          color,
+                        });
+                      update();
+                    }}
+                  />
+                  <span>{`#${target.strokeStyle.color.toString(16)}`}</span>
                 </label>
               </div>
             </>
