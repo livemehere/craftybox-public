@@ -16,7 +16,7 @@ import PixiGrid from '@/lib/pixi-core/components/PixiGrid';
 import PixiPanController from '@/lib/pixi-core/components/PixiPanController';
 import PixiWheelController from '@/lib/pixi-core/components/PixiWheelController';
 import PixiTreeView from '@/lib/pixi-core/components/PixiTreeView/PixiTreeView';
-import ActiveObjMutatePanel from '@/features/edit/design/components/ActiveObjMutatePanel';
+import MutatePanel from '@/features/edit/design/components/MutatePanel';
 import PixiExecutor from '@/lib/pixi-core/components/PixiExecutor';
 import InteractionController from '@/features/edit/design/components/InteractionController';
 
@@ -53,7 +53,7 @@ const EditPage = () => {
 
         {/** Design Edit */}
         <InteractionController />
-        <ActiveObjMutatePanel />
+        <MutatePanel target={selectedObj} />
         <PixiExecutor
           cb={(app) => {
             app.stage.x += app.screen.width / 2;

@@ -1,56 +1,52 @@
-import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { useForceUpdate } from '@fewings/react/hooks';
-import { Graphics } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 
 import { cn } from '@/utils/cn';
-import {
-  rootContainerAtom,
-  selectedObjAtom,
-} from '@/features/edit/design/stores';
 import { useToast } from '@/lib/toast/ToastContext';
 import { usePixi } from '@/lib/pixi-core/PixiContext';
 import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 
-const ActiveObjMutatePanel = () => {
+interface Props {
+  target: Container | null;
+}
+
+const MutatePanel = ({ target }: Props) => {
   const { app } = usePixi();
   const { pushMessage } = useToast();
-  const rootContainer = useAtomValue(rootContainerAtom);
-  const selectedObj = useAtomValue(selectedObjAtom);
-  const [originalObjInfo, setOriginalObjInfo] = useState({
+  const [savedInfoBeforeMutation, setSavedInfoBeforeMutation] = useState({
     width: 0,
     height: 0,
   });
   const [updateSeq, setUpdateSeq] = useState(0);
   const update = useForceUpdate();
 
-  // useOnEvent('selected-object-change',()=> update());
-
   // save original object properties for mutate `Graphics` object in each input
   useEffect(() => {
-    if (!selectedObj) return;
-    if (selectedObj instanceof Graphics) {
-      setOriginalObjInfo({
-        width: selectedObj.width,
-        height: selectedObj.height,
+    if (!target) return;
+    if (target instanceof Graphics) {
+      setSavedInfoBeforeMutation({
+        width: target.width,
+        height: target.height,
       });
     }
 
     const handler = () => {
       setUpdateSeq((prev) => prev + 1);
     };
-    selectedObj.on(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
+    target.on(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
+
     return () => {
-      selectedObj.off(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
+      target.off(PIXI_CUSTOM_EVENTS.CONTAINER_UPDATE, handler);
     };
-  }, [selectedObj]);
+  }, [target]);
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');
-    if (!rootContainer) throw new Error('container is not found');
-    return app.renderer.extract.base64(rootContainer);
+    if (!target) throw new Error('container is not found');
+    return app.renderer.extract.base64(target);
   };
 
   const handleCopy = async () => {
@@ -105,12 +101,9 @@ const ActiveObjMutatePanel = () => {
 
       <hr className={hrClassName} />
 
-      {selectedObj && (
-        <section
-          className={'typo-body2'}
-          key={`${selectedObj.uid}-${updateSeq}`}
-        >
-          <h3 className={'p-16'}>{selectedObj.label}</h3>
+      {target && (
+        <section className={'typo-body2'} key={`${target.uid}-${updateSeq}`}>
+          <h3 className={'p-16'}>{target.label}</h3>
           <hr className={hrClassName} />
           <div className={'p-16'}>Position</div>
           <div
@@ -121,9 +114,9 @@ const ActiveObjMutatePanel = () => {
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.x.toFixed(2)}
+                defaultValue={target.x.toFixed(2)}
                 onChange={(e) => {
-                  selectedObj.x = Number(e.target.value);
+                  target.x = Number(e.target.value);
                 }}
               />
             </label>
@@ -133,9 +126,9 @@ const ActiveObjMutatePanel = () => {
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.y.toFixed(2)}
+                defaultValue={target.y.toFixed(2)}
                 onChange={(e) => {
-                  selectedObj.y = Number(e.target.value);
+                  target.y = Number(e.target.value);
                 }}
               />
             </label>
@@ -151,9 +144,9 @@ const ActiveObjMutatePanel = () => {
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.width.toFixed(2)}
+                defaultValue={target.width.toFixed(2)}
                 onChange={(e) => {
-                  selectedObj.width = Number(e.target.value);
+                  target.width = Number(e.target.value);
                 }}
               />
             </label>
@@ -163,15 +156,15 @@ const ActiveObjMutatePanel = () => {
               <input
                 className={'w-full'}
                 type="number"
-                defaultValue={selectedObj.height.toFixed(2)}
+                defaultValue={target.height.toFixed(2)}
                 onChange={(e) => {
-                  selectedObj.height = Number(e.target.value);
+                  target.height = Number(e.target.value);
                 }}
               />
             </label>
           </div>
 
-          {selectedObj instanceof Graphics && (
+          {target instanceof Graphics && (
             <>
               <hr className={hrClassName} />
               <h3 className={'p-16'}>Stroke</h3>
@@ -180,17 +173,17 @@ const ActiveObjMutatePanel = () => {
                   <input
                     className={'w-24'}
                     type="color"
-                    defaultValue={`#${selectedObj.strokeStyle.color.toString(16)}`}
+                    defaultValue={`#${target.strokeStyle.color.toString(16)}`}
                     onChange={(e) => {
                       const color = e.target.value;
-                      const { width } = selectedObj.strokeStyle;
-                      selectedObj
+                      const { width } = target.strokeStyle;
+                      target
                         .clear()
                         .rect(
                           0,
                           0,
-                          originalObjInfo.width,
-                          originalObjInfo.height
+                          savedInfoBeforeMutation.width,
+                          savedInfoBeforeMutation.height
                         )
                         .stroke({
                           width,
@@ -199,24 +192,24 @@ const ActiveObjMutatePanel = () => {
                       update();
                     }}
                   />
-                  <span>{`#${selectedObj.strokeStyle.color.toString(16)}`}</span>
+                  <span>{`#${target.strokeStyle.color.toString(16)}`}</span>
                 </label>
                 <label className={inputClassName}>
                   <span className={'text-white/50'}>W</span>
                   <input
                     className={'w-full'}
                     type="number"
-                    defaultValue={selectedObj.strokeStyle.width}
+                    defaultValue={target.strokeStyle.width}
                     onChange={(e) => {
                       const width = Number(e.target.value);
-                      const color = selectedObj.strokeStyle.color;
-                      selectedObj
+                      const color = target.strokeStyle.color;
+                      target
                         .clear()
                         .rect(
                           0,
                           0,
-                          originalObjInfo.width,
-                          originalObjInfo.height
+                          savedInfoBeforeMutation.width,
+                          savedInfoBeforeMutation.height
                         )
                         .stroke({
                           width,
@@ -236,4 +229,4 @@ const ActiveObjMutatePanel = () => {
   );
 };
 
-export default ActiveObjMutatePanel;
+export default MutatePanel;
