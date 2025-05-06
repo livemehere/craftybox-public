@@ -7,7 +7,7 @@ import { FiDownload } from 'react-icons/fi';
 
 import { cn } from '@/utils/cn';
 import {
-  exportContainerAtom,
+  rootContainerAtom,
   selectedObjAtom,
 } from '@/features/edit/design/stores';
 import { useToast } from '@/lib/toast/ToastContext';
@@ -17,7 +17,7 @@ import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-events';
 const ActiveObjMutatePanel = () => {
   const { app } = usePixi();
   const { pushMessage } = useToast();
-  const editingContainer = useAtomValue(exportContainerAtom);
+  const rootContainer = useAtomValue(rootContainerAtom);
   const selectedObj = useAtomValue(selectedObjAtom);
   const [originalObjInfo, setOriginalObjInfo] = useState({
     width: 0,
@@ -49,8 +49,8 @@ const ActiveObjMutatePanel = () => {
 
   const getDataUrl = async () => {
     if (!app) throw new Error('app is not ready');
-    if (!editingContainer) throw new Error('container is not found');
-    return app.renderer.extract.base64(editingContainer);
+    if (!rootContainer) throw new Error('container is not found');
+    return app.renderer.extract.base64(rootContainer);
   };
 
   const handleCopy = async () => {

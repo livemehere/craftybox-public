@@ -5,10 +5,10 @@ import { usePixiEffect } from '@/lib/pixi-core/hooks/usePixiEffect';
 
 const PixiExecutor = ({
   cb,
-  deps,
+  deps = [],
 }: {
   cb: (app: Application) => (() => void) | void;
-  deps: any[];
+  deps?: any[];
 }) => {
   const _cb = useCallbackRef(cb);
   usePixiEffect(_cb, deps);

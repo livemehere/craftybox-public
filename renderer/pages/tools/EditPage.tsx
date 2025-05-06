@@ -1,13 +1,12 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useMemo, useRef } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { useMemo } from 'react';
 import {
-  EditMode,
-  exportContainerAtom,
+  rootContainerAtom,
   hoverObjAtom,
   modeAtom,
   selectedObjAtom,
 } from 'renderer/features/edit/design/stores';
+import { Assets, Container, Sprite } from 'pixi.js';
 
 import PixiProvider from '@/lib/pixi-core/components/PixiProvider';
 import PixiCanvas from '@/lib/pixi-core/components/PixiCanvas';
@@ -16,18 +15,18 @@ import { SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY } from '@/features/edit/schema'
 import PixiGrid from '@/lib/pixi-core/components/PixiGrid';
 import PixiPanController from '@/lib/pixi-core/components/PixiPanController';
 import PixiWheelController from '@/lib/pixi-core/components/PixiWheelController';
-import DesignHandToolbar from '@/features/edit/design/components/DesignHandToolbar';
 import PixiTreeView from '@/lib/pixi-core/components/PixiTreeView/PixiTreeView';
-import DesignActivePanel from '@/features/edit/design/components/DesignActivePanel';
+import ActiveObjMutatePanel from '@/features/edit/design/components/ActiveObjMutatePanel';
+import PixiExecutor from '@/lib/pixi-core/components/PixiExecutor';
+import InteractionController from '@/features/edit/design/components/InteractionController';
 
 const EditPage = () => {
   const open = useAtomValue(lnbOpenAtom);
-  const setEditingContainer = useSetAtom(exportContainerAtom);
+  const setRootContainer = useSetAtom(rootContainerAtom);
   const selectedObj = useAtomValue(selectedObjAtom);
   const hoverObj = useAtomValue(hoverObjAtom);
 
-  const [mode, setMode] = useAtom(modeAtom);
-  const prevMode = useRef<EditMode | undefined>(undefined);
+  const mode = useAtomValue(modeAtom);
 
   const imgUrl = useMemo(() => {
     const targetUrl = localStorage.getItem(
@@ -36,30 +35,6 @@ const EditPage = () => {
     // localStorage.removeItem(SCREEN_SHOT_EDIT_TARGET_DATA_URL_LS_KEY);
     return targetUrl || null;
   }, []);
-
-  /** toggle move mode while pressing space */
-  useHotkeys('space', () => {
-    if (mode === 'move') return;
-    prevMode.current = mode;
-    setMode('move');
-  });
-  useHotkeys(
-    'space',
-    () => {
-      if (prevMode.current) {
-        setMode(prevMode.current);
-        prevMode.current = undefined;
-      }
-    },
-    {
-      keyup: true,
-      keydown: false,
-    }
-  );
-  useHotkeys('v', () => setMode('select'));
-  useHotkeys('h', () => setMode('move'));
-  /** drawing */
-  useHotkeys('r', () => setMode('draw-rect'));
 
   // useEffect(() => {
   //   let restoreSelectedObj: () => void = () => {};
@@ -92,43 +67,42 @@ const EditPage = () => {
         <PixiTreeView />
 
         {/** Design Edit */}
-        <DesignHandToolbar />
-        <DesignActivePanel />
-        {/*<InteractionController />*/}
-        {/** initialize with Image */}
-        {/*<PixiExecutor*/}
-        {/*  cb={(app) => {*/}
-        {/*    let editingContainer: Container | null = null;*/}
-        {/*    (async () => {*/}
-        {/*      if (!imgUrl) return;*/}
-        {/*      const container = new Container();*/}
-        {/*      container.label = 'Frame';*/}
-        {/*      const texture = await Assets.load(imgUrl);*/}
-        {/*      const sprite = new Sprite(texture);*/}
-        {/*      sprite.label = 'Image';*/}
+        <InteractionController />
+        <ActiveObjMutatePanel />
+        <PixiExecutor
+          cb={(app) => {
+            app.stage.x += app.screen.width / 2;
+            app.stage.y += app.screen.height / 2;
+          }}
+        />
+        <PixiExecutor
+          cb={(app) => {
+            let editingContainer: Container | null = null;
+            (async () => {
+              if (!imgUrl) return;
+              const container = new Container();
+              container.label = 'Frame';
 
-        {/*      // add.*/}
-        {/*      container.addChild(sprite);*/}
-        {/*      app.stage.addChild(container);*/}
+              const texture = await Assets.load(imgUrl);
+              const sprite = new Sprite(texture);
+              sprite.label = 'Image';
 
-        {/*      // set img center*/}
-        {/*      sprite.position.set(-texture.width / 2, -texture.height / 2);*/}
+              // add.
+              container.addChild(sprite);
+              app.stage.addChild(container);
 
-        {/*      // set viewport center*/}
-        {/*      app.stage.position.set(*/}
-        {/*        app.screen.width / 2,*/}
-        {/*        app.screen.height / 2*/}
-        {/*      );*/}
+              // set img center
+              sprite.position.set(-texture.width / 2, -texture.height / 2);
 
-        {/*      setEditingContainer(container);*/}
-        {/*      editingContainer = container;*/}
-        {/*    })();*/}
-        {/*    return () => {*/}
-        {/*      editingContainer?.destroy();*/}
-        {/*    };*/}
-        {/*  }}*/}
-        {/*  deps={[]}*/}
-        {/*/>*/}
+              setRootContainer(container);
+              editingContainer = container;
+            })();
+            return () => {
+              editingContainer?.destroy();
+            };
+          }}
+          deps={[]}
+        />
       </div>
     </PixiProvider>
   );
