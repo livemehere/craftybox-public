@@ -82,8 +82,14 @@ export class AppWindow {
         }
       }
 
-      if((input.meta || input.control) && input.code === 'KeyC' && input.shift){
-        this.win.webContents.devToolsWebContents?.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
+      if (
+        (input.meta || input.control) &&
+        input.code === 'KeyC' &&
+        input.shift
+      ) {
+        this.win.webContents.devToolsWebContents?.executeJavaScript(
+          'DevToolsAPI.enterInspectElementMode()'
+        );
       }
     });
   }

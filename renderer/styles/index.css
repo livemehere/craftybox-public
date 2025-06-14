@@ -1,7 +1,9 @@
 @import 'tailwindcss';
-@import './components/buttons.css';
-@import './components/typo.css';
 @import './utils.css';
+
+@plugin './hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --color-app-black:#141517;
@@ -10,15 +12,16 @@
   --color-app-primary:#04cd85;
   --color-app-secondary:#dfe2ea;
   --color-app-tertiary:#c9cedc;
+}
 
-  --spacing:1px;
+html {
+  @apply bg-black;
 }
 
 @layer base {
   body {
     font-family: 'Pretendard', sans-serif;
     overflow: hidden;
-    @apply bg-app-black text-white;
   }
 
   * {
@@ -40,31 +43,4 @@
   }
 }
 
-input[type='range'] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 2px;
-  background: var(--color-app-soft-gray);
-  accent-color: var(--color-app-primary);
-  border-radius: 5px;
-  outline: none;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-  -webkit-appearance: none;
-  &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-}
-
-@layer components {
-  .app-input{
-      @apply bg-app-soft-gray text-white rounded-md;
-      @apply focus:outline-none focus:ring-1 focus:ring-app-primary;
-      @apply px-12 py-8;
-  }
-}
 

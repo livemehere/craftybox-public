@@ -1,3 +1,5 @@
+import { Alert } from '@heroui/react';
+
 export default function HomePage() {
   return (
     <div
@@ -5,6 +7,8 @@ export default function HomePage() {
       data-testid="home-page"
     >
       <h1>CraftyBox</h1>
+
+      <Alert title={'hello'} />
     </div>
   );
 }

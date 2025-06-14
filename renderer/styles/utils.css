@@ -7,7 +7,4 @@
     app-region: drag;
   }
 
-  .pressable {
-    @apply rounded hover:bg-app-soft-gray data-[active="true"]:bg-app-soft-gray cursor-pointer;
-  }
 }
