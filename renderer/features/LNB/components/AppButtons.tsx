@@ -32,10 +32,10 @@ const AppButtons = () => {
           key={i}
           onClick={b.onClick}
           className={
-            'no-drag-zone hover:bg-app-soft-gray flex h-full items-center justify-center px-12'
+            'no-drag-zone hover:bg-app-soft-gray flex h-full items-center justify-center px-3'
           }
         >
-          <b.Icon className={'w-12'} />
+          <b.Icon className={'w-3'} />
         </button>
       ))}
     </div>

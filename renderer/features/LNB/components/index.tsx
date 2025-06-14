@@ -53,7 +53,7 @@ const LNB = () => {
   return (
     <aside
       className={
-        'flex shrink-0 flex-col overflow-hidden rounded-l-xl px-12 py-15'
+        'flex shrink-0 flex-col overflow-hidden rounded-l-xl px-3 py-4'
       }
       style={{ width: open ? EXPAND_WIDTH : COLLAPSE_WIDTH }}
     >
