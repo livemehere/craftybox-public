@@ -1,6 +1,6 @@
 import { Alert } from '@heroui/react';
 
-export default function HomePage() {
+export default function Home() {
   return (
     <div
       className={'flex h-full items-center justify-center text-sm'}

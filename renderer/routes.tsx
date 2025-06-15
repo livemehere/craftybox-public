@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import ErrorPage from '@/pages/ErrorPage';
 import Layout from '@/components/Layout';
 
-const HomePage = lazy(() => import('@/pages/HomePage'));
+const HomePage = lazy(() => import('@/pages/home'));
 
 /* tools */
 const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
