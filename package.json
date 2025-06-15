@@ -83,6 +83,7 @@
     "@fewings/react-qs": "^1.0.0",
     "@heroui/card": "^2.2.20",
     "@heroui/react": "2.8.0-beta.7",
+    "@heroui/spinner": "^2.2.18",
     "@heroui/tabs": "^2.2.18",
     "@heroui/toast": "^2.0.11",
     "@tanstack/react-query": "^5.66.11",

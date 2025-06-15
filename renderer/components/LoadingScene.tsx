@@ -1,9 +1,9 @@
-import { Icon } from '@/components/icons/Icon';
+import { Spinner } from '@heroui/spinner';
 
 const LoadingScene = () => {
   return (
     <div className={'flex h-screen items-center justify-center'}>
-      <Icon name={'loading'} fill={'white'} width={50} height={50} />
+      <Spinner size={'lg'} />
     </div>
   );
 };

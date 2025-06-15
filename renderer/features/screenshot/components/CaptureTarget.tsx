@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router';
 import { addToast } from '@heroui/toast';
 import { Slider } from '@heroui/react';
 import { Card, CardFooter } from '@heroui/card';
+import { Spinner } from '@heroui/spinner';
 
 import { Icon } from '@/components/icons/Icon';
 import { getAspectRatio } from '@/utils/size';
@@ -157,7 +158,7 @@ export default function CaptureTarget({
       {hover && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/70">
           {pending ? (
-            <Icon name={'loading'} fill={'white'} width={50} height={50} />
+            <Spinner />
           ) : (
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-2">

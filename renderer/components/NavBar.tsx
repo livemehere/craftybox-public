@@ -31,7 +31,7 @@ const NavBar = () => {
   return (
     <nav className={'drag-zone relative flex h-20 shrink-0 justify-between'}>
       <Link
-        className={'no-drag-zone flex items-center pl-4 text-lg font-bold'}
+        className={'no-drag-zone flex items-center pl-8 text-lg font-bold'}
         to={'/'}
       >
         CRAFTYBOX
