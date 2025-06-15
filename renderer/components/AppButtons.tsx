@@ -26,16 +26,16 @@ const DRAG_BAR_BUTTONS = [
 
 const AppButtons = () => {
   return (
-    <div className={'flex'}>
+    <div className={'flex justify-end self-start'}>
       {DRAG_BAR_BUTTONS.map((b, i) => (
         <button
           key={i}
           onClick={b.onClick}
           className={
-            'no-drag-zone hover:bg-app-soft-gray flex h-full items-center justify-center px-12'
+            'no-drag-zone hover:bg-app-soft-gray mt-[1px] flex h-full items-center justify-center px-3 py-4'
           }
         >
-          <b.Icon className={'w-12'} />
+          <b.Icon className={'w-3'} />
         </button>
       ))}
     </div>

@@ -1,12 +1,17 @@
 import { useQsState } from '@fewings/react-qs';
+import { Tabs, Tab } from '@heroui/tabs';
 
-import Tabs from '@/components/Tabs';
-import ItemList from '@/features/screenshot/components/CaptureTargetList';
+import CaptureTargetList from '@/features/screenshot/components/CaptureTargetList';
 
-type Tabs = 'screen' | 'window';
+type TTabs = 'screen' | 'window';
 export type ScreenShotPageQsState = {
-  tab: Tabs;
+  tab: TTabs;
 };
+
+const TABS = [
+  { key: 'screen', label: 'SCREEN' },
+  { key: 'window', label: 'WINDOW' },
+];
 
 const ScreenShotPage = () => {
   const [qs, setQs] = useQsState<ScreenShotPageQsState>({
@@ -14,21 +19,26 @@ const ScreenShotPage = () => {
   });
 
   return (
-    <div className={'px-30 py-20'}>
-      <section className="flex items-center justify-center gap-4">
+    <div className={'px-7.5 py-5'}>
+      <section className="flex items-center justify-center gap-1">
         <Tabs
-          tabs={[
-            { key: 'screen', label: 'SCREEN' },
-            { key: 'window', label: 'WINDOW' },
-          ]}
-          activeTab={qs.tab}
-          setActiveTab={(key) => {
-            setQs((prev) => ({ ...prev, tab: key as Tabs }));
+          color={'primary'}
+          selectedKey={qs.tab}
+          onSelectionChange={(key) => {
+            setQs((prev) => ({ ...prev, tab: key as TTabs }));
           }}
-        />
+        >
+          {TABS.map((tab) => (
+            <Tab
+              key={tab.key}
+              value={tab.key}
+              title={<span>{tab.label}</span>}
+            />
+          ))}
+        </Tabs>
       </section>
-      <section className="mt-20">
-        <ItemList type={qs.tab} />
+      <section className="mt-5">
+        <CaptureTargetList type={qs.tab} />
       </section>
     </div>
   );

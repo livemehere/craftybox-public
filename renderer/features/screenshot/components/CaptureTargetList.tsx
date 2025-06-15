@@ -5,7 +5,7 @@ import { ScreenShotPageQsState } from '@/pages/tools/ScreenShotPage';
 
 import CaptureTarget from './CaptureTarget';
 
-export default function ItemList({
+export default function CaptureTargetList({
   type,
 }: {
   type: ScreenShotPageQsState['tab'];
@@ -28,7 +28,7 @@ export default function ItemList({
   });
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-12 gap-y-30">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-5 gap-y-7">
       {data?.map((item) => (
         <CaptureTarget
           key={item.id}

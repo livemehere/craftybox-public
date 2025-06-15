@@ -15,7 +15,7 @@ export default function NavTabs({
         <button
           key={tab.key}
           className={cn(
-            'typo-body2 rounded-b-2 hover:bg-app-gray cursor-pointer rounded-t border-b-2 border-transparent px-12 py-8 uppercase',
+            'rounded-b-2 hover:bg-app-gray cursor-pointer rounded-t border-b-2 border-transparent px-3 py-2 uppercase',
             {
               'border-white': activeKey === tab.key,
             }

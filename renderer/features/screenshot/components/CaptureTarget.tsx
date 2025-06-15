@@ -5,8 +5,11 @@ import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 import { TbFaceIdError } from 'react-icons/tb';
 import { useNavigate } from 'react-router';
+import { addToast } from '@heroui/toast';
+import { Slider } from '@heroui/react';
+import { Card, CardFooter } from '@heroui/card';
+import { Spinner } from '@heroui/spinner';
 
-import { useToast } from '@/lib/toast/ToastContext';
 import { Icon } from '@/components/icons/Icon';
 import { getAspectRatio } from '@/utils/size';
 import { ScreenShotPageQsState } from '@/pages/tools/ScreenShotPage';
@@ -29,10 +32,8 @@ export default function CaptureTarget({
   originWidth,
   dataUrl,
   appIcon,
-  originScaleFactor,
 }: CaptureTargetProps) {
   const navigate = useNavigate();
-  const { pushMessage } = useToast();
   const [hover, setHover] = useState(false);
   const [pending, setPending] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
@@ -41,7 +42,7 @@ export default function CaptureTarget({
     width: 0,
     height: 0,
   });
-  const [scaleFactor, setScaleFactor] = useState(originScaleFactor ?? 1);
+  const [scaleFactor, setScaleFactor] = useState(1);
   const anchorWidth = originWidth || 1280;
 
   const anchor = aspectRatio.width > aspectRatio.height ? 'width' : 'height';
@@ -98,13 +99,17 @@ export default function CaptureTarget({
           [blob.type]: blob,
         }),
       ]);
-      pushMessage('Copied to clipboard', {
-        type: 'success',
+      addToast({
+        title: 'Copied to clipboard',
+        description: 'Screenshot has been copied to clipboard.',
+        color: 'success',
       });
     } catch (e) {
       if (e instanceof Error) {
-        pushMessage(e.message, {
-          type: 'error',
+        addToast({
+          title: 'Error',
+          description: e.message,
+          color: 'danger',
         });
       }
     } finally {
@@ -123,8 +128,10 @@ export default function CaptureTarget({
       a.remove();
     } catch (e) {
       if (e instanceof Error) {
-        pushMessage(e.message, {
-          type: 'error',
+        addToast({
+          title: 'Error',
+          description: e.message,
+          color: 'danger',
         });
       }
     } finally {
@@ -139,110 +146,99 @@ export default function CaptureTarget({
   };
 
   const btnClassName =
-    'hover:bg-app-gray flex h-32 w-32 cursor-pointer items-center justify-center rounded-full';
+    'hover:bg-app-gray flex h-8 w-8 cursor-pointer items-center justify-center rounded-full';
 
   return (
-    <div
-      key={id}
+    <Card
+      isFooterBlurred
+      className="relative h-[200px]"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <div className="relative h-180! w-full overflow-hidden rounded-lg bg-neutral-950">
-        <img
-          src={dataUrl}
-          alt={''}
-          className={'h-full w-full border-none object-contain'}
-          onLoad={(e) => {
-            const img = e.currentTarget;
-            const { naturalWidth, naturalHeight } = img;
-            const { width, height } = getAspectRatio(
-              naturalWidth,
-              naturalHeight
-            );
-            setAspectRatio({ width, height });
-            setThumbnailError(false);
-          }}
-          onError={() => {
-            setThumbnailError(true);
-          }}
-        />
-        {thumbnailError && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-            <TbFaceIdError className="h-48 w-48 opacity-50" />
-          </div>
-        )}
-        {hover && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-            {pending ? (
-              <Icon name={'loading'} fill={'white'} width={50} height={50} />
-            ) : (
-              <div className="flex flex-col items-center gap-8">
-                <div className="flex items-center gap-8">
-                  <button className={btnClassName} onClick={copyToClipboard}>
-                    <TbCopy />
-                  </button>
-                  <button className={btnClassName} onClick={download}>
-                    <FiDownload />
-                  </button>
-                  <button className={btnClassName} onClick={goEdit}>
-                    <Icon
-                      name={'edit'}
-                      className="h-18 w-18 [&_path]:stroke-white"
-                    />
-                  </button>
-                </div>
-                <input
-                  className="mt-10"
-                  type="range"
-                  min={0.1}
-                  max={2}
-                  step={0.1}
-                  value={scaleFactor}
-                  onChange={(e) => {
-                    setScaleFactor(parseFloat(e.target.value));
-                  }}
-                />
-                <div className="typo-body2 text-app-secondary mt-20">
-                  {scaledWidth}
-                  <span className="opacity-50"> x </span>
-                  {scaledHeight} ({scaleFactor})
-                </div>
+      {hover && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/70">
+          {pending ? (
+            <Spinner />
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <button className={btnClassName} onClick={copyToClipboard}>
+                  <TbCopy />
+                </button>
+                <button className={btnClassName} onClick={download}>
+                  <FiDownload />
+                </button>
+                <button className={btnClassName} onClick={goEdit}>
+                  <Icon
+                    name={'edit'}
+                    className="h-4.5 w-4.5 [&_path]:stroke-white"
+                  />
+                </button>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="mt-8 flex">
-        <div className="bg-app-gray mr-10 h-40 w-40 shrink-0 rounded-full">
+              <Slider
+                className="mt-5 max-w-md"
+                aria-label={'Scale Factor'}
+                defaultValue={scaleFactor}
+                showTooltip={true}
+                minValue={0.1}
+                maxValue={2}
+                step={0.1}
+                onChange={(v) => {
+                  setScaleFactor(v as number);
+                }}
+              />
+              <div className="text-app-secondary">
+                {scaledWidth}
+                <span className="opacity-50"> x </span>
+                {scaledHeight} ({scaleFactor})
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {thumbnailError && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
+          <TbFaceIdError className="mb-[50px] h-[48px] w-[48px] opacity-50" />
+        </div>
+      )}
+      <img
+        className="z-0 h-full w-full -translate-y-6 scale-125 object-contain"
+        src={dataUrl}
+        alt={`screenshot-${id}`}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          const { naturalWidth, naturalHeight } = img;
+          const { width, height } = getAspectRatio(naturalWidth, naturalHeight);
+          setAspectRatio({ width, height });
+          setThumbnailError(false);
+        }}
+        onError={() => {
+          setThumbnailError(true);
+        }}
+      />
+      <CardFooter className="absolute bottom-0 z-10 border-t-1 border-zinc-100/50 bg-black/20">
+        <div className="bg-app-gray mr-2.5 h-10 w-10 shrink-0 rounded-full">
           {appIcon ? (
             <img
               src={appIcon}
               alt="app-icon"
-              className="h-full w-full object-contain p-8"
+              className="h-full w-full object-contain p-2"
             />
           ) : (
-            <MdOutlineMonitor className="h-full w-full p-8" />
+            <MdOutlineMonitor className="h-full w-full p-2" />
           )}
         </div>
-        <div className="overflow-hidden">
-          <p className="typo-body1 text-app-secondary truncate font-bold">
-            {name}
+        <div className="flex-1 truncate">
+          <p className="truncate">
+            {name} ({id})
           </p>
-          <p className="typo-body2 text-app-tertiary mt-4">{id}</p>
-          <div className="mt-4 flex items-center gap-8">
-            <Icon
-              name="constraint"
-              className="h-16 w-16 translate-y-1 opacity-70"
-            />
-            {thumbnailError ? 'error' : ''}
-            <p className="typo-body2 text-app-tertiary mt-2">
-              {width}
-              <span className="opacity-50"> x </span>
-              {height}
-            </p>
-          </div>
+          <p className="text-tiny text-app-tertiary">
+            {width}
+            <span className="opacity-50"> x </span>
+            {height}
+          </p>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

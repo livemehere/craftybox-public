@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'jotai';
+import { HeroUIProvider } from '@heroui/react';
+import { ToastProvider } from '@heroui/toast';
 
 import { OverlayProvider } from '@/lib/overlay';
 import TimerProvider from '@/features/timer/TimerProvider';
-import ToastProvider from '@/lib/toast/ToastProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,9 +22,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <Provider>
       <QueryClientProvider client={queryClient}>
         <OverlayProvider>
-          <ToastProvider>
+          <HeroUIProvider>
+            <ToastProvider toastOffset={10} />
             <TimerProvider>{children}</TimerProvider>
-          </ToastProvider>
+          </HeroUIProvider>
         </OverlayProvider>
       </QueryClientProvider>
     </Provider>
