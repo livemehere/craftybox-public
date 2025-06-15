@@ -1,8 +1,8 @@
 import { Fragment, useMemo } from 'react';
 import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { getShortcutMeta } from '@shared/meta/shortcuts';
+import { Switch } from '@heroui/react';
 
-import Switch from '@/components/Switch';
 import Kbd from '@/components/Kbd/Kbd';
 import { resolveShortCutToKbd } from '@/utils/kbd';
 import { usePlatform } from '@/queries/usePlatform';
@@ -55,8 +55,10 @@ const ShortCutItem = ({
           ))}
         </div>
         <Switch
-          value={shortcut.enabled}
-          onChange={(v) => onChangeShortcut(shortcut.key, shortcut.value, v)}
+          isSelected={shortcut.enabled}
+          onChange={(e) =>
+            onChangeShortcut(shortcut.key, shortcut.value, e.target.checked)
+          }
         />
       </section>
     </div>

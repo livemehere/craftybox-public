@@ -218,10 +218,10 @@ export default function CaptureTarget({
             <img
               src={appIcon}
               alt="app-icon"
-              className="h-full w-full object-contain p-8"
+              className="h-full w-full object-contain p-2"
             />
           ) : (
-            <MdOutlineMonitor className="h-full w-full p-8" />
+            <MdOutlineMonitor className="h-full w-full p-2" />
           )}
         </div>
         <div className="overflow-hidden">

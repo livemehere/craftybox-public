@@ -1,6 +1,6 @@
 import { PKG_JSON } from '@shared/constants';
 
-import SettingItem from '@/features/Settings-General/components/SettingItem';
+import SettingItem from '@/features/settings/components/general/SettingItem';
 
 export default function GeneralSettings() {
   return (

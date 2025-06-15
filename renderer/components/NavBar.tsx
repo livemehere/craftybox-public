@@ -1,8 +1,8 @@
-import { NavLink } from 'react-router';
+import { Link, NavLink } from 'react-router';
 
 import { IconKeys } from '@/components/icons/IconMap';
 import { Icon } from '@/components/icons/Icon';
-import AppButtons from '@/features/LNB/components/AppButtons';
+import AppButtons from '@/components/AppButtons';
 import { cn } from '@/utils/cn';
 
 const TABS: {
@@ -29,13 +29,16 @@ const TABS: {
 
 const NavBar = () => {
   return (
-    <nav className={'drag-zone flex shrink-0 justify-between'}>
-      <div className={'flex w-1/3 items-center pl-4 text-lg font-bold'}>
+    <nav className={'drag-zone relative flex h-20 shrink-0 justify-between'}>
+      <Link
+        className={'no-drag-zone flex items-center pl-4 text-lg font-bold'}
+        to={'/'}
+      >
         CRAFTYBOX
-      </div>
+      </Link>
       <div
         className={
-          'no-drag-zone mt-8 flex items-center justify-center gap-8 rounded-full bg-[#111111] px-4 text-sm'
+          'no-drag-zone absolute left-1/2 mt-8 flex -translate-x-1/2 items-center justify-center gap-8 rounded-full bg-[#111111] px-4 text-sm'
         }
       >
         {TABS.map((tab) => (

@@ -4,8 +4,8 @@ import useStore from '@shared/Store/react/useStore';
 import { TUserShortcutSettings } from '@shared/types/shortcut-types';
 import { STORE_KEY_MAP } from '@shared/constants';
 
-import { ShortCutInputOverlay } from '@/features/Settings-Shortcut/components/ShortCutInputOverlay';
-import useCaptureInput from '@/features/Settings-Shortcut/hooks/useCaptureInput';
+import { ShortCutInputOverlay } from '@/features/settings/components/shortcut/ShortCutInputOverlay';
+import useCaptureInput from '@/features/settings/hooks/useCaptureInput';
 
 import ShortCutItem from './ShortCutItem';
 

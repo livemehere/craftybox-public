@@ -2,8 +2,8 @@ import { useQsState } from '@fewings/react-qs';
 import { Space } from '@fewings/react/components';
 import { ReactNode } from 'react';
 
-import GeneralSettings from '@/features/Settings-General/components/GeneralSettings';
-import ShortCutSettings from '@/features/Settings-Shortcut/components/ShortCutSettings';
+import GeneralSettings from '@/features/settings/components/general';
+import ShortCutSettings from '@/features/settings/components/shortcut';
 import NavTabs from '@/components/NavTabs';
 
 type SettingsQueryParams = {
@@ -26,9 +26,7 @@ export default function SettingsPage() {
   }));
 
   return (
-    <div className={'h-full px-30 py-20'}>
-      <h1 className={'heading1'}>Settings</h1>
-      
+    <div className={'h-full px-7 py-5'}>
       <Space y={22} />
       <NavTabs
         tabs={tabs}

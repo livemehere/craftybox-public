@@ -26,7 +26,7 @@ const DRAG_BAR_BUTTONS = [
 
 const AppButtons = () => {
   return (
-    <div className={'flex w-1/3 justify-end self-start'}>
+    <div className={'flex justify-end self-start'}>
       {DRAG_BAR_BUTTONS.map((b, i) => (
         <button
           key={i}

@@ -7,7 +7,6 @@ export default function Home() {
       data-testid="home-page"
     >
       <h1>CraftyBox</h1>
-
       <Alert title={'hello'} />
     </div>
   );
