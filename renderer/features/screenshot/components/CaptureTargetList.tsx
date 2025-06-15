@@ -5,7 +5,7 @@ import { ScreenShotPageQsState } from '@/pages/tools/ScreenShotPage';
 
 import CaptureTarget from './CaptureTarget';
 
-export default function ItemList({
+export default function CaptureTargetList({
   type,
 }: {
   type: ScreenShotPageQsState['tab'];
