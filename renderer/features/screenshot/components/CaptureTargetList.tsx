@@ -28,7 +28,7 @@ export default function CaptureTargetList({
   });
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-12 gap-y-30">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-5 gap-y-7">
       {data?.map((item) => (
         <CaptureTarget
           key={item.id}
