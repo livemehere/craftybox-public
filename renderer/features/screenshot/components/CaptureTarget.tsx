@@ -5,8 +5,8 @@ import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
 import { TbFaceIdError } from 'react-icons/tb';
 import { useNavigate } from 'react-router';
+import { addToast } from '@heroui/toast';
 
-import { useToast } from '@/lib/toast/ToastContext';
 import { Icon } from '@/components/icons/Icon';
 import { getAspectRatio } from '@/utils/size';
 import { ScreenShotPageQsState } from '@/pages/tools/ScreenShotPage';
@@ -32,7 +32,6 @@ export default function CaptureTarget({
   originScaleFactor,
 }: CaptureTargetProps) {
   const navigate = useNavigate();
-  const { pushMessage } = useToast();
   const [hover, setHover] = useState(false);
   const [pending, setPending] = useState(false);
   const [thumbnailError, setThumbnailError] = useState(false);
@@ -98,13 +97,17 @@ export default function CaptureTarget({
           [blob.type]: blob,
         }),
       ]);
-      pushMessage('Copied to clipboard', {
-        type: 'success',
+      addToast({
+        title: 'Copied to clipboard',
+        description: 'Screenshot has been copied to clipboard.',
+        color: 'success',
       });
     } catch (e) {
       if (e instanceof Error) {
-        pushMessage(e.message, {
-          type: 'error',
+        addToast({
+          title: 'Error',
+          description: e.message,
+          color: 'danger',
         });
       }
     } finally {
@@ -123,8 +126,10 @@ export default function CaptureTarget({
       a.remove();
     } catch (e) {
       if (e instanceof Error) {
-        pushMessage(e.message, {
-          type: 'error',
+        addToast({
+          title: 'Error',
+          description: e.message,
+          color: 'danger',
         });
       }
     } finally {

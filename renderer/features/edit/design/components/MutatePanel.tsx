@@ -3,9 +3,9 @@ import { useForceUpdate } from '@fewings/react/hooks';
 import { Container, Graphics } from 'pixi.js';
 import { TbCopy } from 'react-icons/tb';
 import { FiDownload } from 'react-icons/fi';
+import { addToast } from '@heroui/toast';
 
 import { cn } from '@/utils/cn';
-import { useToast } from '@/lib/toast/ToastContext';
 import { usePixi } from '@/lib/pixi-core/PixiContext';
 import { PIXI_CUSTOM_EVENTS } from '@/lib/pixi-core/pixi-custom-constants';
 
@@ -16,7 +16,6 @@ interface Props {
 
 const MutatePanel = ({ rootContainer, target }: Props) => {
   const { app } = usePixi();
-  const { pushMessage } = useToast();
   const [savedInfoBeforeMutation, setSavedInfoBeforeMutation] = useState({
     width: 0,
     height: 0,
@@ -53,8 +52,10 @@ const MutatePanel = ({ rootContainer, target }: Props) => {
         [blob.type]: blob,
       }),
     ]);
-    pushMessage('Copied to clipboard', {
-      type: 'success',
+    addToast({
+      title: 'Copied to clipboard',
+      description: 'Screenshot has been copied to clipboard.',
+      color: 'success',
     });
   };
 

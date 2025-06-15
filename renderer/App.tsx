@@ -4,7 +4,6 @@ import {
   createHashRouter,
   createMemoryRouter,
 } from 'react-router';
-import { HeroUIProvider } from '@heroui/react';
 
 import { routes } from './routes';
 import LoadingScene from './components/LoadingScene';
@@ -25,10 +24,8 @@ export default function App({
   }, [routerType, initialEntries]);
 
   return (
-    <HeroUIProvider>
-      <Suspense fallback={<LoadingScene />}>
-        <RouterProvider router={router} />
-      </Suspense>
-    </HeroUIProvider>
+    <Suspense fallback={<LoadingScene />}>
+      <RouterProvider router={router} />
+    </Suspense>
   );
 }

@@ -46,7 +46,7 @@ export default function ShortCutSettings() {
   return (
     <div>
       {changeTarget && <ShortCutInputOverlay char={curChar} />}
-      <div className={'flex flex-col gap-24'}>
+      <div className={'flex flex-col gap-6'}>
         {shortcuts?.map((shortcut) => {
           return (
             <ShortCutItem

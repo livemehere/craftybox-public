@@ -33,7 +33,7 @@ export default function SettingsPage() {
         activeKey={qs.tab}
         onChange={(key) => setQs({ tab: key as SettingsQueryParams['tab'] })}
       />
-      <section className={'mt-20'}>{TAB[qs.tab]}</section>
+      <section className={'mt-5'}>{TAB[qs.tab]}</section>
     </div>
   );
 }
