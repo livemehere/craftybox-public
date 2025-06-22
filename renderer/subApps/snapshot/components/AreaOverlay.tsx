@@ -33,7 +33,6 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
   const leftTopY = useMotionValue(0);
   const width = useMotionValue(0);
   const height = useMotionValue(0);
-  console.log(leftTopX.get(), leftTopY.get(), width.get(), height.get());
 
   const setDone = (v: boolean) => {
     setIsDone(v);
