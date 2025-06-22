@@ -9,7 +9,7 @@ const AppButtons = () => {
           key={i}
           onClick={b.onClick}
           className={cn('no-drag-zone h-3 w-3 rounded-full bg-red-500', b.color)}
-        ></button>
+        />
       ))}
     </div>
   );

@@ -17,13 +17,6 @@ export class ShortcutManager extends Manager {
       enabled: true,
       description: '현재 마우스 커서가 위치한 모니터를 캡쳐합니다.'
     },
-    {
-      key: 'color-picker:open',
-      value: 'Control+2',
-      label: '색상 추출',
-      enabled: true,
-      description: '현재 마우스 커서가 위치한 화면의 색상을 추출합니다.'
-    }
   ];
 
   constructor({ app }: { app: AppManager }) {
@@ -76,6 +69,13 @@ export class ShortcutManager extends Manager {
 
   private async toggleShortcut(key: TShortcutKeys, enabled: boolean): Promise<void> {
     const shortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
+
+    // shortcuts가 배열이 아닌 경우 기본값 사용
+    if (!Array.isArray(shortcuts)) {
+      this.logger.warn('shortcuts가 배열이 아닙니다. 기본값을 사용합니다.');
+      return;
+    }
+
     const targetShortcut = shortcuts.find((shortcut) => shortcut.key === key);
 
     if (!targetShortcut) return;
@@ -95,14 +95,26 @@ export class ShortcutManager extends Manager {
   }
 
   private initialize(): void {
-    const storedShortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
-    const mergedShortcuts = this.mergeWithDefaults(storedShortcuts);
+    try {
+      const storedShortcuts = getStoreData<Shortcuts>(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
+      const mergedShortcuts = this.mergeWithDefaults(storedShortcuts);
 
-    setStoreData(STORE_KEY_MAP.shortcuts, mergedShortcuts);
-    this.registerGlobalShortcuts(mergedShortcuts);
+      setStoreData(STORE_KEY_MAP.shortcuts, mergedShortcuts);
+      this.registerGlobalShortcuts(mergedShortcuts);
+    } catch (error) {
+      this.logger.error('단축키 초기화 중 오류 발생:', error);
+      // 오류 발생 시 기본값으로 초기화
+      setStoreData(STORE_KEY_MAP.shortcuts, this.defaultShortcuts);
+      this.registerGlobalShortcuts(this.defaultShortcuts);
+    }
   }
 
   private mergeWithDefaults(storedShortcuts: Shortcuts): Shortcuts {
+    if (!Array.isArray(storedShortcuts)) {
+      this.logger.warn('storedShortcuts가 배열이 아닙니다. 기본값을 사용합니다.');
+      return this.defaultShortcuts;
+    }
+
     return this.defaultShortcuts.map((defaultShortcut) => {
       const userShortcut = storedShortcuts.find((shortcut) => shortcut.key === defaultShortcut.key);
 
