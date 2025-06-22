@@ -1,5 +1,5 @@
 import type { ProgressInfo } from 'electron-builder';
-import type { BundleModuleInvokeMap } from '@main/modules';
+import { BundleModuleInvokeMap, BundleModuleMessageMap } from '@main/modules';
 import type { StoreInvokeMap } from '@shared/Store/schema';
 export {};
 
