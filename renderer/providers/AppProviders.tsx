@@ -4,7 +4,6 @@ import { HeroUIProvider } from '@heroui/react';
 import { ToastProvider } from '@heroui/toast';
 
 import { OverlayProvider } from '@/lib/overlay';
-import TimerProvider from '@/features/timer/TimerProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +23,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <OverlayProvider>
           <HeroUIProvider>
             <ToastProvider toastOffset={10} />
-            <TimerProvider>{children}</TimerProvider>
+            {children}
           </HeroUIProvider>
         </OverlayProvider>
       </QueryClientProvider>
