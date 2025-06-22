@@ -98,7 +98,6 @@ export class WindowManager {
       alwaysOnTop: true,
       skipTaskbar: true,
     });
-    appWin.win.webContents.send('set-image', base64);
     this.pins.push(appWin);
     mainIpc.send(appWin.win.webContents, 'snapshot:get', {
       base64,
