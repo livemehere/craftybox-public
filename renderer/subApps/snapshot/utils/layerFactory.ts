@@ -1,3 +1,5 @@
+import { TToolKey } from '../components/Tools';
+
 import RectLayer from '@/lib/Canvas/Core/Layer/Shapes/RectLayer';
 import { EllipseLayer } from '@/lib/Canvas/Core/Layer/Shapes/EllipseLayer';
 import ArrowLayer from '@/lib/Canvas/Core/Layer/Shapes/ArrowLayer';
@@ -6,7 +8,6 @@ import TextLayer from '@/lib/Canvas/Core/Layer/Shapes/TextLayer';
 import FrameLayer from '@/lib/Canvas/Core/Layer/Container/FrameLayer';
 import Stage from '@/lib/Canvas/Core/Stage';
 import Transform from '@/lib/Canvas/Core/Helper/Transform';
-import { TToolKey } from '../components/Tools';
 
 interface LayerConfig {
     pointerX: number;

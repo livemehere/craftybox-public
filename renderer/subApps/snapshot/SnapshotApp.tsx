@@ -18,6 +18,8 @@ import { cn } from '@/utils/cn';
 const DASH = [10, 5];
 const LABEL_START = 1;
 const INIT_TOOL_KEY = 'rect';
+// 보색 효과를 위한 크로스헤어 커서 - mix-blend-mode: difference 효과
+const crosshairCursor = `url("data:image/svg+xml,%3csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3e%3cg%3e%3cpath d='M12 2v20M2 12h20' stroke='white' stroke-width='2' fill='none'/%3e%3c/g%3e%3c/svg%3e") 12 12, crosshair`;
 
 export const SnapshotApp = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -191,7 +193,7 @@ export const SnapshotApp = () => {
     <main
       className={'h-screen w-screen bg-transparent'}
       style={{
-        cursor: isAreaSelectDone ? 'default' : 'crosshair'
+        cursor: isAreaSelectDone ? 'default' : crosshairCursor
       }}
     >
       <AreaOverlay onChange={setCrop} controls={controls} onChangeDone={setIsAreaSelectDone} />

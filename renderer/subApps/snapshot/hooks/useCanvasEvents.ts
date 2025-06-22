@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 
 import { TToolKey, TToggleKey } from '../components/Tools';
+import { createLayer } from '../utils/layerFactory';
+
 import Stage from '@/lib/Canvas/Core/Stage';
 import Layer from '@/lib/Canvas/Core/Layer/Core/Layer';
-import { createLayer } from '../utils/layerFactory';
 
 interface UseCanvasEventsProps {
     stage: Stage | undefined;

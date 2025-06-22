@@ -1,4 +1,5 @@
 import { ComponentProps, FunctionComponent } from 'react';
+
 import LoadingIcon from '@/assets/svg/loading.svg?react';
 
 export type IconKeys = 'loading'
