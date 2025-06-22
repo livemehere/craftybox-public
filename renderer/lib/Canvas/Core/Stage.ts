@@ -178,7 +178,6 @@ export default class Stage extends Emitter<TStageEvents> {
     const targetLayer = InteractionLayer.getLayerById(color);
 
     this.startPos = { x, y };
-
     if (targetLayer) {
       this.dispatchLayerEvent(targetLayer, 'pointerdown', x, y);
     }

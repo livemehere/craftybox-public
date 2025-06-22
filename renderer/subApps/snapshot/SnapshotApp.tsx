@@ -21,6 +21,7 @@ import FrameLayer from '@/lib/Canvas/Core/Layer/Container/FrameLayer';
 
 const DASH = [10, 5];
 const LABEL_START = 1;
+const INIT_TOOL_KEY = 'rect';
 
 export const SnapshotApp = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,7 +29,6 @@ export const SnapshotApp = () => {
   const toolsRef = useRef<HTMLDivElement>(null);
   const isReset = useRef(false);
   const monitorPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
   const toolX = useMotionValue(0);
   const toolY = useMotionValue(0);
   const controls = useAreaOverlayControls();
@@ -41,23 +41,14 @@ export const SnapshotApp = () => {
   });
   const [pixelRatio, setPixelRatio] = useState(1);
 
-  const [activeToolKey, setActiveToolKey] = useState<TToolKey>('select');
+  const [activeToolKey, setActiveToolKey] = useState<TToolKey>(INIT_TOOL_KEY);
   const [toggleKeys, setToggleKeys] = useState<TToggleKey[]>([]);
   const [color, setColor] = useState('#ff0000');
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [fontSize, setFontSize] = useState(16);
   const [curLabelNumber, setCurLabelNumber] = useState(LABEL_START);
 
-  const historyRef = useRef<string[]>([]);
   const offListenersRef = useRef<(() => void)[]>([]);
-
-  const pushHistory = () => {
-    // TODO
-  };
-
-  const undo = async () => {
-    // TODO
-  };
 
   const createPin = async () => {
     const stage = stageRef.current;
@@ -106,7 +97,7 @@ export const SnapshotApp = () => {
     controls.current.reset();
     stageRef.current?.destroy();
     stageRef.current = undefined;
-    setActiveToolKey('select');
+    setActiveToolKey(INIT_TOOL_KEY);
     setToggleKeys([]);
     setCurLabelNumber(LABEL_START);
     isReset.current = true;
@@ -127,7 +118,6 @@ export const SnapshotApp = () => {
     stage.render();
   };
 
-  useHotkeys('mod+z', () => undo());
   useHotkeys('mod+c', () => copyToClipboard());
   useOn('snapshot:reset', () => {
     reset();
@@ -217,7 +207,6 @@ export const SnapshotApp = () => {
         x: e.pointerX,
         y: e.pointerY
       };
-
       switch (activeToolKey) {
         case 'select':
           break;
@@ -322,7 +311,7 @@ export const SnapshotApp = () => {
       moveOff();
       upOff();
     };
-  }, [activeToolKey, toggleKeys, color, strokeWidth, fontSize, curLabelNumber]);
+  });
 
   return (
     <main

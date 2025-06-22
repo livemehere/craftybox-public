@@ -25,10 +25,15 @@ export const useAreaOverlayControls = () => {
 const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
   const [isDone, setIsDone] = useState(false);
   const isDown = useRef(false);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  const startX = useMotionValue(0);
+  const startY = useMotionValue(0);
+  const endX = useMotionValue(0);
+  const endY = useMotionValue(0);
+  const leftTopX = useMotionValue(0);
+  const leftTopY = useMotionValue(0);
   const width = useMotionValue(0);
   const height = useMotionValue(0);
+  console.log(leftTopX.get(), leftTopY.get(), width.get(), height.get());
 
   const setDone = (v: boolean) => {
     setIsDone(v);
@@ -37,8 +42,12 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
 
   useImperativeHandle(controls, () => ({
     reset: () => {
-      x.set(0);
-      y.set(0);
+      startX.set(0);
+      startY.set(0);
+      endX.set(0);
+      endY.set(0);
+      leftTopX.set(0);
+      leftTopY.set(0);
       width.set(0);
       height.set(0);
       isDown.current = false;
@@ -57,12 +66,12 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
       }}
       onPointerDown={(e) => {
         if (isDone) return;
-        x.set(e.clientX);
-        y.set(e.clientY);
+        startX.set(e.clientX);
+        startY.set(e.clientY);
         isDown.current = true;
         onChange({
-          x: x.get(),
-          y: y.get(),
+          x: startX.get(),
+          y: startY.get(),
           width: 0,
           height: 0
         });
@@ -73,11 +82,15 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
       }}
       onPointerMove={(e) => {
         if (!isDown.current) return;
-        width.set(e.clientX - x.get());
-        height.set(e.clientY - y.get());
+        endX.set(e.clientX);
+        endY.set(e.clientY);
+        leftTopX.set(Math.min(startX.get(), endX.get()));
+        leftTopY.set(Math.min(startY.get(), endY.get()));
+        width.set(Math.abs(endX.get() - startX.get()));
+        height.set(Math.abs(endY.get() - startY.get()));
         onChange({
-          x: x.get(),
-          y: y.get(),
+          x: startX.get(),
+          y: startY.get(),
           width: width.get(),
           height: height.get()
         });
@@ -89,10 +102,10 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
           <motion.rect
             fill='black'
             style={{
-              x,
-              y,
-              width,
-              height
+              x: leftTopX,
+              y: leftTopY,
+              width: width,
+              height: height
             }}
           />
         </mask>
@@ -101,10 +114,10 @@ const AreaOverlay = ({ onChange, controls, onChangeDone }: Props) => {
       <motion.rect
         fill='transparent'
         style={{
-          x,
-          y,
-          width,
-          height,
+          x: leftTopX,
+          y: leftTopY,
+          width: width,
+          height: height,
           outline: '2px solid white'
         }}
       />

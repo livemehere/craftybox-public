@@ -8,8 +8,6 @@ const HomePage = lazy(() => import('@/pages/HomePage'));
 
 /* tools */
 const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
-const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
-const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
 const GeneralSettingPage = lazy(() => import('@/pages/settings/GeneralSettingPage'));
@@ -25,8 +23,6 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path={'/tools'}>
           <Route path={'/tools/screenshot'} element={<ScreenShotPage />} />
-          <Route path={'/tools/timer'} element={<TimerPage />} />
-          <Route path={'/tools/color-picker'} element={<ColorPickerPage />} />
         </Route>
         <Route path={'/settings'}>
           <Route path={'/settings'} element={<GeneralSettingPage />} />
