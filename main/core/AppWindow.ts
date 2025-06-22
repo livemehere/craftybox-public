@@ -44,7 +44,6 @@ export class AppWindow {
       transparent: config.transparent,
       resizable: config.resizable,
       show: config.initialShow,
-      simpleFullscreen: config.fullscreen,
       webPreferences: {
         preload: join(__dirname, './preload.js'),
         sandbox: false,
@@ -61,6 +60,9 @@ export class AppWindow {
     }
     if (!config.x && !config.y) {
       this.win.center();
+    }
+    if (config.fullscreen) {
+      this.win.setSimpleFullScreen(true);
     }
   }
 

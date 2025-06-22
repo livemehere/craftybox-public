@@ -14,7 +14,6 @@ const LABEL_START = 1;
 export const SnapshotApp = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const toolsRef = useRef<HTMLDivElement>(null);
-  const isReset = useRef(false);
   const monitorPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const toolX = useMotionValue(0);
@@ -79,17 +78,15 @@ export const SnapshotApp = () => {
 
   const reset = useCallback(() => {
     // keep color, strokeWidth, fontSize
-    // if (isReset.current) return;
-    // controls.current.reset();
+    controls.current.reset();
     // stageRef.current?.destroy();
     // stageRef.current = undefined;
-    // setActiveToolKey('select');
-    // setToggleKeys([]);
-    // setCurLabelNumber(LABEL_START);
-    // isReset.current = true;
+    setActiveToolKey('select');
+    setToggleKeys([]);
+    setCurLabelNumber(LABEL_START);
     //
-    // toolX.set(0);
-    // toolY.set(0);
+    toolX.set(0);
+    toolY.set(0);
   }, [controls]);
 
   const resetCanvas = () => {
@@ -115,6 +112,8 @@ export const SnapshotApp = () => {
     const ctx = canvas.getContext('2d')!;
     canvas.width = e.width * e.scaleFactor;
     canvas.height = e.height * e.scaleFactor;
+    canvas.style.width = `${e.width}px`;
+    canvas.style.height = `${e.height}px`;
     await drawImg(ctx, e.base64, {
       width: e.width * e.scaleFactor,
       height: e.height * e.scaleFactor,
@@ -179,10 +178,7 @@ export const SnapshotApp = () => {
           createPin={createPin}
         />
       </motion.div>
-      <canvas
-        className={'fixed inset-0 z-[2] h-screen w-screen'}
-        ref={canvasRef}
-      ></canvas>
+      <canvas className={'fixed inset-0 z-[2]'} ref={canvasRef}></canvas>
     </main>
   );
 };
