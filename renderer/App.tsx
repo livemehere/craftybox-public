@@ -4,8 +4,6 @@ import { lazy } from 'react';
 import Layout from '@/components/Layout';
 import useOn from '@/hooks/electron/useOn';
 
-const HomePage = lazy(() => import('@/pages/HomePage'));
-
 /* tools */
 const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
 
@@ -28,7 +26,6 @@ export default function App() {
           <Route path={'/settings'} element={<GeneralSettingPage />} />
           <Route path={'/settings/shortcuts'} element={<ShortCutSettingPage />} />
         </Route>
-        <Route path={'/'} element={<HomePage />} />
         <Route path={'*'} element={<div>404</div>} />
       </Route>
     </Routes>

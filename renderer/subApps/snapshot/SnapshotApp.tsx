@@ -5,19 +5,15 @@ import { motion, useMotionValue } from 'motion/react';
 
 import AreaOverlay, { useAreaOverlayControls } from './components/AreaOverlay';
 import Tools, { TToggleKey, TToolKey } from './components/Tools';
+import { useIsDragging } from './hooks/useIsDragging';
+import { useCanvasEvents } from './hooks/useCanvasEvents';
+import { mergeRef } from './utils/mergeRef';
 
 import Stage from '@/lib/Canvas/Core/Stage';
 import ImageLayer from '@/lib/Canvas/Core/Layer/Shapes/ImageLayer';
 import useOn from '@/hooks/electron/useOn';
-import InteractionLayer from '@/lib/Canvas/Core/Layer/Core/InteractionLayer';
-import RectLayer from '@/lib/Canvas/Core/Layer/Shapes/RectLayer';
-import ArrowLayer from '@/lib/Canvas/Core/Layer/Shapes/ArrowLayer';
-import Layer from '@/lib/Canvas/Core/Layer/Core/Layer';
-import LineLayer from '@/lib/Canvas/Core/Layer/Shapes/LineLayer';
-import { EllipseLayer } from '@/lib/Canvas/Core/Layer/Shapes/EllipseLayer';
-import TextLayer from '@/lib/Canvas/Core/Layer/Shapes/TextLayer';
 import Transform from '@/lib/Canvas/Core/Helper/Transform';
-import FrameLayer from '@/lib/Canvas/Core/Layer/Container/FrameLayer';
+import { cn } from '@/utils/cn';
 
 const DASH = [10, 5];
 const LABEL_START = 1;
@@ -32,6 +28,7 @@ export const SnapshotApp = () => {
   const toolX = useMotionValue(0);
   const toolY = useMotionValue(0);
   const controls = useAreaOverlayControls();
+  const [isDragging, dragRef] = useIsDragging();
   const [isAreaSelectDone, setIsAreaSelectDone] = useState(false);
   const [crop, setCrop] = useState({
     x: 0,
@@ -47,8 +44,6 @@ export const SnapshotApp = () => {
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [fontSize, setFontSize] = useState(16);
   const [curLabelNumber, setCurLabelNumber] = useState(LABEL_START);
-
-  const offListenersRef = useRef<(() => void)[]>([]);
 
   const createPin = async () => {
     const stage = stageRef.current;
@@ -140,7 +135,7 @@ export const SnapshotApp = () => {
       width: e.width,
       height: e.height
     });
-    stage.root.addChild(screenImg);
+    stage.root.addChild(screenImg as any);
     stage.render();
     isReset.current = false;
     monitorPosRef.current = { x: e.x, y: e.y };
@@ -177,140 +172,19 @@ export const SnapshotApp = () => {
     }
   }, [isAreaSelectDone]);
 
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    if (activeToolKey === 'select') {
-      offListenersRef.current = allDraggable();
-    } else {
-      offListenersRef.current?.forEach((off) => off());
-    }
-
-    let layer: InteractionLayer | null = null;
-    const downOff = stage.on('pointerdown', (e) => {
-      const strokes = {
-        strokeWidth,
-        strokeStyle: color,
-        dash: toggleKeys.includes('dash') ? DASH : undefined
-      };
-      const fills = {
-        fillStyle: color
-      };
-      const linePos = {
-        x1: e.pointerX,
-        y1: e.pointerY,
-        x2: e.pointerX,
-        y2: e.pointerY
-      };
-      const boxPos = {
-        x: e.pointerX,
-        y: e.pointerY
-      };
-      switch (activeToolKey) {
-        case 'select':
-          break;
-        case 'rect':
-          layer = new RectLayer({
-            ...boxPos,
-            ...strokes
-          });
-          break;
-        case 'ellipse':
-          layer = new EllipseLayer({
-            ...boxPos,
-            ...strokes
-          });
-          break;
-        case 'arrow':
-          layer = new ArrowLayer({
-            ...linePos,
-            ...strokes
-          });
-          break;
-        case 'line':
-          layer = new LineLayer({
-            ...linePos,
-            ...strokes
-          });
-          break;
-        case 'text':
-          {
-            layer = new TextLayer({
-              ...boxPos,
-              ...fills,
-              text: '',
-              strokeWidth: 0,
-              fontSize
-            });
-            const off = Transform.textEditable(stage, layer as TextLayer, {
-              onBlur: () => {
-                off();
-                setActiveToolKey('select');
-              }
-            });
-          }
-          break;
-        case 'label':
-          {
-            const group = new FrameLayer({
-              ...boxPos,
-              width: 20,
-              height: 20
-            });
-            group.x -= group.width / 2;
-            group.y -= group.height / 2;
-            const count = new TextLayer({
-              text: `${curLabelNumber}`,
-              fontSize: 14,
-              fillStyle: '#fff',
-              strokeWidth: 0
-            });
-            stage.measureAndUpdateTextLayer(count);
-            count.x = group.width / 2 - count.width / 2;
-            count.y = group.height / 2 - count.height / 2;
-            const bg = new EllipseLayer({
-              width: group.width,
-              height: group.height,
-              ...fills
-            });
-            group.addChild(bg);
-            group.addChild(count);
-            group.addTag('label');
-            layer = group;
-            setCurLabelNumber((prev) => prev + 1);
-          }
-          break;
-        default:
-          throw new Error('invalid tool key');
-      }
-      if (layer) {
-        stage.root.addChild(layer);
-        stage.render();
-      }
-    });
-
-    const moveOff = stage.on('pointermove', (e) => {
-      if (!layer) return;
-      if (Layer.isLineLayer(layer)) {
-        layer.x2 = e.pointerX;
-        layer.y2 = e.pointerY;
-      } else {
-        layer.width = e.pointerX - layer.x;
-        layer.height = e.pointerY - layer.y;
-      }
-      stage.render();
-    });
-
-    const upOff = stage.on('pointerup', () => {
-      layer = null;
-    });
-
-    return () => {
-      downOff();
-      moveOff();
-      upOff();
-    };
+  // Canvas 이벤트 처리를 커스텀 훅으로 분리
+  useCanvasEvents({
+    stage: stageRef.current,
+    activeToolKey,
+    strokeWidth,
+    color,
+    toggleKeys,
+    fontSize,
+    curLabelNumber,
+    setActiveToolKey,
+    setCurLabelNumber,
+    allDraggable,
+    dash: DASH
   });
 
   return (
@@ -325,7 +199,9 @@ export const SnapshotApp = () => {
         ref={toolsRef}
         drag
         dragMomentum={false}
-        className={'absolute z-10'}
+        className={cn('absolute z-10', {
+          'pointer-events-none opacity-15': isDragging
+        })}
         style={{
           top: `${crop.y + crop.height}px`,
           right: `calc(100% - ${crop.x + crop.width}px)`,
@@ -348,7 +224,7 @@ export const SnapshotApp = () => {
           createPin={createPin}
         />
       </motion.div>
-      <canvas className={'fixed inset-0 z-[2] h-screen w-screen'} ref={canvasRef}></canvas>
+      <canvas className={'fixed inset-0 z-[2] h-screen w-screen'} ref={mergeRef(canvasRef, dragRef)} />
     </main>
   );
 };
