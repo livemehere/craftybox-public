@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { motion, useMotionValue } from 'motion/react';
+import { setupCanvasSize } from 'renderer/lib/simple-canvas-utils';
 
 import useOn from '@/hooks/electron/useOn';
-import { drawImg } from '@/lib/simple-canvas/draw/img';
+import { drawImg } from '@/lib/simple-canvas-utils/draw/img';
+import { convertPointer } from '@/lib/simple-canvas-utils/pointer';
 
 import Tools, { TToggleKey, TToolKey } from './components/Tools';
 import AreaOverlay, { useAreaOverlayControls } from './components/AreaOverlay';
@@ -26,7 +28,7 @@ export const SnapshotApp = () => {
     width: 0,
     height: 0,
   });
-  const [pixelRatio, setPixelRatio] = useState(1);
+  const [scaleFactor, setScaleFactor] = useState(1);
 
   const [activeToolKey, setActiveToolKey] = useState<TToolKey>('select');
   const [toggleKeys, setToggleKeys] = useState<TToggleKey[]>([]);
@@ -89,7 +91,7 @@ export const SnapshotApp = () => {
     toolY.set(0);
   }, [controls]);
 
-  const resetCanvas = () => {
+  const resetDrawing = () => {
     // const stage = stageRef.current;
     // if (!stage) return;
     // stage.root.children.forEach((layer) => {
@@ -107,20 +109,50 @@ export const SnapshotApp = () => {
   });
   useOn('snapshot:get', async (e) => {
     reset();
-    console.log(e);
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
-    canvas.width = e.width * e.scaleFactor;
-    canvas.height = e.height * e.scaleFactor;
-    canvas.style.width = `${e.width}px`;
-    canvas.style.height = `${e.height}px`;
+    setupCanvasSize(canvas, e.width, e.height, e.scaleFactor);
+    setScaleFactor(e.scaleFactor);
     await drawImg(ctx, e.base64, {
       width: e.width * e.scaleFactor,
       height: e.height * e.scaleFactor,
       x: 0,
       y: 0,
     });
+    //
+    // const crop = cropCanvas(canvas, e.width, e.height, e.scaleFactor, {
+    //   x: 0,
+    //   y: 0,
+    //   width: 200,
+    //   height: 200,
+    // });
+    //
+    // await drawImg(ctx, crop.toDataURL(), {
+    //   x: 300,
+    //   y: 300,
+    //   width: crop.width,
+    //   height: crop.height,
+    // });
   });
+
+  useEffect(() => {
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext('2d')!;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const x = convertPointer(e.clientX, scaleFactor);
+      const y = convertPointer(e.clientY, scaleFactor);
+      ctx.rect(x, y, 10, 10);
+      ctx.fillStyle = 'red';
+      ctx.fill();
+    };
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+
+    return () => {
+      canvas.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [scaleFactor]);
 
   // Tool box position to inner if it is out of screen
   useEffect(() => {
@@ -174,7 +206,7 @@ export const SnapshotApp = () => {
           setStrokeWidth={
             activeToolKey === 'text' ? setFontSize : setStrokeWidth
           }
-          resetChildren={resetCanvas}
+          resetChildren={resetDrawing}
           createPin={createPin}
         />
       </motion.div>

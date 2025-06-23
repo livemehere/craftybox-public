@@ -1,4 +1,4 @@
-import { CBounds } from '@/lib/simple-canvas/types';
+import { CBounds } from '@/lib/simple-canvas-utils/types';
 
 export const drawImg = (
   ctx: CanvasRenderingContext2D,
