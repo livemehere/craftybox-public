@@ -81,6 +81,11 @@
     "@fewings/fancy-react": "^0.0.6",
     "@fewings/react": "^0.0.14",
     "@fewings/react-qs": "^1.0.0",
+    "@heroui/card": "^2.2.20",
+    "@heroui/react": "2.8.0-beta.7",
+    "@heroui/spinner": "^2.2.18",
+    "@heroui/tabs": "^2.2.18",
+    "@heroui/toast": "^2.0.11",
     "@tanstack/react-query": "^5.66.11",
     "@tanstack/react-query-devtools": "^5.66.11",
     "clsx": "^2.1.1",
@@ -102,7 +107,7 @@
     "react-icons": "^5.3.0",
     "react-router": "^7.1.1",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss": "^4.0.6",
+    "tailwindcss": "^4.1.10",
     "uid": "^2.0.2"
   },
   "eslintConfig": {

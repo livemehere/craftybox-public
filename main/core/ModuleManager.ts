@@ -60,7 +60,7 @@ export class ModuleManager {
       const disabled = userSetting && !userSetting.enabled;
       if (disabled) continue;
       try {
-        globalShortcut.register(accelerator, shortcut.callback);
+        globalShortcut.register(accelerator, shortcut.callback); // TODO: should check issue with `this` binding.
         logger.log(
           `Added ${shortcut.key}(${accelerator}) : ${disabled ? 'disabled' : 'enabled'}`
         );

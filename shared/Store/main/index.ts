@@ -6,6 +6,9 @@ import fs from 'fs';
 
 import { createStoreData, StoreDataType, validateStoreData } from '../schema';
 
+/**
+ * 1.create directory for file & return file path
+ */
 function ensureStoreFilePath(key: string) {
   const dir = resolve(app.getPath('userData'), 'stores');
   const hasDepth = key.includes('/');

@@ -4,14 +4,11 @@ import { lazy } from 'react';
 import ErrorPage from '@/pages/ErrorPage';
 import Layout from '@/components/Layout';
 
-const HomePage = lazy(() => import('@/pages/HomePage'));
+const HomePage = lazy(() => import('@/pages/home'));
 
 /* tools */
 const ScreenShotPage = lazy(() => import('@/pages/tools/ScreenShotPage'));
 const RecordingPage = lazy(() => import('@/pages/tools/RecordingPage'));
-const EditPage = lazy(() => import('@/pages/tools/EditPage'));
-// const ColorPickerPage = lazy(() => import('@/pages/tools/ColorPickerPage'));
-// const TimerPage = lazy(() => import('@/pages/tools/TimerPage'));
 
 /* settings */
 const SettingsPage = lazy(() => import('@/pages/settings'));
@@ -49,21 +46,6 @@ export const routes: RouteObject[] = [
             id: 'Recording',
             Component: RecordingPage,
           },
-          {
-            path: 'edit',
-            id: 'Edit',
-            Component: EditPage,
-          },
-          // {
-          //   path: 'timer',
-          //   id: 'Timer',
-          //   Component: TimerPage,
-          // },
-          // {
-          //   path: 'color-picker',
-          //   id: 'ColorPicker',
-          //   Component: ColorPickerPage,
-          // },
         ],
       },
       {
